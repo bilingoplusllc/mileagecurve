@@ -111,7 +111,8 @@ def ruler(shape: dict) -> str:
 
 
 def histogram(hist: dict, shape: dict, total: int, label: str, uid: str = "h",
-              kicker: str = "", title: str = "", foot: str = "") -> str:
+              kicker: str = "", title: str = "", foot: str = "",
+              level: str = "h3") -> str:
     """Гистограмма пробегов до отказа. Равномерные корзины, подписи снаружи."""
     bins = hist["bins"]
     ov = hist.get("overflow") or {}
@@ -176,7 +177,7 @@ def histogram(hist: dict, shape: dict, total: int, label: str, uid: str = "h",
            f'equal bins on a linear scale. Tallest bar = {fmt(mx)} complaints.')
     return (f'<figure class="fig histfig">'
             f'<p class="fig-kicker">{kicker}</p>'
-            f'<h3 class="fig-title">{title}</h3>'
+            f'<{level} class="fig-title">{title}</{level}>'
             f'<p class="fig-sub">{sub}</p>'
             f'<div class="plot">{_yaxis(mx)}'
             f'<div class="pane">{callout}{"".join(parts)}{ruler(shape)}{axis_row()}</div>'
@@ -224,7 +225,8 @@ def axis_row_log() -> str:
 
 
 def system_strips(systems: list[dict], limit: int = 7,
-                  kicker: str = "", title: str = "", foot: str = "") -> str:
+                  kicker: str = "", title: str = "", foot: str = "",
+                  level: str = "h3") -> str:
     """Средние половины сообщений на пропорциональной шкале пробега.
 
     Здесь и живёт настоящая находка сайта: у Prius 2010–2015 гидроконтур тормозов
@@ -290,7 +292,7 @@ def system_strips(systems: list[dict], limit: int = 7,
            'equal ratios, not equal miles.')
     return (f'<figure class="fig sysfig">'
             f'<p class="fig-kicker">{kicker}</p>'
-            f'<h3 class="fig-title">{title}</h3>'
+            f'<{level} class="fig-title">{title}</{level}>'
             f'<p class="fig-sub">{sub}</p>{body}'
             f'<div class="fig-foot">{foot}'
             f'<p>Ordered by median mileage, earliest first. The first 12,000 miles '

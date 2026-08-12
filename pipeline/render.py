@@ -1005,7 +1005,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
             s["histogram"], sh, s["complaints_with_miles"], f"{make} {model} {years}",
             kicker=f'Figure 1 &middot; {esc(make)} {esc(model)} {years} &middot; '
                    f'{fmt(s["complaints_with_miles"])} reports with mileage',
-            title="Mileage at failure", foot=hfoot))
+            title="Mileage at failure", foot=hfoot, level="h2"))
 
     B.append('<p class="note">What this can and cannot tell you: these are complaints owners '
              'chose to file, not a failure rate. Popular models accumulate more of them simply '
@@ -1235,7 +1235,7 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
             kicker=f'Figure 1 &middot; Toyota Prius 2010&ndash;2015 &middot; '
                    f'{fmt(demo.get("n", 0))} reports',
             title="Counts tell you a car has a problem. Timing tells you which problem.",
-            foot=foot))
+            foot=foot, level="h2"))
 
     # Указатель марок, а не 28 одинаковых плиток. Различие дают сами числа
     # в табличной колонке справа — Ford 149,119 против Lexus 198, — а не полоска,
