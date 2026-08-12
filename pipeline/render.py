@@ -498,7 +498,10 @@ footer a{color:var(--muted)}
   .wrap.wide .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);
     gap:var(--s-6);align-items:start}
   .wrap.wide .hero .lede{margin-bottom:0}
-  .wrap.wide .hero-find{grid-column:2;grid-row:1/span 2;padding:var(--s-4);
+  /* В левой колонке 636px — держать заголовок в 16ch и ломать его на три строки
+     незачем; в две строки он читается как одно высказывание. */
+  .wrap.wide .hero h1{max-width:22ch}
+  .wrap.wide .hero-find{grid-column:2;grid-row:1/span 2;margin:0;padding:var(--s-4);
     border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
   .wrap.wide .qbox,.wrap.wide .qr{max-width:none}
 }
