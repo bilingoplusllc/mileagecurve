@@ -595,7 +595,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         seen = set()
         shown = 0
         for q in s["quotes"]:
-            txt = names.sentence_case((q["text"] or "").strip())
+            txt = names.sentence_case((q["text"] or "").strip(), (make, model))
             key = txt[:80].lower()
             if not txt or key in seen:
                 continue
@@ -604,7 +604,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                          if q["miles"] and q["miles"] > 1 else "")
             B.append(f'<blockquote class="quote"><p>{esc(names.truncate_words(txt, 320))}</p>'
                      f'<cite>{q["year"]}{miles_bit} · '
-                     f'{esc(narrative.plain(q["system"] or "").capitalize())}</cite></blockquote>')
+                     f'{esc(re.sub(r"^the ", "", narrative.plain(q["system"] or "")).capitalize())}</cite></blockquote>')
             shown += 1
             if shown >= 4:
                 break
@@ -638,7 +638,7 @@ SHAPE_LABEL = {
 def render_index(index: list[dict], stats: dict) -> str:
     by_make: dict[str, list[dict]] = {}
     for p in index:
-        by_make.setdefault(p["make"].title(), []).append(p)
+        by_make.setdefault(names.display(p["make"]), []).append(p)
 
     B = ["<h1>What breaks, and at what mileage</h1>",
          '<p class="sub">Vehicle reliability from '
@@ -647,21 +647,23 @@ def render_index(index: list[dict], stats: dict) -> str:
 
     B.append('<div class="card finding"><p>Most reliability sites count complaints. '
              "The count tells you a car has a problem; it does not tell you whether that problem "
-             "arrives at 3,000 miles or–0,000 — and those are completely different cars to own. "
-             f"Of {fmt(stats['complaints'])} complaints in this dataset, "
+             "arrives at 3,000 miles or at 130,000 — and those are completely different cars to "
+             f"own. Of {fmt(stats['complaints'])} complaints in this dataset, "
              f"<strong>{fmt(stats['with_miles'])}</strong> record the mileage at which the failure "
              "occurred, which is enough to show the distribution.</p>"
-             "<p>Sometimes that distribution has two peaks. A manufacturing defect that shows up "
-             "at delivery and ordinary wear a hundred thousand miles later are two separate "
-             "problems that share one name in a complaint database. An average hides that. "
-             f"On this site, <strong>{stats['bimodal']} generations</strong> show it plainly.</p></div>")
+             "<p>That distinction does real work. On the 2010–2015 Toyota Prius, the hydraulic "
+             "brake circuit draws complaints at a median of 3,500 miles while the brakes as a "
+             "whole draw them at 87,000 — two separate problems sharing one name in the "
+             "database, with no overlap between the middle half of each. Every generation page "
+             "here breaks the timing out by system, so that difference is visible rather than "
+             "averaged away.</p></div>")
 
     B.append(f"<h2>{len(index)} generations covered</h2>")
     for make in sorted(by_make):
         pages = sorted(by_make[make], key=lambda p: (p["model"], p["y0"]))
         B.append(f"<h3>{esc(make)}</h3><ul class='rel'>")
         for p in pages:
-            B.append(f'<li><a href="{p["url"]}">{esc(p["model"].title())} {p["y0"]}–{p["y1"]}</a></li>')
+            B.append(f'<li><a href="{p["url"]}">{esc(names.display(p["model"]))} {p["y0"]}–{p["y1"]}</a></li>')
         B.append("</ul>")
 
     return page_shell(f"{SITE} — {TAGLINE}",

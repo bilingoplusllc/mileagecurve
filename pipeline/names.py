@@ -35,6 +35,12 @@ EXACT = {
 # Служебные слова, которые внутри названия пишутся строчными
 LOWER_WORDS = {"and", "or", "of", "the", "for", "in", "on", "with", "by"}
 
+# Марки — восстанавливаются в цитатах владельцев после снятия КАПСА
+MAKES = ("Toyota", "Honda", "Ford", "Chevrolet", "Nissan", "Hyundai", "Kia", "Jeep",
+         "Dodge", "Chrysler", "Subaru", "Mazda", "Volkswagen", "Audi", "Volvo",
+         "Lexus", "Acura", "Infiniti", "Buick", "Cadillac", "Lincoln", "Mercury",
+         "Pontiac", "Saturn", "Oldsmobile", "Mitsubishi", "Mercedes-Benz", "Tesla")
+
 
 def display(raw: str) -> str:
     """Название марки, модели или узла в человеческом виде."""
@@ -77,18 +83,21 @@ def round_miles(n) -> int | None:
     if n is None:
         return None
     n = int(n)
+    if n < 1_000:
+        return n                       # мелкий пробег значим сам по себе, не округляем
     if n < 10_000:
         return int(round(n / 500.0)) * 500
     return int(round(n / 1000.0)) * 1000
 
 
-def sentence_case(text: str) -> str:
+def sentence_case(text: str, extra: tuple = ()) -> str:
     """Жалобы NHTSA приходят КАПСОМ. Приводим к нормальному виду, не ломая аббревиатуры."""
     if not text:
         return ""
     letters = [c for c in text if c.isalpha()]
-    if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.7:
-        return text  # уже нормальный регистр — не трогаем
+    shouty = bool(letters) and sum(c.isupper() for c in letters) / len(letters) >= 0.7
+    if not shouty:
+        return _restore(text, extra)   # регистр нормальный, но обозначения всё равно чиним
     out, cap = [], True
     for ch in text.lower():
         if cap and ch.isalpha():
@@ -98,10 +107,34 @@ def sentence_case(text: str) -> str:
             out.append(ch)
         if ch in ".!?":
             cap = True
-    s = "".join(out)
-    # вернуть общеизвестные аббревиатуры
-    for ab in ("nhtsa", "abs", "suv", "vin", "tsb", "usa", "us dot"):
+    return _restore("".join(out), extra)
+
+
+def _restore(s: str, extra: tuple = ()) -> str:
+    """Вернуть аббревиатуры и обозначения моделей.
+
+    Без этого «GMC» в жалобе владельца становится «Gmc», а «RAV4» — «Rav4»,
+    прямо в цитате на странице.
+    """
+    for ab in ("nhtsa", "abs", "suv", "vin", "tsb", "usa", "us dot", "epa", "dot",
+               "led", "ecu", "pcm", "tpms", "awd", "4wd", "fwd", "rwd", "cvt",
+               "mph", "rpm", "psi", "vsc"):
         s = re.sub(rf"\b{ab}\b", ab.upper(), s)
+    # Только однозначные обозначения. Короткие вроде IS, ES, LS, SE, GT сталкиваются
+    # с обычными словами: без этого фильтра глагол «is» превращался в модель Lexus IS.
+    safe = {t for t in (KEEP_UPPER | set(EXACT))
+            if len(t) >= 3 and t not in {"SUV", "AWD", "FWD", "RWD", "XLT", "XLE", "TRD"}}
+    for token in sorted(safe, key=len, reverse=True):
+        s = re.sub(rf"\b{re.escape(token.lower())}\b", EXACT.get(token, token), s,
+                   flags=re.IGNORECASE)
+    for mk in MAKES:
+        s = re.sub(rf"\b{mk.lower()}\b", mk, s, flags=re.IGNORECASE)
+    # Название модели самой страницы: владелец пишет «my acadia», нужно «my Acadia».
+    # Общего списка моделей не держим — их сотни, а нужна ровно текущая.
+    for token in extra:
+        if token and len(token) >= 3:
+            s = re.sub(rf"\b{re.escape(str(token).lower())}\b", str(token), s,
+                       flags=re.IGNORECASE)
     return s
 
 
