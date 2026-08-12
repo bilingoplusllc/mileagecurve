@@ -506,7 +506,10 @@ footer a{color:var(--muted)}
   /* В левой колонке 636px — держать заголовок в 16ch и ломать его на три строки
      незачем; в две строки он читается как одно высказывание. */
   .wrap.wide .hero h1{max-width:22ch}
-  .wrap.wide .hero-find{grid-column:2;grid-row:1/span 2;margin:0;padding:var(--s-4);
+  /* Левая часть — ОДИН элемент сетки. Пока заголовок и лид были двумя строками,
+     а карточка их перекрывала через grid-row:1/span 2, высокая карточка растягивала
+     первую строку и отрывала лид от заголовка на 135px. */
+  .wrap.wide .hero-find{margin:0;padding:var(--s-4);
     border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
   .wrap.wide .qbox,.wrap.wide .qr{max-width:none}
 }
@@ -763,11 +766,13 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
         by_make.setdefault(p["make"], []).append(p)
 
     B = ['<div class="hero">',
+         '<div class="hero-say">',
          '<h1>Find out what breaks on your car — and when</h1>',
          '<p class="lede">Owners filed '
          f'<strong>{fmt(stats["complaints"])}</strong> complaints with US safety regulators. '
          f'<strong>{fmt(stats["with_miles"])}</strong> of them recorded the odometer reading at '
          'the moment the part failed. That second number is what makes this site possible.</p>',
+         '</div>',
          # Поиск живёт в собственной карточке: на широком экране она уходит вправо
          # от заголовка, на узком — просто ложится под ним. Одна разметка на оба случая.
          '<div class="hero-find"><h2>Look up a vehicle</h2>',
