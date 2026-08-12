@@ -522,7 +522,9 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     # Системы: полоски + таблица
     B.append("<h2>What fails, and when</h2>")
     for x in s["systems"]:
-        x["display_name"] = narrative.plain(x["system"]).capitalize()
+        _n = narrative.plain(x["system"])
+        # в прозе «the brakes» нужен артикль, в подписи строки — нет
+        x["display_name"] = re.sub(r"^the ", "", _n).capitalize()
     strips = charts.system_strips(s["systems"])
     if strips:
         B.append('<p class="meta">Each bar spans the middle half of reports for that system; '

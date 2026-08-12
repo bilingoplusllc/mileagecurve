@@ -21,6 +21,8 @@ from __future__ import annotations
 
 import html
 
+import names
+
 DOMAIN = 200_000          # основная область оси X, мили
 DEFECT_EDGE = 12_000      # граница окна «заводской брак»
 PLOT_W = 948.0            # ширина области столбиков в единицах viewBox
@@ -154,9 +156,9 @@ def system_strips(systems: list[dict], limit: int = 7) -> str:
             f'<rect class="{cls}" x="{x0:.1f}" y="2" width="{w:.1f}" height="12"/>'
             f'<line class="med" x1="{mpos:.1f}" y1="0" x2="{mpos:.1f}" y2="16" '
             f'vector-effect="non-scaling-stroke"/></svg>'
-            f'<span class="mv">{fmt(x["median_miles"])}</span>'
+            f'<span class="mv">{fmt(names.round_miles(x["median_miles"]))}</span>'
             f'<span class="vh">median {fmt(x["median_miles"])} miles, '
-            f'middle half {fmt(p25)} to {fmt(p75)}</span></li>')
+            f'middle half {fmt(names.round_miles(p25))} to {fmt(names.round_miles(p75))}</span></li>')
 
     return (f'<ol class="sys">{"".join(items)}</ol>{axis_row()}')
 
