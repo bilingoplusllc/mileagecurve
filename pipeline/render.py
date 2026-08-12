@@ -394,7 +394,8 @@ ul.rel a:hover{background:var(--track);border-color:var(--accent)}
 .ad{display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:var(--s-2);min-height:290px;margin:var(--s-6) 0;padding:var(--s-2);
   background:var(--track);border-radius:var(--radius);overflow:hidden}
-.ad-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* 12px — нижняя граница по собственному правилу; при 11px подпись не читалась. */
+.ad-label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
 .ad>ins,.ad>iframe,.ad>div{max-width:100%}
 @media(max-width:479px){.ad{min-height:260px;margin:var(--s-5) 0}}
 
