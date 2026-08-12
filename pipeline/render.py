@@ -427,11 +427,14 @@ figure.sysfig{--sys-cols:minmax(8em,13em) minmax(0,1fr) 104px;--plot-span:2/3;
 .band{grid-column:var(--plot-span);display:grid;
   grid-template-columns:var(--edge-pct) calc(100% - var(--edge-pct));
   font-size:var(--f-2xs);color:var(--muted);border-bottom:1px solid var(--line-strong)}
-.band>span{padding:3px 6px 4px 0;min-width:0;overflow:hidden;
-  text-overflow:ellipsis;white-space:nowrap}
+/* Перенос, а не обрезка. Ширина полосы зависит от КОНТЕЙНЕРА, а не от окна:
+   на странице поколения полотно ~408px, на главной ~800px, поэтому порогом
+   по ширине окна эту подпись не спасти — при 885px её резало. */
+.band>span{padding:3px 6px 4px 0;min-width:0;overflow:visible;
+  white-space:normal;line-height:1.25}
 .band-a{background:var(--warn);padding-left:4px}
 .band b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
-.band i{font-style:normal;letter-spacing:.05em;text-transform:uppercase}
+.band i{display:block;font-style:normal;letter-spacing:.05em;text-transform:uppercase}
 
 ol.sys{list-style:none;margin:0;padding:0}
 ol.sys li{display:grid;grid-template-columns:var(--sys-cols);gap:0 var(--s-3);
