@@ -271,7 +271,7 @@ svg.hist{width:100%;height:clamp(180px,24vw,240px)}
 /* x axis: 8 tracks of 11.85% mirror the 948/1000 plot area, so a right-aligned
    label in track k sits exactly on the k x 25,000-mile boundary. The remaining
    5.2% is the gap plus the detached 200k+ bar, labelled in the legend below. */
-.xax{display:grid;grid-template-columns:repeat(8,11.85%);margin-top:var(--s-2);
+.xax{display:grid;grid-template-columns:repeat(8,11.85%);margin:var(--s-2) 0 var(--s-4);
   font-size:12px;line-height:1.2;color:var(--muted);font-variant-numeric:tabular-nums}
 .xax span{text-align:right;white-space:nowrap}
 @media(max-width:479px){.xax .q{visibility:hidden}}  /* 8 labels -> 4 */
@@ -472,7 +472,11 @@ footer a{color:var(--muted)}
   border-radius:var(--radius);color:var(--muted);font-size:var(--f-sm);margin:0}
 
 .demo{padding:var(--s-6) 0;border-bottom:1px solid var(--line)}
-.demo h2{max-width:22ch}
+/* У секций свои границы, поэтому собственная линия заголовка здесь лишняя:
+   на экране получались ДВЕ горизонтальные черты в 78px друг от друга.
+   Хуже того, max-width обрезал и границу — линия выходила культёй в 260px. */
+.demo h2,#makes{border-top:none;padding-top:0;margin-top:0}
+.demo h2{max-width:30ch}
 .cta{font-weight:600}
 
 .makes{list-style:none;margin:var(--s-4) 0 var(--s-6);padding:0;
@@ -509,6 +513,15 @@ footer a{color:var(--muted)}
 .hero-find{margin:var(--s-5) 0 0}
 .hero-find h2{font-size:var(--f-md);margin:0 0 var(--s-3);padding:0;border:none;
   letter-spacing:0;text-transform:none}
+.qpop-h{font-size:var(--f-xs);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin:var(--s-4) 0 var(--s-2);max-width:none}
+.qpop{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-2)}
+.qpop li{margin:0;max-width:none}
+.qpop a{display:inline-block;padding:5px 10px;border:1px solid var(--line);
+  border-radius:999px;font-size:var(--f-sm);text-decoration:none;color:var(--ink);
+  background:var(--surface)}
+.qpop a:hover,.qpop a:focus-visible{border-color:var(--accent);background:var(--track)}
+.qpop a span{color:var(--muted);font-variant-numeric:tabular-nums}
 """
 
 
@@ -758,9 +771,30 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
          # Поиск живёт в собственной карточке: на широком экране она уходит вправо
          # от заголовка, на узком — просто ложится под ним. Одна разметка на оба случая.
          '<div class="hero-find"><h2>Look up a vehicle</h2>',
-         search.search_markup(),
-         '</div>',
-         '</div>']
+         search.search_markup()]
+
+    # Под формой — реальные ссылки. Раньше правая колонка на широком экране
+    # заканчивалась карточкой, и под ней оставалось ~190px пустоты.
+    # Формулировка «most reported», а не «most popular»: данных о посещаемости
+    # у нас нет, а число сообщений — есть, и оно про это и говорит.
+    # По одной машине на марку. Без этого список — пять Ford подряд: у крупных
+    # марок верхние строки занимают их же соседние поколения, и подборка теряет смысл.
+    seen_makes: set = set()
+    top = []
+    for p in sorted(index, key=lambda x: -x["n"]):
+        if p["make"] in seen_makes:
+            continue
+        seen_makes.add(p["make"])
+        top.append(p)
+        if len(top) == 6:
+            break
+    B.append('<p class="qpop-h">Most reported vehicles</p><ul class="qpop">')
+    for p in top:
+        B.append(f'<li><a href="{p["url"]}">{esc(names.display(p["make"]))} '
+                 f'{esc(names.display(p["model"]))} <span>{p["y0"]}–{p["y1"]}</span></a></li>')
+    B.append('</ul>')
+    B.append('</div>')
+    B.append('</div>')
 
     # Демонстрация вместо объяснения: живой график на реальных данных
     if demo:
