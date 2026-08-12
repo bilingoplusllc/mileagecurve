@@ -256,21 +256,21 @@ def guidance_narrative(s: dict) -> str:
     if kind == "bimodal":
         out.append(_p(
             f"For a buyer, the two-peak pattern is the useful part. The early cluster — "
-            f"{sh['early_share'] * 100:.0f}% of failures below 12,000 miles — will already have "
+            f"{sh['early_pct']}% of failures below 12,000 miles — will already have "
             f"happened on any example you are looking at today, and either been repaired under "
             f"warranty or not. Ask what was done. The late cluster, "
-            f"{sh['late_share'] * 100:.0f}% above 100,000 miles, is the one still ahead of you if "
+            f"{sh['late_pct']}% above 100,000 miles, is the one still ahead of you if "
             f"the car has lower mileage than that."))
     elif kind == "early":
         out.append(_p(
             f"For a buyer, an early-failure pattern is comparatively good news on a used example: "
-            f"{sh['early_share'] * 100:.0f}% of the reported failures occur in the first 12,000 "
+            f"{sh['early_pct']}% of the reported failures occur in the first 12,000 "
             f"miles, which on a car of this age means they have already happened or they were "
             f"never going to. Service history matters more than mileage here."))
     elif kind == "late":
         out.append(_p(
             f"For a buyer, a late-failure pattern shifts the question from <em>whether</em> to "
-            f"<em>when</em>. {sh['late_share'] * 100:.0f}% of reported failures occur beyond "
+            f"<em>when</em>. {sh['late_pct']}% of reported failures occur beyond "
             f"100,000 miles, so an example approaching that figure is approaching the range where "
             f"other owners started reporting problems. The middle half of all failures falls "
             f"between {fmt(sh['p25'])} and {fmt(sh['p75'])} miles."))

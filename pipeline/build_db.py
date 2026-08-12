@@ -96,7 +96,14 @@ def to_int(s: str) -> int | None:
 
 
 def yn(s: str) -> int:
-    return 1 if s.strip().upper() == "Y" else 0
+    """Флаги NHTSA приходят как Yes/No в отзывах и как Y/N в жалобах.
+
+    Сравнение с "Y" давало 0 на ВСЕХ 217 256 строках отзывов, поэтому
+    предупреждения «не ездить» и «парковать снаружи» не выводились никогда.
+    Проверено по тексту самих отзывов: индекс 27 — «do not drive»
+    (Volkswagen Atlas), индекс 28 — «park outside» (Porsche 918).
+    """
+    return 1 if s.strip().upper().startswith("Y") else 0
 
 
 def load_complaints(con: sqlite3.Connection, limit: int | None) -> int:

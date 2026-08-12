@@ -791,6 +791,18 @@ ul.gens a:hover .gy{text-decoration:underline;text-decoration-thickness:2px;
 """
 
 
+# Цитата отбрасывается целиком, а не чистится: кандидатов заведомо больше,
+# чем показываемые четыре, поэтому отказ ничего не стоит, а частичная зачистка
+# оставила бы обрывок вроде «позвонил в  по поводу».
+QUOTE_REJECT = re.compile(
+    r"\b(?:\+?1[-. ])?(?:\(\d{3}\)\s?|\d{3}[-. ])\d{3}[-. ]\d{4}\b"   # телефон
+    r"|\b1[-. ]?8\d{2}[-. ]?\d{3}[-. ]?\d{4}\b"                       # бесплатный номер
+    r"|\[x{2,}\]"                                                     # метка редактирования NHTSA
+    r"|freedom of information act"
+    r"|\b(?:mr|mrs|ms|dr)\.\s+[A-Z][a-z]+"                            # «mr. Sutton»
+    r"|\b\d{2,6}\s+[a-z][a-z. ]{2,24}\b(?:blvd|street|st|ave|avenue|road|rd|drive|dr|lane|ln|hwy)\b",
+    re.I)
+
 JUMP_SECTIONS = (("fails", "What fails, and when"), ("years", "By model year"),
                  ("recalls", "Recalls"), ("owners", "What owners reported"))
 
@@ -1026,8 +1038,12 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         shown = 0
         for q in s["quotes"]:
             txt = names.sentence_case((q["text"] or "").strip(), (make, model))
+            # NHTSA обезличивает ПОДАВШЕГО, а не тех, кого он вписал в текст.
+            # В опубликованных цитатах оказались адрес и телефон автосалона,
+            # метки редактирования [xxx] и канцелярская вставка про FOIA.
+            txt = re.sub(r"^tl\*\s*", "", txt, flags=re.I).strip()
             key = txt[:80].lower()
-            if not txt or key in seen:
+            if not txt or key in seen or QUOTE_REJECT.search(txt):
                 continue
             seen.add(key)
             miles_bit = (f' · {fmt(names.round_miles(q["miles"]))} miles'
@@ -1312,10 +1328,12 @@ def render_privacy() -> str:
          '<a href="https://adssettings.google.com">adssettings.google.com</a>, and from many other '
          'vendors at <a href="https://optout.aboutads.info">optout.aboutads.info</a>.</p>',
          "<h2>Data about vehicles</h2>"
-         "<p>The vehicle data shown here comes from public NHTSA records. Those records are "
-         "published by the United States government with personal details already removed, and "
-         "nothing on this site is keyed to an individual, an address or a vehicle identification "
-         "number.</p>",
+         "<p>The vehicle data shown here comes from public NHTSA records. NHTSA removes the "
+         "identity of the person who filed, but complaint narratives are free text and can name "
+         "other people or businesses. Quotes published here are screened for names, phone numbers "
+         "and street addresses before they appear. Nothing on this site is keyed to an individual, "
+         "an address or a vehicle identification number. If a quote still carries identifying "
+         f'detail, <a href="mailto:{CONTACT}">tell us</a> and it comes down.</p>',
          "<h2>Contact</h2>"
          f'<p>Questions about this policy: <a href="mailto:{CONTACT}">{CONTACT}</a> ({OWNER}).</p>'
          f"<p>Last updated {date.today().isoformat()}.</p>"]
@@ -1364,15 +1382,20 @@ def main() -> int:
         if args.only and args.only.upper() not in label.upper():
             continue
         gens = m["generations"]
-        for g in gens:
-            s = analyze.generation_stats(con, m["make"], m["model"],
-                                         int(g["year_start"]), int(g["year_end"]))
-            if s["complaints_with_miles"] < MIN_WITH_MILES:
-                skipped += 1
-                continue
+        # Соседние поколения считаем ЗАРАНЕЕ и оставляем только те, что реально
+        # соберутся. Раньше блок «Other generations» получал полный список, и
+        # 179 ссылок на 158 страницах вели на страницы, которых не существует:
+        # тонкие поколения пропускались уже после того, как попали в соседи.
+        stats = {id(g): analyze.generation_stats(con, m["make"], m["model"],
+                                                 int(g["year_start"]), int(g["year_end"]))
+                 for g in gens}
+        live = [g for g in gens if stats[id(g)]["complaints_with_miles"] >= MIN_WITH_MILES]
+        skipped += len(gens) - len(live)
+        for g in live:
+            s = stats[id(g)]
             out = DIST / slug(m["make"], m["model"], g["year_start"], g["year_end"])
             out.mkdir(parents=True, exist_ok=True)
-            (out / "index.html").write_text(render_generation(s, g, m, gens), encoding="utf-8")
+            (out / "index.html").write_text(render_generation(s, g, m, live), encoding="utf-8")
             index.append({"url": f"/{out.name}/", "make": m["make"], "model": m["model"],
                           "y0": g["year_start"], "y1": g["year_end"],
                           "n": s["complaints_with_miles"], "shape": s["shape"].get("kind"),
@@ -1462,6 +1485,15 @@ def main() -> int:
             problems.append(f"{rel}: кириллица в отгружаемой странице")
         if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", t):
             problems.append(f"{rel}: управляющий символ")
+        # Внутренние ссылки должны вести на существующие файлы. При частичной
+        # сборке проверять нечего — там половины сайта нет по построению.
+        if not args.limit and not args.only:
+            body = re.sub(r"<style>.*?</style>", "", t, flags=re.S)
+            for href in sorted(set(re.findall(r'href="(/[^"#?]*)"', body))):
+                tgt = (DIST / href.strip("/") / "index.html") if href.endswith("/") \
+                    else (DIST / href.lstrip("/"))
+                if not tgt.exists():
+                    problems.append(f"{rel}: битая ссылка {href}")
     if problems:
         for line in problems[:20]:
             print(f"ШЛЮЗ: {line}")

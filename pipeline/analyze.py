@@ -106,7 +106,8 @@ def _shape(vals: list[int]) -> dict:
                 f"{d_early / d_mid:.0f} times higher than during the rest of the car's life.")
     elif d_mid > 0 and d_late >= 1.3 * d_mid:
         kind = "late"
-        note = f"{late:.0%} of failures occur beyond 100,000 miles — a wear pattern."
+        note = (f"{int(round(late * 100))}% of failures occur beyond 100,000 miles"
+                " — a wear pattern.")
     else:
         kind = "spread"
         note = (f"Failures are spread across the mileage range, with the middle half between "
@@ -118,8 +119,8 @@ def _shape(vals: list[int]) -> dict:
     return {
         "kind": kind, "note": note,
         "p10": p10, "p25": p25, "median": int(med), "p75": p75, "p90": p90,
-        "early_share": round(early, 3), "early_pct": early_pct,
-        "late_share": round(late, 3),
+        "early_share": round(early, 3), "late_share": round(late, 3),
+        "late_pct": int(round(late * 100)), "early_pct": early_pct,
         "density": density,
     }
 
@@ -166,7 +167,11 @@ def generation_stats(con: sqlite3.Connection, make: str, model: str,
 
     # Тяжесть
     sev = con.execute(
-        "SELECT SUM(crash), SUM(fire), SUM(injured), SUM(deaths) FROM complaints "
+        # crash и fire — это флаги 0/1, а injured и deaths — ЧИСЛО ЛЮДЕЙ.
+        # Предложение вокруг говорит о числе ЖАЛОБ, поэтому суммировать людей
+        # нельзя: Explorer 1995-2001 выходил на 1 473 вместо 864, в сторону
+        # преувеличения вреда, и так на 315 страницах из 318.
+        "SELECT SUM(crash), SUM(fire), SUM(injured > 0), SUM(deaths > 0) FROM complaints "
         "WHERE make=? AND model=? AND year BETWEEN ? AND ?", args).fetchone()
 
     # Отзывы поколения
@@ -230,7 +235,7 @@ def _demo(make: str, model: str, y0: int, y1: int) -> None:
     print(f"\nОТЗЫВОВ: {s['recalls_count']} (тяжёлых предупреждений: {s['severe_advisories']})")
     sv = s["severity"]
     print(f"ТЯЖЕСТЬ: аварий {sv['crashes']:,} | возгораний {sv['fires']:,} | "
-          f"пострадавших {sv['injured']:,} | погибших {sv['deaths']:,}")
+          f"жалоб с пострадавшими {sv['injured']:,} | с погибшими {sv['deaths']:,}")
     con.close()
 
 
