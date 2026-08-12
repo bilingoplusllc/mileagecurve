@@ -271,14 +271,13 @@ h3{font-family:var(--serif);font-weight:700;font-size:var(--f-lg);line-height:1.
   border-radius:var(--radius);padding:var(--s-4) var(--s-5);margin:var(--s-4) 0}
 .card>:first-child{margin-top:0}
 .card>:last-child{margin-bottom:0}
-/* accent rule as an inset shadow: no 3px-into-1px miter on the rounded corner */
-.finding{box-shadow:inset 3px 0 0 var(--accent)}
+.finding{border-left:3px solid var(--ink)}
 
 .verdict{font-size:var(--f-lg);line-height:1.4;margin:0 0 var(--s-4);
   max-width:var(--measure)}
 
 .note{background:var(--warn);border-left:3px solid var(--peak);
-  border-radius:0 var(--radius) var(--radius) 0;padding:var(--s-3) var(--s-4);
+  border-radius:0;padding:var(--s-3) var(--s-4);
   margin:var(--s-4) 0;font-size:var(--f-sm)}
 .note>:last-child{margin-bottom:0}
 mark{background:var(--warn);color:inherit;padding:0 3px;border-radius:2px;
@@ -524,14 +523,14 @@ blockquote.quote cite{display:block;margin-top:var(--s-2);font-style:normal;
 blockquote.quote cite a{color:var(--muted)}
 
 /* ---------- 10. tags and advisories --------------------------------------- */
-.tag{display:inline-block;margin:0 var(--s-1) 0 0;padding:2px 10px;
-  border-radius:99px;background:var(--track);color:var(--muted);
-  font-size:var(--f-xs);line-height:1.4;vertical-align:baseline}
+/* Один знак, три оттенка. Скругления в 999px — типовая мебель готовых тем. */
+.tag,.badge,.alert{display:inline-block;margin:0 var(--s-1) 2px 0;padding:2px 9px;
+  border-radius:var(--radius);font-size:var(--f-2xs);line-height:1.5;font-weight:600;
+  white-space:nowrap;vertical-align:baseline;background:var(--track);
+  color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
 .tag-weak{background:transparent;box-shadow:inset 0 0 0 1px var(--line-strong)}
-.alert{display:inline-block;margin:0 var(--s-1) 0 0;padding:2px 10px;
-  border-radius:99px;background:var(--danger-bg);color:var(--danger-fg);
-  box-shadow:inset 0 0 0 1px var(--danger-ring);
-  font-size:var(--f-xs);font-weight:600;line-height:1.4;vertical-align:baseline}
+.alert{background:var(--danger-bg);color:var(--danger-fg);
+  box-shadow:inset 0 0 0 1px var(--danger-ring)}
 
 /* ---------- 11. link chips (related generations, index) -------------------- */
 ul.rel{list-style:none;padding:0;margin:var(--s-3) 0 var(--s-4);
@@ -613,7 +612,7 @@ footer a{color:var(--muted)}
 
 /* ---------- 15. motion ------------------------------------------------------ */
 @media(prefers-reduced-motion:no-preference){
-  ul.rel a,tbody tr,header.site nav a{
+  ul.rel a,tbody tr,header.site nav a,.jump a,.foot-nav a{
     transition:background-color .12s ease,border-color .12s ease,color .12s ease}
 }
 
@@ -626,10 +625,11 @@ footer a{color:var(--muted)}
     --bar:#b8b8b8;--bar-hi:#252525;
     --danger-bg:transparent;--danger-fg:#000;--danger-ring:#000;--shadow:transparent}
   body{background:#fff;font-size:10.5pt}
-  .ad,ul.rel,header.site nav,.skip,.crumbs{display:none}
+  .gen-grid{display:block}
+  .rail,.ad,ul.rel,header.site nav,.skip,.crumbs{display:none}
   .tw{overflow:visible;background-image:none}
-  .card,.tw,figure.chart,blockquote.quote,ol.sys li,.pct{break-inside:avoid}
-  h2,h3{break-after:avoid}
+  .card,.tw,figure.fig,figure.chart,blockquote.quote,ol.sys li,.pct{break-inside:avoid}
+  h2,h3,.fig-title{break-after:avoid}
   details.nums>*{display:block}
   a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;color:#555}
 }
