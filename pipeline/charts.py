@@ -115,7 +115,7 @@ def histogram(hist: dict, shape: dict, total: int, label: str, uid: str = "h") -
     legend = []
     if highlight:
         legend.append(f'<li><span class="k k-hi"></span>First {fmt(DEFECT_EDGE)} miles — '
-                      f'{shape.get("early_share", 0) * 100:.0f}% of all failures</li>')
+                      f'{shape.get("early_pct", 0)}% of all failures</li>')
     legend.append('<li><span class="k k-bar"></span>Rest of the range</li>')
     if shape.get("median"):
         legend.append('<li><span class="k k-med"></span>Median</li>')

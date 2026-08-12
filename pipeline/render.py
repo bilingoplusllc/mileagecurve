@@ -169,7 +169,7 @@ img,svg{display:block;max-width:100%}
 p,li,dd,blockquote,.note,.meta,.sub{max-width:var(--measure)}
 .tw,figure.chart,ol.sys,.ad,ul.rel,.pct,.prov,table{max-width:none}
 
-p{margin:0 0 var(--s-5)}            /* 32px gap > 26.4px leading */
+p{margin:0 0 var(--s-5)}            /* 32px gap >….4px leading */
 p:last-child{margin-bottom:0}
 ul,ol{margin:0 0 var(--s-5);padding-left:var(--s-4)}
 li{margin:0 0 var(--s-2)}
@@ -208,7 +208,7 @@ header.site nav a:hover{color:var(--ink);border-bottom-color:var(--accent)}
   padding:0;margin:0 0 var(--s-2);font-size:var(--f-xs);color:var(--muted)}
 .crumbs li{margin:0}
 .crumbs a{color:var(--muted)}
-.crumbs li+li::before{content:"\203A";margin-right:var(--s-2);color:var(--line-strong)}
+.crumbs li+li::before{content:"›";margin-right:var(--s-2);color:var(--line-strong)}
 
 /* ---------- 4. page title, dateline, headings ----------------------------- */
 h1{font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.15;letter-spacing:-.022em;
@@ -221,7 +221,7 @@ h1{font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.15;letter-spacing:-.02
   padding-bottom:var(--s-3);border-bottom:1px solid var(--line);max-width:none}
 .dateline b{font-weight:600;color:var(--ink)}
 .dateline a{color:var(--muted)}
-.dateline span+span::before{content:"\00B7";margin-right:var(--s-3);color:var(--line-strong)}
+.dateline span+span::before{content:"·";margin-right:var(--s-3);color:var(--line-strong)}
 
 h2{font-size:var(--f-xl);line-height:1.2;letter-spacing:-.018em;font-weight:600;
   margin:var(--s-6) 0 var(--s-3);padding-top:var(--s-4);
@@ -334,8 +334,8 @@ svg.strip{width:100%;height:16px}
   background-image:
     linear-gradient(to right,var(--surface),transparent 28px),
     linear-gradient(to left,var(--surface),transparent 28px),
-    linear-gradient(to right,var(--shadow),transparent 14px),
-    linear-gradient(to left,var(--shadow),transparent 14px);
+    linear-gradient(to right,var(--shadow),transparent—px),
+    linear-gradient(to left,var(--shadow),transparent—px);
   background-position:0 0,100% 0,0 0,100% 0;
   background-repeat:no-repeat;
   background-size:36px 100%,36px 100%,14px 100%,14px 100%;
@@ -378,7 +378,7 @@ blockquote.quote cite a{color:var(--muted)}
 ul.rel{list-style:none;padding:0;margin:var(--s-3) 0 var(--s-4);
   display:flex;flex-wrap:wrap;gap:10px}
 ul.rel li{margin:0;max-width:none}
-ul.rel a{display:block;padding:12px 14px;line-height:1.35;font-size:var(--f-sm);
+ul.rel a{display:block;padding:12px—px;line-height:1.35;font-size:var(--f-sm);
   color:var(--ink);text-decoration:none;background:var(--surface);
   border:1px solid var(--line-strong);border-radius:8px}   /* 45px tall */
 ul.rel a:hover{background:var(--track);border-color:var(--accent)}
@@ -386,7 +386,7 @@ ul.rel a:hover{background:var(--track);border-color:var(--accent)}
 /* ---------- 12. index page ------------------------------------------------- */
 .idx-make{padding-top:var(--s-3);border-top:1px solid var(--line)}
 
-/* ---------- 13. ad slots ---------------------------------------------------
+/* ----------–. ad slots ---------------------------------------------------
    Reserved before the units exist, so insertion never shifts content.
    Never between the h1 and the histogram.                                   */
 .ad{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -396,7 +396,7 @@ ul.rel a:hover{background:var(--track);border-color:var(--accent)}
 .ad>ins,.ad>iframe,.ad>div{max-width:100%}
 @media(max-width:479px){.ad{min-height:260px;margin:var(--s-5) 0}}
 
-/* ---------- 14. provenance strip and footer -------------------------------- */
+/* ----------—. provenance strip and footer -------------------------------- */
 .prov{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
   margin:var(--s-6) 0 0;padding-top:var(--s-3);border-top:1px solid var(--line);
   font-size:var(--f-xs);color:var(--muted)}
@@ -645,7 +645,7 @@ def render_index(index: list[dict], stats: dict) -> str:
 
     B.append('<div class="card finding"><p>Most reliability sites count complaints. '
              "The count tells you a car has a problem; it does not tell you whether that problem "
-             "arrives at 3,000 miles or 130,000 — and those are completely different cars to own. "
+             "arrives at 3,000 miles or–0,000 — and those are completely different cars to own. "
              f"Of {fmt(stats['complaints'])} complaints in this dataset, "
              f"<strong>{fmt(stats['with_miles'])}</strong> record the mileage at which the failure "
              "occurred, which is enough to show the distribution.</p>"
@@ -742,7 +742,7 @@ def render_about() -> str:
          "had a problem. They rarely tell you <em>when</em> — and for someone deciding whether to "
          "buy a used car, or whether to repair the one they have, timing is most of the answer.</p>"
          "<p>A transmission that fails at 36,000 miles is a design problem you will meet. One that "
-         "fails at 140,000 is a car that served its owner well. The same complaint count describes "
+         "fails at—0,000 is a car that served its owner well. The same complaint count describes "
          "both.</p></div>",
 
          "<h2>Editorial approach</h2>"

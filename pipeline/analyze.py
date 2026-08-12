@@ -83,6 +83,7 @@ def _shape(vals: list[int]) -> dict:
     p10, p25, p75, p90 = (_quantile(vs, q) for q in (0.10, 0.25, 0.75, 0.90))
 
     early = sum(1 for v in vs if v <= 12_000) / len(vs)
+    early_pct = int(round(early * 100))   # считаем ОДИН раз, см. аудит 2026-08-12
     late = sum(1 for v in vs if v >= 100_000) / len(vs)
 
     # Классификация по ПЛОТНОСТИ (жалоб на 1000 миль), а не по долям окон разной ширины.
@@ -98,10 +99,10 @@ def _shape(vals: list[int]) -> dict:
     if d_mid > 0 and d_early >= 3 * d_mid and d_late >= 1.3 * d_mid:
         kind = "bimodal"
         note = (f"failures concentrate at two separate points in the vehicle's life: "
-                f"{early:.0%} before 12,000 miles, and a second concentration beyond 100,000.")
+                f"{early_pct}% before 12,000 miles, and a second concentration beyond 100,000.")
     elif d_mid > 0 and d_early >= 3 * d_mid:
         kind = "early"
-        note = (f"{early:.0%} of failures fall within the first 12,000 miles — a rate roughly "
+        note = (f"{early_pct}% of failures fall within the first 12,000 miles — a rate roughly "
                 f"{d_early / d_mid:.0f} times higher than during the rest of the car's life.")
     elif d_mid > 0 and d_late >= 1.3 * d_mid:
         kind = "late"
@@ -117,7 +118,8 @@ def _shape(vals: list[int]) -> dict:
     return {
         "kind": kind, "note": note,
         "p10": p10, "p25": p25, "median": int(med), "p75": p75, "p90": p90,
-        "early_share": round(early, 3), "late_share": round(late, 3),
+        "early_share": round(early, 3), "early_pct": early_pct,
+        "late_share": round(late, 3),
         "density": density,
     }
 
