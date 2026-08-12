@@ -718,8 +718,12 @@ ul.makes a:hover .mk{text-decoration:underline;text-decoration-thickness:2px;
 .mk-g,.mk-n{font-size:var(--f-2xs);color:var(--muted);text-align:right;
   white-space:nowrap;font-variant-numeric:tabular-nums}
 .mk-n{color:var(--ink)}
+/* Шапку надо повторить над КАЖДОЙ колонкой, а сколько их — решает auto-fill,
+   и в CSS это число недоступно. Кладём заведомо больше ячеек, лишние ряды
+   схлопываем в нулевую высоту и обрезаем: над каждой колонкой ровно одна. */
 .makes-key{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));
-  gap:0 var(--s-5);margin:var(--s-3) 0 0;max-width:none}
+  gap:0 var(--s-5);margin:var(--s-3) 0 0;max-width:none;
+  grid-template-rows:auto;grid-auto-rows:0;overflow:hidden}
 .makes-key>span{display:grid;grid-template-columns:minmax(0,1fr) 2.4em 5.4em;
   gap:var(--s-2);font-size:var(--f-2xs);letter-spacing:.08em;
   text-transform:uppercase;color:var(--muted)}
@@ -741,7 +745,8 @@ ul.gens a:hover .gy{text-decoration:underline;text-decoration-thickness:2px;
   white-space:nowrap;font-variant-numeric:tabular-nums}
 .gm{color:var(--ink)}
 .gen-key{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
-  gap:0 var(--s-5);margin:var(--s-3) 0 0;max-width:none}
+  gap:0 var(--s-5);margin:var(--s-3) 0 0;max-width:none;
+  grid-template-rows:auto;grid-auto-rows:0;overflow:hidden}
 .gen-key>span{display:grid;grid-template-columns:minmax(0,1fr) 4.6em 5.4em;
   gap:var(--s-2);font-size:var(--f-2xs);letter-spacing:.08em;
   text-transform:uppercase;color:var(--muted)}
@@ -1161,8 +1166,8 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
     # в табличной колонке справа — Ford 149,119 против Lexus 198, — а не полоска,
     # чью шкалу пришлось бы защищать.
     B.append(f'<h2 id="makes">Browse {len(index)} generations across {len(by_make)} makes</h2>')
-    B.append('<div class="makes-key" aria-hidden="true"><span><span>Make</span>'
-             '<i>Gens</i><i>Reports</i></span></div>')
+    mkey = '<span><span>Make</span><i>Gens</i><i>Reports</i></span>'
+    B.append(f'<div class="makes-key" aria-hidden="true">{mkey * 6}</div>')
     B.append('<ul class="makes">')
     for mk in sorted(by_make, key=lambda m: names.display(m)):
         rows = by_make[mk]

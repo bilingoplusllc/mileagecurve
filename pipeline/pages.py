@@ -55,8 +55,8 @@ def make_hub(make_raw: str, pages: list[dict], shell) -> str:
     for model in sorted(by_model):
         rows = sorted(by_model[model], key=lambda p: p["y0"])
         B.append(f'<h2>{esc(model)}</h2>')
-        B.append('<div class="gen-key" aria-hidden="true"><span><span>Generation</span>'
-                 '<i>Reports</i><i>Median</i></span></div>')
+        key = ('<span><span>Generation</span><i>Reports</i><i>Median</i></span>')
+        B.append(f'<div class="gen-key" aria-hidden="true">{key * 6}</div>')
         B.append('<ul class="gens">')
         for p in rows:
             med = p.get("median")
