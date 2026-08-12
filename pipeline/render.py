@@ -516,6 +516,15 @@ footer a{color:var(--muted)}
 .hero-find{margin:var(--s-5) 0 0}
 .hero-find h2{font-size:var(--f-md);margin:0 0 var(--s-3);padding:0;border:none;
   letter-spacing:0;text-transform:none}
+.creds{margin:var(--s-5) 0 0;padding:var(--s-4) 0 0;border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3) var(--s-4);
+  max-width:var(--measure)}
+.creds div{min-width:0}
+.creds dt{font-size:var(--f-xs);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 2px}
+.creds dd{margin:0;font-size:var(--f-sm);line-height:1.35;max-width:none}
+@media(max-width:479px){.creds{grid-template-columns:1fr}}
+
 .qpop-h{font-size:var(--f-xs);letter-spacing:.06em;text-transform:uppercase;
   color:var(--muted);margin:var(--s-4) 0 var(--s-2);max-width:none}
 .qpop{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-2)}
@@ -772,6 +781,16 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
          f'<strong>{fmt(stats["complaints"])}</strong> complaints with US safety regulators. '
          f'<strong>{fmt(stats["with_miles"])}</strong> of them recorded the odometer reading at '
          'the moment the part failed. That second number is what makes this site possible.</p>',
+         # Основания доверять — фактами, а не значками. Заполняет низ левой колонки,
+         # где на широком экране оставалось ~180px пустоты рядом с высокой карточкой.
+         '<dl class="creds">'
+         '<div><dt>Source</dt><dd>US government records, public domain</dd></div>'
+         '<div><dt>Method</dt><dd>Published in full · <a href="/methodology/">read it</a></dd></div>'
+         '<div><dt>Code</dt><dd>Public · '
+         '<a href="https://github.com/bilingoplusllc/mileagecurve">every figure reproducible</a>'
+         '</dd></div>'
+         f'<div><dt>Updated</dt><dd>Monthly · {date.today().strftime("%d %B %Y")}</dd></div>'
+         '</dl>',
          '</div>',
          # Поиск живёт в собственной карточке: на широком экране она уходит вправо
          # от заголовка, на узком — просто ложится под ним. Одна разметка на оба случая.
