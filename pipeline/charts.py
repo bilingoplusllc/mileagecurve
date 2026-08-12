@@ -157,7 +157,9 @@ def system_strips(systems: list[dict], limit: int = 7) -> str:
             f'<line class="med" x1="{mpos:.1f}" y1="0" x2="{mpos:.1f}" y2="16" '
             f'vector-effect="non-scaling-stroke"/></svg>'
             f'<span class="mv">{fmt(names.round_miles(x["median_miles"]))}</span>'
-            f'<span class="vh">median {fmt(x["median_miles"])} miles, '
+            # Округление одинаковое в заголовке и в подписи для чтеца экрана:
+            # иначе рядом стоят «59,000» и «median 58,847 miles» — на одну и ту же величину.
+            f'<span class="vh">median {fmt(names.round_miles(x["median_miles"]))} miles, '
             f'middle half {fmt(names.round_miles(p25))} to {fmt(names.round_miles(p75))}</span></li>')
 
     return (f'<ol class="sys">{"".join(items)}</ol>{axis_row()}')

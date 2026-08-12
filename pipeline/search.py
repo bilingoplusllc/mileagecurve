@@ -54,17 +54,30 @@ SEARCH_JS = r"""
 
   function norm(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim(); }
 
+  // People type the name the way they say it, not the way the manufacturer
+  // registers it: "crv" for CR-V, "f150" for F-150, "chevy" for Chevrolet.
+  var ALIAS = {
+    chevy: 'chevrolet', vw: 'volkswagen', benz: 'mercedes', bimmer: 'bmw',
+    beemer: 'bmw', caddy: 'cadillac', merc: 'mercury', olds: 'oldsmobile'
+  };
+
   function score(row, terms, year) {
     // row = [make, model, y0, y1, url, n]
     var hay = norm(row[0] + ' ' + row[1]);
     var words = hay.split(' ');
+    var flat = norm(row[1]).replace(/ /g, '');   // "CR-V" -> "crv", "F-150" -> "f150"
     var s = 0;
     for (var i = 0; i < terms.length; i++) {
-      var t = terms[i], hit = 0;
+      var t = ALIAS[terms[i]] || terms[i], hit = 0;
       for (var j = 0; j < words.length; j++) {
         if (words[j] === t) { hit = 12; break; }              // whole word
         if (words[j].indexOf(t) === 0) { hit = Math.max(hit, 7); }  // prefix
         else if (words[j].indexOf(t) > 0) { hit = Math.max(hit, 3); }
+      }
+      if (!hit && flat) {                                     // punctuation dropped
+        if (flat === t) hit = 12;
+        else if (flat.indexOf(t) === 0) hit = 7;
+        else if (flat.indexOf(t) > 0) hit = 3;
       }
       if (!hit) return 0;                                     // every term must match
       s += hit;
@@ -86,9 +99,12 @@ SEARCH_JS = r"""
     var h = '<ul class="qr-list" role="listbox">';
     for (var i = 0; i < list.length; i++) {
       var r = list[i];
+      // toLocaleString() with no argument follows the visitor's browser locale and
+      // would print "8 278" on a US site. The audience is American; pin en-US.
       h += '<li role="option"><a href="' + r[4] + '"><span class="qr-car">' +
            esc(r[0] + ' ' + r[1]) + '</span> <span class="qr-yr">' + r[2] + '–' + r[3] +
-           '</span><span class="qr-n">' + r[5].toLocaleString() + ' with mileage</span></a></li>';
+           '</span> <span class="qr-n">' + r[5].toLocaleString('en-US') +
+           ' reports with mileage</span></a></li>';
     }
     out.innerHTML = h + '</ul>';
     out.hidden = false; active = -1;
