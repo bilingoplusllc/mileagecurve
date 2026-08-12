@@ -492,11 +492,31 @@ footer a{color:var(--muted)}
 """
 
 
+def strip_comments(css: str = "", js: str = "") -> str:
+    """Убирает комментарии из CSS/JS перед отгрузкой.
+
+    Комментарии — для того, кто правит исходник, а не для читателя страницы.
+    В HTML они только весят и, если написаны по-русски, нарушают языковой шлюз
+    сборки: сайт англоязычный, а в исходном коде страницы виден русский текст.
+    """
+    import re as _re
+    blank = _re.compile(r"\n{3,}")
+    block = _re.compile(r"/\*.*?\*/", _re.S)
+    if css:
+        return blank.sub("\n\n", block.sub("", css)).strip()
+    if js:
+        # Строковые литералы не трогаем: строчный комментарий ищем только там,
+        # где строка с него начинается. Иначе '//' внутри URL съест полстроки.
+        kept = [ln for ln in js.splitlines() if not ln.lstrip().startswith("//")]
+        return blank.sub("\n\n", block.sub("", "\n".join(kept))).strip()
+    return ""
+
+
 def page_shell(title: str, desc: str, body: str, canonical: str,
                script: str = "") -> str:
     # Скрипт подключается только там, где он нужен (поиск на главной).
     # Страницы поколений остаются полностью статичными.
-    tail = f"<script>{script}</script>" if script else ""
+    tail = f"<script>{strip_comments(js=script)}</script>" if script else ""
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -511,7 +531,7 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
 <meta property="og:url" content="{esc(canonical)}">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f6e5e'/%3E%3Crect x='3' y='4' width='2.4' height='8' fill='%23fff'/%3E%3Crect x='6.6' y='8' width='2.4' height='4' fill='%23fff' opacity='.7'/%3E%3Crect x='10.2' y='9.5' width='2.4' height='2.5' fill='%23fff' opacity='.5'/%3E%3C/svg%3E">
-<style>{CSS}</style>
+<style>{strip_comments(css=CSS)}</style>
 </head><body>
 <a class="skip" href="#main">Skip to content</a>
 <div class="wrap">

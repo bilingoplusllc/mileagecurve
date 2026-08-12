@@ -36,8 +36,8 @@ SEARCH_JS = r"""
   var form = document.getElementById('qf');
   var idx = null, loading = false, lastQuery = '', active = -1;
 
-  // Индекс подгружается при первом фокусе, а не на загрузке страницы:
-  // большинство визитов приходит из поиска сразу на страницу поколения.
+  // The index loads on first focus, not on page load: most visits arrive from
+  // search directly on a generation page and never touch this box.
   function load(cb) {
     if (idx) { cb(); return; }
     if (loading) return;
@@ -62,18 +62,18 @@ SEARCH_JS = r"""
     for (var i = 0; i < terms.length; i++) {
       var t = terms[i], hit = 0;
       for (var j = 0; j < words.length; j++) {
-        if (words[j] === t) { hit = 12; break; }              // точное слово
-        if (words[j].indexOf(t) === 0) { hit = Math.max(hit, 7); }  // начало слова
+        if (words[j] === t) { hit = 12; break; }              // whole word
+        if (words[j].indexOf(t) === 0) { hit = Math.max(hit, 7); }  // prefix
         else if (words[j].indexOf(t) > 0) { hit = Math.max(hit, 3); }
       }
-      if (!hit) return 0;                                     // все слова обязательны
+      if (!hit) return 0;                                     // every term must match
       s += hit;
     }
     if (year) {
-      if (year >= row[2] && year <= row[3]) s += 25;           // год попал в поколение
+      if (year >= row[2] && year <= row[3]) s += 25;           // year falls inside the generation
       else s -= Math.min(12, Math.abs(year < row[2] ? row[2] - year : year - row[3]));
     }
-    return s + Math.min(row[5] / 900, 4);                      // чуть выше — где больше данных
+    return s + Math.min(row[5] / 900, 4);                      // nudge up where data is deeper
   }
 
   function render(list, q) {
@@ -144,7 +144,7 @@ SEARCH_JS = r"""
     }
     if (e.key === 'Escape') { box.focus(); render([], ''); }
   });
-  // Без JS форма ведёт на список марок; с JS сабмит открывает первый результат.
+  // Without JS the form goes to the make list; with JS, submit opens the top hit.
   form.addEventListener('submit', function (e) {
     var first = out.querySelector('.qr-list a');
     if (first) { e.preventDefault(); window.location = first.getAttribute('href'); }

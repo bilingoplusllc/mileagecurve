@@ -90,10 +90,42 @@ def round_miles(n) -> int | None:
     return int(round(n / 1000.0)) * 1000
 
 
+# Управляющие символы, попадающие из ODI: файл читается как latin-1, а писался
+# в чём-то ещё. Проверено на данных: 0x19 стоит ровно там, где по смыслу апостроф
+# («I\x19ve owned over 30 cars»). Остальное — обычная свалка cp1252 в диапазоне C1.
+CTRL_MAP = {
+    0x19: "’", 0x18: "‘", 0x91: "‘", 0x92: "’", 0x93: "“", 0x94: "”",
+    0x96: "–", 0x97: "—", 0x85: "…", 0x95: "·", 0xA0: " ",
+}
+
+
+def clean_control(text: str) -> str:
+    """Убрать управляющие символы из текста владельца до всякой обработки.
+
+    Иначе они доезжают до HTML: цитата рендерится как «I\x19ve», а на части
+    парсеров невидимый управляющий символ ломает разбор страницы целиком.
+    """
+    if not text:
+        return ""
+    out = []
+    for ch in text:
+        o = ord(ch)
+        if o in CTRL_MAP:
+            out.append(CTRL_MAP[o])
+        elif o < 32 and ch not in "\n\t":
+            out.append(" ")
+        elif 0x7F <= o <= 0x9F:
+            out.append(" ")
+        else:
+            out.append(ch)
+    return re.sub(r"[ \t]{2,}", " ", "".join(out)).strip()
+
+
 def sentence_case(text: str, extra: tuple = ()) -> str:
     """Жалобы NHTSA приходят КАПСОМ. Приводим к нормальному виду, не ломая аббревиатуры."""
     if not text:
         return ""
+    text = clean_control(text)
     letters = [c for c in text if c.isalpha()]
     shouty = bool(letters) and sum(c.isupper() for c in letters) / len(letters) >= 0.7
     if not shouty:
