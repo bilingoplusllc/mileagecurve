@@ -20,7 +20,9 @@ from pathlib import Path
 
 import analyze
 import charts
+import pages
 import names
+import search
 import narrative
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -429,10 +431,72 @@ footer a{color:var(--muted)}
   details.nums>*{display:block}
   a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;color:#555}
 }
+
+
+/* ---------- главная: герой, поиск, марки ------------------------------------
+   Всё в потоке. Выпадающий список результатов — обычный блок под формой,
+   не оверлей: страница под ним сдвигается, и это честнее, чем перекрытие. */
+.hero{padding:var(--s-5) 0 var(--s-6);border-bottom:1px solid var(--line)}
+.hero h1{font-size:clamp(30px,5.2vw,44px);line-height:1.08;letter-spacing:-.025em;
+  margin:0 0 var(--s-3);max-width:16ch}
+.lede{font-size:var(--f-lg);line-height:1.45;color:var(--muted);margin:0 0 var(--s-5);
+  max-width:52ch}
+.lede strong{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+
+.qbox{display:flex;gap:var(--s-2);max-width:520px}
+.qbox input{flex:1 1 auto;min-width:0;font:inherit;font-size:var(--f-md);
+  padding:14px var(--s-3);border:2px solid var(--line-strong);border-radius:var(--radius);
+  background:var(--surface);color:var(--ink)}
+.qbox input:focus-visible{outline:none;border-color:var(--accent)}
+.qbox input::placeholder{color:var(--muted)}
+.qbox button{font:inherit;font-weight:600;padding:14px var(--s-4);border:2px solid var(--accent);
+  border-radius:var(--radius);background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap}
+.qbox button:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+.qhint{font-size:var(--f-xs);color:var(--muted);margin:var(--s-2) 0 0;
+  font-variant-numeric:tabular-nums}
+
+.qr{max-width:520px;margin:var(--s-2) 0 0}
+.qr[hidden]{display:none}
+.qr-list{list-style:none;margin:0;padding:0;border:1px solid var(--line-strong);
+  border-radius:var(--radius);background:var(--surface);overflow:hidden}
+.qr-list li{margin:0;border-bottom:1px solid var(--line)}
+.qr-list li:last-child{border-bottom:none}
+.qr-list a{display:block;padding:12px var(--s-3);text-decoration:none;color:var(--ink)}
+.qr-list a:hover,.qr-list a:focus-visible{background:var(--track)}
+.qr-car{font-weight:600}
+.qr-yr{color:var(--muted);font-variant-numeric:tabular-nums}
+.qr-n{display:block;font-size:var(--f-xs);color:var(--muted);
+  font-variant-numeric:tabular-nums;margin-top:2px}
+.qr-none{padding:12px var(--s-3);border:1px dashed var(--line-strong);
+  border-radius:var(--radius);color:var(--muted);font-size:var(--f-sm);margin:0}
+
+.demo{padding:var(--s-6) 0;border-bottom:1px solid var(--line)}
+.demo h2{max-width:22ch}
+.cta{font-weight:600}
+
+.makes{list-style:none;margin:var(--s-4) 0 var(--s-6);padding:0;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--s-2)}
+.makes li{margin:0}
+.makes a{display:block;padding:12px var(--s-3);border:1px solid var(--line);
+  border-radius:var(--radius);background:var(--surface);text-decoration:none;color:var(--ink)}
+.makes a:hover,.makes a:focus-visible{border-color:var(--accent);background:var(--track)}
+.mk{display:block;font-weight:600}
+.mk-n{display:block;font-size:var(--f-xs);color:var(--muted);
+  font-variant-numeric:tabular-nums;margin-top:2px}
+
+@media(max-width:479px){
+  .qbox{flex-direction:column}
+  .qbox button{width:100%}
+  .makes{grid-template-columns:1fr}
+}
 """
 
 
-def page_shell(title: str, desc: str, body: str, canonical: str) -> str:
+def page_shell(title: str, desc: str, body: str, canonical: str,
+               script: str = "") -> str:
+    # Скрипт подключается только там, где он нужен (поиск на главной).
+    # Страницы поколений остаются полностью статичными.
+    tail = f"<script>{script}</script>" if script else ""
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -467,7 +531,7 @@ def page_shell(title: str, desc: str, body: str, canonical: str) -> str:
   <p>{OWNER}. Complaint counts reflect what owners reported to NHTSA and are not a measure of
   failure rate per vehicle sold.</p>
 </footer>
-</div></body></html>"""
+</div>{tail}</body></html>"""
 
 
 def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict]) -> str:
@@ -635,40 +699,61 @@ SHAPE_LABEL = {
 }
 
 
-def render_index(index: list[dict], stats: dict) -> str:
+def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> str:
+    """Главная. Задача: найти свою машину за секунды и понять идею за один взгляд."""
     by_make: dict[str, list[dict]] = {}
     for p in index:
-        by_make.setdefault(names.display(p["make"]), []).append(p)
+        by_make.setdefault(p["make"], []).append(p)
 
-    B = ["<h1>What breaks, and at what mileage</h1>",
-         '<p class="sub">Vehicle reliability from '
-         f'{fmt(stats["complaints"])} owner complaints filed with NHTSA — organised by model '
-         "generation, and showing <em>when</em> failures happen rather than just how many.</p>"]
+    B = ['<div class="hero">',
+         '<h1>Find out what breaks on your car — and when</h1>',
+         '<p class="lede">Owners filed '
+         f'<strong>{fmt(stats["complaints"])}</strong> complaints with US safety regulators. '
+         f'<strong>{fmt(stats["with_miles"])}</strong> of them recorded the odometer reading at '
+         'the moment the part failed. That second number is what makes this site possible.</p>',
+         search.search_markup(),
+         '</div>']
 
-    B.append('<div class="card finding"><p>Most reliability sites count complaints. '
-             "The count tells you a car has a problem; it does not tell you whether that problem "
-             "arrives at 3,000 miles or at 130,000 — and those are completely different cars to "
-             f"own. Of {fmt(stats['complaints'])} complaints in this dataset, "
-             f"<strong>{fmt(stats['with_miles'])}</strong> record the mileage at which the failure "
-             "occurred, which is enough to show the distribution.</p>"
-             "<p>That distinction does real work. On the 2010–2015 Toyota Prius, the hydraulic "
-             "brake circuit draws complaints at a median of 3,500 miles while the brakes as a "
-             "whole draw them at 87,000 — two separate problems sharing one name in the "
-             "database, with no overlap between the middle half of each. Every generation page "
-             "here breaks the timing out by system, so that difference is visible rather than "
-             "averaged away.</p></div>")
+    # Демонстрация вместо объяснения: живой график на реальных данных
+    if demo:
+        B.append('<section class="demo">')
+        B.append('<h2>Counts tell you a car has a problem. Timing tells you which problem.</h2>')
+        B.append('<p>Take the 2010–2015 Toyota Prius. Complaints about "brakes" look like one '
+                 'story until you separate them by system and plot when each was reported:</p>')
+        for x in demo["systems"]:
+            x["display_name"] = re.sub(r"^the ", "", narrative.plain(x["system"])).capitalize()
+        B.append(charts.system_strips(demo["systems"], limit=5))
+        B.append('<p>The hydraulic brake circuit fails at a median of '
+                 f'<strong>{fmt(names.round_miles(demo["hyd"]))} miles</strong> — a manufacturing '
+                 'defect that shows up almost immediately. The brakes as a whole wear out at '
+                 f'<strong>{fmt(names.round_miles(demo["svc"]))} miles</strong> — ordinary '
+                 'service life. Two different problems, one word in the database, and the middle '
+                 'half of each does not overlap the other.</p>'
+                 f'<p><a class="cta" href="{demo["url"]}">See the full Prius page →</a></p>')
+        B.append('</section>')
 
-    B.append(f"<h2>{len(index)} generations covered</h2>")
-    for make in sorted(by_make):
-        pages = sorted(by_make[make], key=lambda p: (p["model"], p["y0"]))
-        B.append(f"<h3>{esc(make)}</h3><ul class='rel'>")
-        for p in pages:
-            B.append(f'<li><a href="{p["url"]}">{esc(names.display(p["model"]))} {p["y0"]}–{p["y1"]}</a></li>')
-        B.append("</ul>")
+    # Марки, а не 318 чипов: иерархия появилась, ей и пользуемся
+    B.append(f'<h2 id="makes">Browse {len(index)} generations across {len(by_make)} makes</h2>')
+    B.append('<ul class="makes">')
+    for mk in sorted(by_make, key=lambda m: names.display(m)):
+        rows = by_make[mk]
+        n = sum(r["n"] for r in rows)
+        B.append(f'<li><a href="/{slug(mk)}/"><span class="mk">{esc(names.display(mk))}</span>'
+                 f'<span class="mk-n">{len(rows)} generation{"s" if len(rows) != 1 else ""}'
+                 f' · {fmt(n)} complaints</span></a></li>')
+    B.append('</ul>')
+
+    B.append('<p class="prov">Built from the '
+             '<a href="https://www.nhtsa.gov/nhtsa-datasets-and-apis">NHTSA Office of Defects '
+             'Investigation</a> dataset, refreshed monthly · '
+             '<a href="/methodology/">how it is built</a> · '
+             '<a href="/data/generations.json">open data</a> · '
+             '<a href="https://github.com/bilingoplusllc/mileagecurve">source</a></p>')
 
     return page_shell(f"{SITE} — {TAGLINE}",
-                      "US vehicle reliability by model generation: when failures happen, from "
-                      "NHTSA owner complaints.", "\n".join(B), DOMAIN + "/")
+                      f"When failures happen on {len(index)} US vehicle generations, from "
+                      f"{fmt(stats['with_miles'])} NHTSA complaints that record mileage.",
+                      "\n".join(B), DOMAIN + "/", script=search.SEARCH_JS)
 
 
 def render_methodology(stats: dict) -> str:
@@ -811,7 +896,9 @@ def write_page(path: Path, content: str) -> None:
 
 def render_sitemap(index: list[dict]) -> str:
     today = date.today().isoformat()
-    urls = ["/", "/methodology/", "/about/", "/privacy/"] + [p["url"] for p in index]
+    makes = sorted({p["make"] for p in index})
+    urls = (["/", "/methodology/", "/about/", "/privacy/", "/contact/", "/terms/"]
+            + [f"/{slug(m)}/" for m in makes] + [p["url"] for p in index])
     body = "".join(
         f"<url><loc>{DOMAIN}{u}</loc><lastmod>{today}</lastmod></url>" for u in urls)
     return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>'
@@ -870,10 +957,39 @@ def main() -> int:
         "bimodal": sum(1 for p in index if p["shape"] == "bimodal"),
     }
 
-    write_page(DIST, render_index(index, stats))
+    # Демонстрация на реальных данных: показать идею, а не описать её
+    demo = None
+    try:
+        d = analyze.generation_stats(con, "TOYOTA", "PRIUS", 2010, 2015)
+        by = {x["system"]: x for x in d["systems"]}
+        hyd = by.get("SERVICE BRAKES, HYDRAULIC", {}).get("median_miles")
+        svc = by.get("SERVICE BRAKES", {}).get("median_miles")
+        if hyd and svc:
+            demo = {"systems": d["systems"], "hyd": hyd, "svc": svc,
+                    "url": "/toyota-prius-2010-2015/"}
+    except Exception:
+        demo = None
+
+    write_page(DIST, render_index(index, stats, demo))
+    (DIST / "search-index.json").write_text(search.build_index(index), encoding="utf-8")
     write_page(DIST / "methodology", render_methodology(stats))
     write_page(DIST / "about", render_about())
     write_page(DIST / "privacy", render_privacy())
+    write_page(DIST / "contact", pages.render_contact(page_shell))
+    write_page(DIST / "terms", pages.render_terms(page_shell))
+
+    # Хабы по маркам: даёт иерархию вместо 318 листьев на корне
+    by_make: dict[str, list[dict]] = {}
+    for p in index:
+        by_make.setdefault(p["make"], []).append(p)
+    for mk, plist in by_make.items():
+        write_page(DIST / slug(mk), pages.make_hub(mk, plist, page_shell))
+
+    # Настоящая 404: сейчас любой неизвестный адрес отдаёт главную с кодом 200
+    (DIST / "404.html").write_text(pages.render_404(page_shell), encoding="utf-8")
+    # Никаких catch-all правил: неизвестный адрес должен отдавать 404.html,
+    # а не главную с кодом 200 — это блокер при проверке AdSense.
+    (DIST / "_redirects").write_text("/index.html  /  301\n", encoding="utf-8")
 
     (DIST / "sitemap.xml").write_text(render_sitemap(index), encoding="utf-8")
     (DIST / "robots.txt").write_text(
@@ -888,7 +1004,7 @@ def main() -> int:
         GENS.read_text(encoding="utf-8"), encoding="utf-8")
 
     print(f"страниц поколений: {built}  | пропущено (мало данных): {skipped}")
-    print(f"плюс: главная, methodology, about, privacy, sitemap.xml, robots.txt, открытые данные")
+    print(f"плюс: главная, {len(by_make)} хабов по маркам, methodology, about, privacy, contact, terms, 404, sitemap.xml, robots.txt, открытые данные")
     print(f"→ {DIST}")
     con.close()
     return 0
