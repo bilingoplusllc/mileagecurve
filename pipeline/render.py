@@ -19,6 +19,7 @@ from datetime import date
 from pathlib import Path
 
 import analyze
+import narrative
 
 ROOT = Path(__file__).resolve().parent.parent
 DB = ROOT / "data" / "mileagecurve.db"
@@ -264,6 +265,11 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                      f'<td class="num">{fmt(y["with_miles"])}</td></tr>')
         B.append("</table></div>")
 
+    # содержательный разбор, выведенный из данных (narrative.py)
+    for heading, block in narrative.full_analysis(s, gen):
+        B.append(f"<h2>{esc(heading)}</h2>")
+        B.append(block)
+
     # известные дефекты
     issues = gen.get("known_issues") or []
     if issues:
@@ -308,6 +314,196 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     return page_shell(title, desc, "\n".join(B), canonical)
 
 
+# ---------------------------------------------------------------- institutional pages
+SHAPE_LABEL = {
+    "bimodal": "two separate failure populations",
+    "early": "failures concentrated early",
+    "late": "failures concentrated late",
+    "spread": "failures spread across the mileage range",
+    "insufficient": "limited data",
+}
+
+
+def render_index(index: list[dict], stats: dict) -> str:
+    by_make: dict[str, list[dict]] = {}
+    for p in index:
+        by_make.setdefault(p["make"].title(), []).append(p)
+
+    B = ["<h1>What breaks, and at what mileage</h1>",
+         '<p class="sub">Vehicle reliability from '
+         f'{fmt(stats["complaints"])} owner complaints filed with NHTSA — organised by model '
+         "generation, and showing <em>when</em> failures happen rather than just how many.</p>"]
+
+    B.append('<div class="card finding"><p>Most reliability sites count complaints. '
+             "The count tells you a car has a problem; it does not tell you whether that problem "
+             "arrives at 3,000 miles or 130,000 — and those are completely different cars to own. "
+             f"Of {fmt(stats['complaints'])} complaints in this dataset, "
+             f"<strong>{fmt(stats['with_miles'])}</strong> record the mileage at which the failure "
+             "occurred, which is enough to show the distribution.</p>"
+             "<p>Sometimes that distribution has two peaks. A manufacturing defect that shows up "
+             "at delivery and ordinary wear a hundred thousand miles later are two separate "
+             "problems that share one name in a complaint database. An average hides that. "
+             f"On this site, <strong>{stats['bimodal']} generations</strong> show it plainly.</p></div>")
+
+    B.append(f"<h2>{len(index)} generations covered</h2>")
+    for make in sorted(by_make):
+        pages = sorted(by_make[make], key=lambda p: (p["model"], p["y0"]))
+        B.append(f"<h3>{esc(make)}</h3><ul class='rel'>")
+        for p in pages:
+            B.append(f'<li><a href="{p["url"]}">{esc(p["model"].title())} {p["y0"]}–{p["y1"]}</a></li>')
+        B.append("</ul>")
+
+    return page_shell(f"{SITE} — {TAGLINE}",
+                      "US vehicle reliability by model generation: when failures happen, from "
+                      "NHTSA owner complaints.", "\n".join(B), DOMAIN + "/")
+
+
+def render_methodology(stats: dict) -> str:
+    B = ["<h1>Methodology</h1>",
+         '<p class="sub">Where the numbers come from, how they are computed, and what they '
+         "cannot tell you.</p>",
+
+         "<h2>Sources</h2><p>Everything here derives from the "
+         '<a href="https://www.nhtsa.gov/nhtsa-datasets-and-apis">NHTSA Office of Defects '
+         "Investigation</a> flat files, which are United States government work and in the public "
+         "domain. Three sets are used:</p>",
+         "<div class='tw'><table>"
+         "<tr><th>File</th><th>What it provides</th><th class='num'>Records</th></tr>"
+         f"<tr><td>FLAT_CMPL</td><td>Owner complaints. Field 18 carries mileage at failure.</td>"
+         f"<td class='num'>{fmt(stats['complaints'])}</td></tr>"
+         f"<tr><td>FLAT_RCL_POST_2010</td><td>Recall campaigns since 2010, including the "
+         f"DO&nbsp;NOT&nbsp;DRIVE and PARK&nbsp;OUTSIDE severe advisories.</td>"
+         f"<td class='num'>{fmt(stats['recalls'])}</td></tr>"
+         "<tr><td>FLAT_INV</td><td>Defect investigations.</td><td class='num'>—</td></tr>"
+         "</table></div>",
+
+         "<h2>How pages are grouped</h2>"
+         "<p>Pages cover a model <strong>generation</strong>, not a model year. Generation is how "
+         "a vehicle is actually engineered and how buyers think about it, and grouping this way "
+         "avoids thousands of near-empty pages. The generation map was compiled from public "
+         "references and audited for overlaps, gaps and boundary errors before use.</p>"
+         "<p>Where a manufacturer sold an old and a new generation in the same model year — the "
+         "2007 Silverado, the 2014–15 Rogue, the 2024 Traverse — NHTSA records do not separate "
+         "them. Those years are assigned to the newer generation and flagged on the page as "
+         "<em>mixed</em>. Where NHTSA does file the carryover separately (Malibu Classic, for "
+         "instance), no ambiguity arises.</p>",
+
+         "<h2>What is computed</h2>"
+         "<p>For each generation: the distribution of mileage-at-failure across all complaints "
+         "that record one; the same distribution per vehicle system; complaint counts by model "
+         "year; recall campaigns; and reported crashes, fires, injuries and fatalities. Mileage "
+         "values above 500,000 or at or below zero are discarded as data-entry errors. A "
+         "distribution is only drawn when at least 30 complaints carry mileage, and a page is "
+         f"only published at {MIN_WITH_MILES} or more.</p>"
+         "<p>The shape label — early, late, spread, or two separate populations — is derived "
+         "mechanically from the share of failures below 12,000 miles, above 100,000, and in "
+         "between. No judgement is applied.</p>",
+
+         "<h2>What these numbers are not</h2>"
+         "<div class='card'><p><strong>They are not a failure rate.</strong> Complaint counts "
+         "reflect what owners chose to report, not how often a part fails per vehicle sold. "
+         "Converting to a rate needs production volume by model and year, and no free, "
+         "authoritative source for that exists. The obvious substitute — the affected-vehicle "
+         "count published with recall campaigns — was tested against known US sales figures and "
+         "rejected: it overstates by a median factor of 7.6, because most campaigns span several "
+         "model years while the affected count is given for the campaign as a whole.</p>"
+         "<p>So this site does not rank vehicles against each other. It describes what happens to "
+         "a given vehicle, and when. Popular models accumulate more complaints simply by being "
+         "common, and a larger number here is not by itself evidence of a worse car.</p></div>",
+
+         "<h2>Reproducibility</h2>"
+         "<p>The full pipeline is public at "
+         f'<a href="https://github.com/bilingoplusllc/mileagecurve">github.com/bilingoplusllc/mileagecurve</a>. '
+         "It is plain Python with no external dependencies: download the source files, build the "
+         "database, render the site. Anyone can reproduce every figure on this site from the "
+         "original government data.</p>"
+         f"<p>Data snapshot: {date.today().isoformat()}. Rebuilt monthly, as NHTSA publishes.</p>"]
+
+    return page_shell(f"Methodology — {SITE}",
+                      "Sources, computation, and limitations of the MileageCurve reliability data.",
+                      "\n".join(B), DOMAIN + "/methodology/")
+
+
+def render_about() -> str:
+    B = ["<h1>About</h1>",
+         f'<p class="sub">{SITE} is published by {OWNER}.</p>',
+
+         "<div class='card finding'><p>This site exists because of a gap in how vehicle "
+         "reliability is usually reported. Complaint databases tell you <em>how many</em> people "
+         "had a problem. They rarely tell you <em>when</em> — and for someone deciding whether to "
+         "buy a used car, or whether to repair the one they have, timing is most of the answer.</p>"
+         "<p>A transmission that fails at 36,000 miles is a design problem you will meet. One that "
+         "fails at 140,000 is a car that served its owner well. The same complaint count describes "
+         "both.</p></div>",
+
+         "<h2>Editorial approach</h2>"
+         "<p>Figures are computed from public government data by an automated pipeline that runs "
+         "monthly. Written material is reviewed before publication. Claims about specific defects "
+         "are included only where they are documented; where a claim rests mainly on owner forums "
+         "rather than manufacturer or regulator material, the page says so.</p>"
+         "<p>Author credit belongs to the organisation. There are no invented expert personas on "
+         "this site.</p>",
+
+         "<h2>Corrections</h2>"
+         f'<p>If something here is wrong, write to <a href="mailto:{CONTACT}">{CONTACT}</a> and '
+         "point at the page. Corrections are made against the source data and noted in the "
+         "repository history, which is public.</p>",
+
+         "<h2>Independence</h2>"
+         "<p>This site is not affiliated with NHTSA, with any vehicle manufacturer, dealer, "
+         "insurer or repair chain. It carries display advertising; advertisers have no input into "
+         "what is published.</p>",
+
+         "<h2>Contact</h2>"
+         f'<p>{OWNER} · <a href="mailto:{CONTACT}">{CONTACT}</a></p>']
+
+    return page_shell(f"About — {SITE}", f"About {SITE}, published by {OWNER}.",
+                      "\n".join(B), DOMAIN + "/about/")
+
+
+def render_privacy() -> str:
+    B = ["<h1>Privacy</h1>",
+         '<p class="sub">What this site collects, and what it does not.</p>',
+         "<h2>What we collect</h2>"
+         "<p>This site is a set of static pages. It has no accounts, no logins, no comment "
+         "system and no newsletter, and it never asks you for personal information.</p>"
+         "<p>Aggregate traffic measurement (page views, referrer, approximate country, device "
+         "type) is used to understand which pages are useful. Nothing on this site is used to "
+         "identify you personally.</p>",
+         "<h2>Advertising</h2>"
+         "<p>This site carries third-party display advertising. Advertising partners may set "
+         "cookies or use similar technology to serve and measure ads, including personalised ads "
+         "where you have consented to that. Visitors in the European Economic Area and the United "
+         "Kingdom are shown a consent choice before any non-essential cookie is set, and that "
+         "choice can be changed at any time.</p>"
+         '<p>You can opt out of personalised advertising from Google at '
+         '<a href="https://adssettings.google.com">adssettings.google.com</a>, and from many other '
+         'vendors at <a href="https://optout.aboutads.info">optout.aboutads.info</a>.</p>',
+         "<h2>Data about vehicles</h2>"
+         "<p>The vehicle data shown here comes from public NHTSA records. Those records are "
+         "published by the United States government with personal details already removed, and "
+         "nothing on this site is keyed to an individual, an address or a vehicle identification "
+         "number.</p>",
+         "<h2>Contact</h2>"
+         f'<p>Questions about this policy: <a href="mailto:{CONTACT}">{CONTACT}</a> ({OWNER}).</p>'
+         f"<p>Last updated {date.today().isoformat()}.</p>"]
+    return page_shell(f"Privacy — {SITE}", "Privacy policy for MileageCurve.",
+                      "\n".join(B), DOMAIN + "/privacy/")
+
+
+def write_page(path: Path, content: str) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "index.html").write_text(content, encoding="utf-8")
+
+
+def render_sitemap(index: list[dict]) -> str:
+    today = date.today().isoformat()
+    urls = ["/", "/methodology/", "/about/", "/privacy/"] + [p["url"] for p in index]
+    body = "".join(
+        f"<url><loc>{DOMAIN}{u}</loc><lastmod>{today}</lastmod></url>" for u in urls)
+    return f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{body}</urlset>'
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int)
@@ -350,7 +546,36 @@ def main() -> int:
     (ROOT / "data" / "page_index.json").write_text(
         json.dumps(index, indent=1, ensure_ascii=False), encoding="utf-8")
 
-    print(f"страниц собрано: {built}  | пропущено (мало данных): {skipped}")
+    # --- институциональная оболочка (PLAYBOOK §8) ---
+    meta = dict(con.execute("SELECT key, value FROM meta").fetchall())
+    with_miles = con.execute(
+        "SELECT COUNT(*) FROM complaints WHERE miles IS NOT NULL").fetchone()[0]
+    stats = {
+        "complaints": int(meta.get("complaints", 0)),
+        "recalls": int(meta.get("recalls", 0)),
+        "with_miles": with_miles,
+        "bimodal": sum(1 for p in index if p["shape"] == "bimodal"),
+    }
+
+    write_page(DIST, render_index(index, stats))
+    write_page(DIST / "methodology", render_methodology(stats))
+    write_page(DIST / "about", render_about())
+    write_page(DIST / "privacy", render_privacy())
+
+    (DIST / "sitemap.xml").write_text(render_sitemap(index), encoding="utf-8")
+    (DIST / "robots.txt").write_text(
+        f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
+    # ads.txt заполняется после одобрения AdSense — идентификатор издателя туда же
+    (DIST / "ads.txt").write_text(
+        "# AdSense publisher line goes here once the account is approved\n", encoding="utf-8")
+
+    # Открытые данные: выгрузка агрегатов — ссылочная приманка (PLAYBOOK §7)
+    (DIST / "data").mkdir(exist_ok=True)
+    (DIST / "data" / "generations.json").write_text(
+        GENS.read_text(encoding="utf-8"), encoding="utf-8")
+
+    print(f"страниц поколений: {built}  | пропущено (мало данных): {skipped}")
+    print(f"плюс: главная, methodology, about, privacy, sitemap.xml, robots.txt, открытые данные")
     print(f"→ {DIST}")
     con.close()
     return 0
