@@ -320,22 +320,48 @@ figure.fig>:first-child{margin-top:0}
   .fig-cols p{margin-bottom:0}
 }
 @media(max-width:479px){figure.fig{padding:var(--s-3);margin:var(--s-5) 0}}
-svg.hist{width:100%;height:clamp(180px,24vw,240px)}
+/* У графика была высота, но не было величины: сколько именно жалоб в самом
+   высоком столбике — не сказано нигде. Колонка слева даёт пять подписей ровно
+   по линиям сетки; это честно, потому что высокий столбик масштабируется
+   ровно в 100 единиц. */
+figure.fig .plot{display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 var(--s-2)}
+figure.fig .pane{min-width:0}
+.yax{display:flex;flex-direction:column;justify-content:space-between;
+  height:clamp(220px,26vw,320px);font-size:var(--f-2xs);line-height:1;text-align:right;
+  color:var(--muted);font-variant-numeric:tabular-nums}
+.yax span{white-space:nowrap}
+svg.hist{width:100%;height:clamp(220px,26vw,320px)}
 .hist .zone{fill:var(--warn)}
 .hist .bar{fill:var(--bar)}
 .hist .bar-hi{fill:var(--bar-hi)}
-.hist .over{fill:var(--bar);opacity:.55}
+/* Прозрачность как канал кодировки запрещена: она не переживает печать
+   и читается как «менее достоверно», хотя означает другое. */
+.hist .over{fill:var(--line-strong)}
 .hist .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4;
   vector-effect:non-scaling-stroke}
 .hist .base{stroke:var(--line-strong);stroke-width:1;vector-effect:non-scaling-stroke}
-.hist .med{stroke:var(--ink);stroke-width:2;stroke-dasharray:3 3;opacity:.55;
+.hist .med{stroke:var(--ink);stroke-width:2;stroke-dasharray:3 3;
   vector-effect:non-scaling-stroke}
+
+.cal{display:grid;grid-template-columns:repeat(8,11.85%);margin:0 0 var(--s-2)}
+.cal span{font-size:var(--f-xs);line-height:1.35;color:var(--ink);
+  border-left:2px solid var(--peak);padding:2px 0 2px 8px;max-width:none}
+
+/* Линейка распределения на той же линейной оси: плоский правый хвост сам
+   по себе не сообщает ничего, а пять чисел на нём — сообщают. */
+svg.ruler{width:100%;height:18px;margin-top:6px}
+.ruler .rtrack{fill:var(--line)}
+.ruler .whisk{fill:var(--bar)}
+.ruler .box{fill:var(--bar-hi)}
+.ruler .rmed{stroke:var(--ink);stroke-width:2}
+.ruler .rmed-in{stroke:var(--surface);stroke-width:2}
 
 /* x axis: 8 tracks of 11.85% mirror the 948/1000 plot area, so a right-aligned
    label in track k sits exactly on the k x 25,000-mile boundary. The remaining
    5.2% is the gap plus the detached 200k+ bar, labelled in the legend below. */
-.xax{display:grid;grid-template-columns:repeat(8,11.85%);margin:var(--s-2) 0 var(--s-4);
-  font-size:12px;line-height:1.2;color:var(--muted);font-variant-numeric:tabular-nums}
+.xax{display:grid;grid-template-columns:repeat(8,11.85%);margin:6px 0 0;
+  font-size:var(--f-2xs);line-height:1.2;color:var(--muted);
+  font-variant-numeric:tabular-nums}
 .xax span{text-align:right;white-space:nowrap}
 @media(max-width:479px){.xax .q{visibility:hidden}}  /* 8 labels -> 4 */
 
@@ -344,10 +370,10 @@ svg.hist{width:100%;height:clamp(180px,24vw,240px)}
 .brk-row{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);list-style:none;
   padding:0;margin:var(--s-3) 0 0;font-size:var(--f-xs);color:var(--ink)}
 .brk-row li{display:flex;align-items:center;gap:var(--s-2);margin:0;max-width:none}
-.brk-row .k{display:block;flex:none;width:14px;height:10px;border-radius:2px}
+.brk-row .k{display:block;flex:none;width:14px;height:10px;border-radius:1px}
 .brk-row .k-hi{background:var(--bar-hi)}
 .brk-row .k-bar{background:var(--bar)}
-.brk-row .k-over{background:var(--bar);opacity:.55}
+.brk-row .k-over{background:var(--line-strong)}
 /* Медиана на графике — это штрих, а не заливка. Правила для .k-med не было
    вовсе, поэтому в легенде на всех 318 страницах перед словом Median зияла
    пустота: образец выводился, но был невидим. */
@@ -355,16 +381,27 @@ svg.hist{width:100%;height:clamp(180px,24vw,240px)}
 
 /* percentiles: five facts as five cells, not one run-on sentence.
    auto-fit needs no media query — 5 columns at desktop, 3 at 360px. */
+/* Процентили — примечание к гистограмме, а не отдельный виджет в рамке
+   со скруглениями рядом с ней. Ряд чисел по левому краю, внутри экспоната. */
+.fig-foot .pct{display:grid;grid-template-columns:repeat(auto-fit,minmax(84px,1fr));
+  gap:0;margin:0 0 var(--s-3);background:none;border:0;border-radius:0;
+  border-top:1px solid var(--line-strong);overflow:visible;max-width:none}
+.fig-foot .pct>div{background:none;text-align:left;
+  padding:var(--s-2) var(--s-3) var(--s-2) 0;border-right:1px solid var(--line)}
+.fig-foot .pct>div:last-child{border-right:0}
 .pct{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:1px;
   margin:var(--s-3) 0 0;background:var(--line);border:1px solid var(--line);
-  border-radius:var(--radius);overflow:hidden}
+  overflow:hidden}
 .pct>div{background:var(--surface);padding:var(--s-2) var(--s-2) 10px;text-align:center}
-.pct dt{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-.pct dd{margin:var(--s-1) 0 0;max-width:none;font-size:16px;letter-spacing:-.01em;
-  font-variant-numeric:tabular-nums}
-.pct .mid dd{font-weight:700;color:var(--accent-ink)}
+.pct dt{font-size:var(--f-2xs);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted)}
+.pct dd{margin:2px 0 0;max-width:none;font-size:var(--f-lg);line-height:1.1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink)}
+.pct .mid dd{font-weight:700}
+.pct .mid dt{color:var(--ink)}
 
-.meta{font-size:var(--f-xs);color:var(--muted);margin:var(--s-3) 0 0}
+.meta{font-size:var(--f-xs);color:var(--muted);margin:0 0 var(--s-2);
+  max-width:var(--measure)}
 
 details.nums{margin-top:var(--s-3)}
 details.nums summary{cursor:pointer;color:var(--muted);font-size:var(--f-xs);
@@ -853,15 +890,20 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
 
     # ГЛАВНОЕ НА СТРАНИЦЕ — график идёт выше сгиба
     if s["histogram"]:
-        B.append(charts.histogram(s["histogram"], sh, s["complaints_with_miles"],
-                                  f"{make} {model} {years}"))
-        B.append(charts.percentiles(sh))
+        # Один составной экспонат вместо графика, таблицы процентилей и двух
+        # подписей, лежавших в тексте россыпью.
         top_bin = max(s["histogram"]["bins"], key=lambda b: b["count"], default=None)
         extra = (f'Tallest bin: {fmt(top_bin["count"])} complaints between {fmt(top_bin["lo"])} '
                  f'and {fmt(top_bin["hi"])} miles. ' if top_bin and top_bin["count"] else "")
-        B.append(f'<p class="meta">{extra}Based on {fmt(s["complaints_with_miles"])} complaints '
-                 f'that record mileage. Bin width {fmt(s["histogram"]["width"])} miles.</p>')
-        B.append(charts.bins_table(s["histogram"]))
+        hfoot = (charts.percentiles(sh)
+                 + f'<p class="meta">{extra}Based on {fmt(s["complaints_with_miles"])} complaints '
+                   f'that record mileage. Bin width {fmt(s["histogram"]["width"])} miles.</p>'
+                 + charts.bins_table(s["histogram"]))
+        B.append(charts.histogram(
+            s["histogram"], sh, s["complaints_with_miles"], f"{make} {model} {years}",
+            kicker=f'Figure 1 &middot; {esc(make)} {esc(model)} {years} &middot; '
+                   f'{fmt(s["complaints_with_miles"])} reports with mileage',
+            title="Mileage at failure", foot=hfoot))
 
     B.append('<p class="note">What this can and cannot tell you: these are complaints owners '
              'chose to file, not a failure rate. Popular models accumulate more of them simply '

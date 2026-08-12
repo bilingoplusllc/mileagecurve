@@ -74,7 +74,44 @@ def _describe(hist: dict, shape: dict, total: int, label: str) -> str:
     return " ".join(parts)
 
 
-def histogram(hist: dict, shape: dict, total: int, label: str, uid: str = "h") -> str:
+def _yaxis(mx: int) -> str:
+    """Пять подписей сверху вниз, ровно по линиям сетки y=0/25/50/75/100.
+
+    Честно потому, что histogram() масштабирует самый высокий столбик ровно
+    в 100 единиц. Без этой шкалы у графика не было величины: высота была,
+    а сколько именно — нигде.
+    """
+    steps = [int(mx * k / 4 + 0.5) for k in (4, 3, 2, 1, 0)]
+    return ('<div class="yax" aria-hidden="true">'
+            + "".join(f"<span>{fmt(v)}</span>" for v in steps) + "</div>")
+
+
+def ruler(shape: dict) -> str:
+    """Пятичисловая сводка на ТОЙ ЖЕ линейной оси x_of(), что и столбики.
+
+    Плоский правый хвост сам по себе не сообщает ничего; линейка превращает
+    его в сведения, не трогая кодировку гистограммы. Медиана — два совпадающих
+    штриха: тёмный во всю высоту строки, чтобы читаться на фоне, и светлый
+    внутри коробки, чтобы читаться как вырез в тёмной заливке.
+    """
+    if not shape.get("median"):
+        return ""
+    a, b = x_of(shape["p10"]), x_of(shape["p90"])
+    c, d = x_of(shape["p25"]), x_of(shape["p75"])
+    m = x_of(shape["median"])
+    return (f'<svg class="ruler" viewBox="0 0 1000 18" preserveAspectRatio="none" '
+            f'aria-hidden="true">'
+            f'<rect class="rtrack" x="0" y="8" width="{PLOT_W}" height="2"/>'
+            f'<rect class="whisk" x="{a:.1f}" y="6" width="{max(b - a, 2):.1f}" height="6"/>'
+            f'<rect class="box" x="{c:.1f}" y="2" width="{max(d - c, 2):.1f}" height="14"/>'
+            f'<line class="rmed" x1="{m:.1f}" y1="0" x2="{m:.1f}" y2="18" '
+            f'vector-effect="non-scaling-stroke"/>'
+            f'<line class="rmed-in" x1="{m:.1f}" y1="3" x2="{m:.1f}" y2="15" '
+            f'vector-effect="non-scaling-stroke"/></svg>')
+
+
+def histogram(hist: dict, shape: dict, total: int, label: str, uid: str = "h",
+              kicker: str = "", title: str = "", foot: str = "") -> str:
     """Гистограмма пробегов до отказа. Равномерные корзины, подписи снаружи."""
     bins = hist["bins"]
     ov = hist.get("overflow") or {}
@@ -126,8 +163,29 @@ def histogram(hist: dict, shape: dict, total: int, label: str, uid: str = "h") -
         legend.append(f'<li><span class="k k-over"></span>{fmt(DOMAIN)}+ — {fmt(ov["count"])} '
                       f'complaints ({ov["pct"]}%), plotted separately</li>')
 
-    return (f'<figure class="chart">{"".join(parts)}{axis_row()}'
-            f'<ul class="brk-row">{"".join(legend)}</ul></figure>')
+    # Выноска к самому высокому столбику. grid-column — ЕДИНСТВЕННЫЙ строчный
+    # стиль во всей сборке, и он задаёт место в потоке, а не position.
+    top = max(bins, key=lambda b: b["count"], default=None)
+    callout = ""
+    if top and top["count"]:
+        col = min(max(int(top["lo"]) // 25_000 + 1, 1), 5)
+        callout = (f'<div class="cal" aria-hidden="true">'
+                   f'<span style="grid-column:{col}/span 4">{top["pct"]}% of all reports '
+                   f'fall between {fmt(top["lo"])} and {fmt(top["hi"])} miles</span></div>')
+    sub = (f'Complaints per {fmt(hist["width"])}-mile bin, 0 to {fmt(DOMAIN)} miles, '
+           f'equal bins on a linear scale. Tallest bar = {fmt(mx)} complaints.')
+    return (f'<figure class="fig histfig">'
+            f'<p class="fig-kicker">{kicker}</p>'
+            f'<h3 class="fig-title">{title}</h3>'
+            f'<p class="fig-sub">{sub}</p>'
+            f'<div class="plot">{_yaxis(mx)}'
+            f'<div class="pane">{callout}{"".join(parts)}{ruler(shape)}{axis_row()}</div>'
+            f'</div>'
+            f'<ul class="brk-row">{"".join(legend)}</ul>'
+            f'<div class="fig-foot">{foot}'
+            f'<p>Source: NHTSA Office of Defects Investigation, public domain. '
+            f'Complaint counts reflect what owners reported and are not a measure of '
+            f'failure rate per vehicle sold.</p></div></figure>')
 
 
 LOG_MIN = 500.0            # левая привязка пропорциональной оси, мили
