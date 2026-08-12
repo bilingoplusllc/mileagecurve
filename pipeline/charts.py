@@ -20,6 +20,7 @@
 from __future__ import annotations
 
 import html
+import math
 
 import names
 
@@ -129,40 +130,116 @@ def histogram(hist: dict, shape: dict, total: int, label: str, uid: str = "h") -
             f'<ul class="brk-row">{"".join(legend)}</ul></figure>')
 
 
-def system_strips(systems: list[dict], limit: int = 7) -> str:
-    """Полоски «когда отказывает каждая система» на той же оси, что и гистограмма.
+LOG_MIN = 500.0            # левая привязка пропорциональной оси, мили
+LOG_MAX = 200_000.0
+_LSPAN = math.log10(LOG_MAX / LOG_MIN)      # 2,60206 десятичных порядка
+STRIP_H = 26
+EDGE_X = 530.4             # lx(DEFECT_EDGE), проверено
+
+
+def lx(miles: float) -> float:
+    """Мили → X в системе 0..1000, пропорционально, с привязкой к 500 милям.
+
+    ТОЛЬКО ДЛЯ ПОЛОЖЕНИЙ. Никогда не применять к отметке, у которой ШИРИНА или
+    ПЛОЩАДЬ кодирует количество или плотность. Равные корзины на сжатой оси —
+    ровно та кодировка, что однажды уже сфабриковала здесь главный вывод;
+    гистограмма остаётся на x_of() и линейной навсегда.
+
+    И ещё: полотно и строка подписей обязаны делить ОДНУ конечную константу.
+    lx() занимает все 0..1000, поэтому колонки axis_row_log() дают 100,000%.
+    x_of() занимает PLOT_W=948, поэтому колонки axis_row() дают 94,8%. Не смешивать.
+    """
+    m = min(max(float(miles), LOG_MIN), LOG_MAX)
+    return (math.log10(m) - math.log10(LOG_MIN)) / _LSPAN * 1000.0
+
+
+def axis_row_log() -> str:
+    """Правый край колонки k — это деление k, поэтому подпись, прижатая вправо,
+    попадает точно на свою линию сетки. Ширины — последовательные разности lx()
+    и в сумме дают ровно 100,000%. Первая ячейка — пара, чтобы «500» встало
+    вx=0 без второго перекрывающего элемента и без всякого позиционирования."""
+    return ('<div class="sys-axis"><span class="lbl" aria-hidden="true"></span>'
+            '<div class="ticks" aria-hidden="true">'
+            '<span class="pair"><i>500</i><i>1k</i></span>'
+            '<span>2k</span><span>5k</span><span>10k</span><span>20k</span>'
+            '<span>50k</span><span>100k</span><span>200k</span></div></div>')
+
+
+def system_strips(systems: list[dict], limit: int = 7,
+                  kicker: str = "", title: str = "", foot: str = "") -> str:
+    """Средние половины сообщений на пропорциональной шкале пробега.
 
     Здесь и живёт настоящая находка сайта: у Prius 2010–2015 гидроконтур тормозов
     имеет медиану 3 500 миль (средняя половина 1 000–7 500), а тормоза в целом —
     87 000 (34 000–128 000). Средние половины НЕ пересекаются: это две разные
     поломки под одним словом. В общей гистограмме этого не видно, а здесь видно.
+
+    Строки ОТБИРАЮТСЯ по числу сообщений (топ-N), а затем СОРТИРУЮТСЯ по медиане
+    по возрастанию: разделение на две группы создаётся порядком строк раньше,
+    чем читатель дойдёт до слов. Оба конца интервала печатаются под медианой —
+    на сжатой оси ширина полосы кодирует ОТНОШЕНИЕ, а не число миль, и напечатанные
+    концы не дают ширине остаться единственным источником для читателя.
     """
     rows = [x for x in systems if x.get("median_miles")][:limit]
     if len(rows) < 2:
         return ""
+    rows = sorted(rows, key=lambda x: x["median_miles"])
 
+    GRID = "".join(f"M{lx(t):.1f} 0V{STRIP_H}"
+                   for t in (1000, 2000, 5000, 10000, 20000, 50000, 100000))
     items = []
     for x in rows:
-        p25, p75 = x.get("p25_miles", x["median_miles"]), x.get("p75_miles", x["median_miles"])
-        x0, x1 = x_of(p25), x_of(p75)
-        w = max(x1 - x0, 6.0)          # минимальная видимая ширина
-        mpos = x_of(x["median_miles"])
+        p25 = x.get("p25_miles", x["median_miles"])
+        p75 = x.get("p75_miles", x["median_miles"])
+        x0, x1 = lx(p25), lx(p75)
+        w = max(x1 - x0, 10.0)
+        if x0 + w > 1000.0:
+            x0 = 1000.0 - w
+        mpos = min(max(lx(x["median_miles"]), x0 + 1.0), x0 + w - 1.0)
         cls = "iqr-hi" if x["median_miles"] <= DEFECT_EDGE else "iqr"
+        # Метка «интервал уходит левее шкалы»: p25 ниже привязки в 500 миль.
+        clip = ('<rect class="clip" x="0" y="6" width="6" height="14"/>'
+                if p25 < LOG_MIN else "")
         name = esc(x.get("display_name") or x["system"].title())
+        med = fmt(names.round_miles(x["median_miles"]))
+        lo, hi = fmt(names.round_miles(p25)), fmt(names.round_miles(p75))
         items.append(
-            f'<li><span class="nm">{name}</span>'
-            f'<svg class="strip" viewBox="0 0 1000 16" preserveAspectRatio="none" aria-hidden="true">'
-            f'<rect class="track" x="0" y="6" width="1000" height="4"/>'
-            f'<rect class="{cls}" x="{x0:.1f}" y="2" width="{w:.1f}" height="12"/>'
-            f'<line class="med" x1="{mpos:.1f}" y1="0" x2="{mpos:.1f}" y2="16" '
+            f'<li><span class="nm">{name}'
+            f'<span class="ct">{fmt(x["count"])} reports</span></span>'
+            f'<svg class="strip" viewBox="0 0 1000 {STRIP_H}" '
+            f'preserveAspectRatio="none" aria-hidden="true">'
+            f'<rect class="zone" x="0" y="0" width="{EDGE_X}" height="{STRIP_H}"/>'
+            f'<path class="g" d="{GRID}" vector-effect="non-scaling-stroke"/>'
+            f'<line class="edge" x1="{EDGE_X}" y1="0" x2="{EDGE_X}" y2="{STRIP_H}" '
+            f'vector-effect="non-scaling-stroke"/>'
+            f'<rect class="{cls}" x="{x0:.1f}" y="6" width="{w:.1f}" height="14"/>{clip}'
+            f'<line class="med" x1="{mpos:.1f}" y1="6" x2="{mpos:.1f}" y2="20" '
             f'vector-effect="non-scaling-stroke"/></svg>'
-            f'<span class="mv">{fmt(names.round_miles(x["median_miles"]))}</span>'
-            # Округление одинаковое в заголовке и в подписи для чтеца экрана:
-            # иначе рядом стоят «59,000» и «median 58,847 miles» — на одну и ту же величину.
-            f'<span class="vh">median {fmt(names.round_miles(x["median_miles"]))} miles, '
-            f'middle half {fmt(names.round_miles(p25))} to {fmt(names.round_miles(p75))}</span></li>')
+            f'<span class="mv"><b>{med}</b><span class="rg">{lo}&#8211;{hi}</span></span>'
+            f'<span class="vh">{name}: {fmt(x["count"])} reports, median {med} miles, '
+            f'middle half {lo} to {hi} miles.</span></li>')
 
-    return (f'<ol class="sys">{"".join(items)}</ol>{axis_row()}')
+    body = ('<div class="sys-head" aria-hidden="true"><span class="hd">System</span>'
+            '<span class="band"><span class="band-a"><b>0&#8211;12,000 mi</b> '
+            '<i>factory-defect window</i></span>'
+            '<span class="band-b"><b>12,000 mi and beyond</b> '
+            '<i>wear and service life</i></span></span>'
+            '<span class="hd hd-r">Median</span></div>'
+            f'<ol class="sys">{"".join(items)}</ol>{axis_row_log()}')
+
+    sub = ('Bar spans the middle half of reports; the pale tick is the median. '
+           'Miles at failure on a proportional scale &mdash; equal distances are '
+           'equal ratios, not equal miles.')
+    return (f'<figure class="fig sysfig">'
+            f'<p class="fig-kicker">{kicker}</p>'
+            f'<h3 class="fig-title">{title}</h3>'
+            f'<p class="fig-sub">{sub}</p>{body}'
+            f'<div class="fig-foot">{foot}'
+            f'<p>Ordered by median mileage, earliest first. The first 12,000 miles '
+            f'are shaded: that is the boundary this site uses between a manufacturing '
+            f'defect and ordinary wear, not a property of the world.</p>'
+            f'<p>Source: NHTSA Office of Defects Investigation, public domain.</p>'
+            f'</div></figure>')
 
 
 def percentiles(shape: dict) -> str:

@@ -115,6 +115,14 @@ CSS = """
 :root{
   color-scheme:light dark;
 
+  /* Засечки для слов, гротеск для чисел. Внешних запросов не появляется —
+     обе гарнитуры системные. ПРАВИЛО: у Georgia минускульные цифры (часть
+     из них уходит ниже строки), поэтому ни одна строка с числом не должна
+     попадать в элемент с засечками. .h1-years, .verdict и все цифры —
+     явно гротеском именно по этой причине. */
+  --serif:Georgia,"Times New Roman",Times,"Noto Serif",serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
   --bg:#fbfbfa; --surface:#ffffff;
   --ink:#181c1b;          /* 16.9:1 on --bg */
   --muted:#5a6360;        /*  6.0:1 on --bg */
@@ -127,18 +135,26 @@ CSS = """
 
   /* chart ink: separated in LIGHTNESS, not hue, so the encoding survives
      greyscale, print and every colour-vision deficiency.
-     --bar 3.3:1 on surface · --bar-hi 3.5:1 on --bar · --bar-hi 10:1 on surface */
-  --bar:#7e938e; --bar-hi:#0b4238;
+     --bar был #7e938e — 2.89:1 на кремовой зоне --warn, ниже порога 3:1
+     для нетекстовой графики. #758a85: 3.25:1 на --warn, 3.66:1 на белом. */
+  --bar:#758a85; --bar-hi:#0b4238;
+  --tick:#ffffff;         /* метка медианы — рисуется ТОЛЬКО внутри полосы */
 
   /* severe advisories. Never `opacity` on a text-bearing element. */
   --danger-bg:#8c2f0e; --danger-fg:#ffffff; --danger-ring:#8c2f0e;  /* 8.3:1 */
 
-  --shadow:rgba(20,30,28,.13);
+  --shadow:rgba(20,30,28,.13);   /* остаётся ради одной работы: подсказка прокрутки */
 
-  --f-xs:13px; --f-sm:15px; --f-md:17px; --f-lg:21px; --f-xl:26px; --f-2xl:33px;
+  --f-2xs:12px; --f-xs:13px; --f-sm:15px; --f-md:17px;
+  --f-lg:21px; --f-xl:26px; --f-2xl:34px; --f-3xl:44px;
   --s-1:4px; --s-2:8px; --s-3:16px; --s-4:24px; --s-5:32px; --s-6:48px; --s-7:64px;
   --measure:68ch;   /* ~578px at 17px — 66-70 characters */
-  --radius:10px;
+
+  /* Было 10px. Самый громкий признак шаблона на странице: скруглённые
+     карточки, поля ввода и таблицы читаются как готовая тема, а не как
+     свёрстанное издание. */
+  --radius:2px;
+  --rule:3px;             /* линия под шапкой и над экспонатом */
 }
 @media(prefers-color-scheme:dark){:root{
   --bg:#111413; --surface:#191d1c;
@@ -149,7 +165,8 @@ CSS = """
   --track:#232827; --warn:#2a2419;
 
   --accent:#4fc0aa; --accent-ink:#7ad6c4; --peak:#f0a882;
-  --bar:#5c6b67; --bar-hi:#7fe0c8;        /* 3.5:1 between them */
+  --bar:#667672; --bar-hi:#7fe0c8;        /* 3.5:1 between them */
+  --tick:#111413;
 
   --danger-bg:transparent; --danger-fg:#f0a882; --danger-ring:#f0a882;  /* 8.7:1 */
   --shadow:rgba(0,0,0,.55);
@@ -169,7 +186,9 @@ img,svg{display:block;max-width:100%}
    wide. One shared left edge for prose and figures — nothing is centred, so
    nothing can look adrift. */
 p,li,dd,blockquote,.note,.meta,.sub{max-width:var(--measure)}
-.tw,figure.chart,ol.sys,.ad,ul.rel,.pct,.prov,table{max-width:none}
+.tw,figure.chart,figure.fig,ol.sys,.ad,ul.rel,.pct,.prov,table,
+.sys-head,.sys-axis,.band,ul.makes,.creds,.qpop,
+.fig-kicker,.fig-title,.fig-sub{max-width:none}
 
 p{margin:0 0 var(--s-5)}            /* 32px gap >….4px leading */
 p:last-child{margin-bottom:0}
@@ -190,20 +209,28 @@ a:hover{text-decoration-thickness:2px}
   border:1px solid var(--accent);border-radius:var(--radius);text-decoration:none}
 
 /* ---------- 3. header, nav, breadcrumbs ----------------------------------- */
-header.site{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s-2) var(--s-4);
-  padding-bottom:var(--s-3);margin-bottom:var(--s-4);
-  border-bottom:1px solid var(--line-strong)}
-header.site .brand{font-weight:700;font-size:19px;letter-spacing:-.015em;
-  text-decoration:none;color:var(--ink)}
-header.site .tag{color:var(--muted);font-size:var(--f-xs)}
-header.site nav{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
-  margin-left:auto;font-size:var(--f-sm)}
+/* Шапка издания: марка с подзаголовком слева, рубрики справа, всё это
+   отбито жирной линией. Раньше здесь стояли имя и четыре серые ссылки
+   без веса — страница начиналась ни с чего. */
+header.site{display:grid;grid-template-columns:auto minmax(0,1fr);align-items:end;
+  gap:2px var(--s-4);padding:var(--s-3) 0 10px;margin-bottom:var(--s-5);
+  border-bottom:var(--rule) solid var(--ink)}
+header.site .brand{grid-column:1;grid-row:1;display:flex;align-items:center;gap:8px;
+  font-family:var(--serif);font-weight:700;font-size:24px;letter-spacing:-.02em;
+  line-height:1;color:var(--ink);text-decoration:none}
+header.site .brand svg{color:var(--accent);flex:none}
+header.site .masthead-tag{grid-column:1;grid-row:2;font-size:var(--f-2xs);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);max-width:none}
+header.site nav{grid-column:2;grid-row:1/span 2;align-self:end;display:flex;
+  flex-wrap:wrap;justify-content:flex-end;gap:var(--s-2) var(--s-4);
+  font-size:var(--f-2xs);letter-spacing:.08em;text-transform:uppercase}
 header.site nav a{color:var(--muted);text-decoration:none;padding-bottom:2px;
-  border-bottom:1px solid transparent}
+  border-bottom:2px solid transparent}
 header.site nav a:hover{color:var(--ink);border-bottom-color:var(--accent)}
+header.site nav a[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
 @media(max-width:560px){
-  header.site .tag{display:none}
-  header.site nav{margin-left:0;width:100%}
+  header.site{grid-template-columns:minmax(0,1fr);padding-bottom:8px}
+  header.site nav{grid-column:1;grid-row:3;justify-content:flex-start;margin-top:8px}
 }
 
 .crumbs{display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-2);list-style:none;
@@ -213,9 +240,15 @@ header.site nav a:hover{color:var(--ink);border-bottom-color:var(--accent)}
 .crumbs li+li::before{content:"›";margin-right:var(--s-2);color:var(--line-strong)}
 
 /* ---------- 4. page title, dateline, headings ----------------------------- */
-h1{font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.15;letter-spacing:-.022em;
-  font-weight:700;margin:0 0 var(--s-2);max-width:none}
-.h1-years{font-weight:400;color:var(--muted)}
+/* ДОМАШНЕЕ ПРАВИЛО: элемент с границей НИКОГДА не получает max-width — граница
+   ровно такой же ширины, как элемент, и именно это дало культю в 260px.
+   Ограничивать нужно колонку, а не сам блок с линией. */
+h1{font-family:var(--serif);font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.12;
+  letter-spacing:-.018em;font-weight:700;margin:0 0 var(--s-2);max-width:22ch}
+/* Цифры — всегда гротеском: у Georgia минускульные цифры, и «2010–2015»
+   в засечках прыгает по базовой линии. */
+.h1-years{font-family:var(--sans);font-weight:400;font-size:.72em;color:var(--muted);
+  letter-spacing:0;font-variant-numeric:tabular-nums;white-space:nowrap}
 .sub{color:var(--muted);font-size:var(--f-sm);margin:0 0 var(--s-3)}
 
 .dateline{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s-1) var(--s-3);
@@ -225,12 +258,13 @@ h1{font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.15;letter-spacing:-.02
 .dateline a{color:var(--muted)}
 .dateline span+span::before{content:"·";margin-right:var(--s-3);color:var(--line-strong)}
 
-h2{font-size:var(--f-xl);line-height:1.2;letter-spacing:-.018em;font-weight:600;
-  margin:var(--s-6) 0 var(--s-3);padding-top:var(--s-4);
-  border-top:1px solid var(--line);max-width:none}
-h3{font-size:var(--f-lg);line-height:1.3;letter-spacing:-.01em;font-weight:600;
-  margin:var(--s-5) 0 var(--s-2);max-width:none}
+h2{font-family:var(--serif);font-weight:400;font-size:var(--f-xl);line-height:1.22;
+  letter-spacing:-.012em;margin:var(--s-6) 0 var(--s-3);padding-top:var(--s-3);
+  border-top:1px solid var(--line-strong);max-width:none}
+h3{font-family:var(--serif);font-weight:700;font-size:var(--f-lg);line-height:1.3;
+  letter-spacing:-.008em;margin:var(--s-5) 0 var(--s-2);max-width:none}
 :is(h1,h2,h3)+*{margin-top:0}
+:is(h1,h2,h3)[id]{scroll-margin-top:var(--s-4)}
 
 /* ---------- 5. cards ------------------------------------------------------ */
 .card{background:var(--surface);border:1px solid var(--line);
@@ -257,6 +291,35 @@ mark{background:var(--warn);color:inherit;padding:0 3px;border-radius:2px;
    CSS height, x stretches. Rectangles are immune to x-stretch; strokes are
    pinned with vector-effect. Never put a diagonal or a circle in here.      */
 figure.chart{margin:0 0 var(--s-4);padding:0}
+
+/* График как экспонат: рубрика, заголовок, пояснение, полотно, примечание.
+   Раньше графики лежали россыпью в тексте и читались как остатки, хотя они
+   и есть предмет сайта. Верхняя линия в 3px — та же, что под шапкой. */
+figure.fig{margin:var(--s-6) 0;padding:var(--s-4) var(--s-4) var(--s-3);
+  background:var(--surface);border:1px solid var(--line);
+  border-top:var(--rule) solid var(--ink);border-radius:0;max-width:none}
+figure.fig>:first-child{margin-top:0}
+.fig-kicker{font-family:var(--sans);font-size:var(--f-2xs);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--muted);margin:0 0 var(--s-1);
+  max-width:none;font-variant-numeric:tabular-nums}
+.fig-title{font-family:var(--serif);font-weight:400;font-size:var(--f-xl);
+  line-height:1.2;letter-spacing:-.012em;margin:0 0 var(--s-2);
+  padding:0;border:0;max-width:26ch}
+.fig-sub{font-family:var(--sans);font-size:var(--f-xs);line-height:1.45;
+  color:var(--muted);margin:0 0 var(--s-3);max-width:62ch}
+.fig-foot{margin-top:var(--s-4);padding-top:var(--s-3);
+  border-top:1px solid var(--line);font-size:var(--f-xs);color:var(--muted)}
+.fig-foot p{margin:0 0 var(--s-2);max-width:var(--measure)}
+.fig-foot p:last-child{margin-bottom:0}
+.fig-foot details.nums{margin-top:var(--s-2)}
+.fig-cols p{max-width:44ch}
+.fig-cols b{font-family:var(--sans);font-weight:700;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+@media(min-width:1180px){
+  .fig-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 var(--s-6)}
+  .fig-cols p{margin-bottom:0}
+}
+@media(max-width:479px){figure.fig{padding:var(--s-3);margin:var(--s-5) 0}}
 svg.hist{width:100%;height:clamp(180px,24vw,240px)}
 .hist .zone{fill:var(--warn)}
 .hist .bar{fill:var(--bar)}
@@ -285,6 +348,10 @@ svg.hist{width:100%;height:clamp(180px,24vw,240px)}
 .brk-row .k-hi{background:var(--bar-hi)}
 .brk-row .k-bar{background:var(--bar)}
 .brk-row .k-over{background:var(--bar);opacity:.55}
+/* Медиана на графике — это штрих, а не заливка. Правила для .k-med не было
+   вовсе, поэтому в легенде на всех 318 страницах перед словом Median зияла
+   пустота: образец выводился, но был невидим. */
+.brk-row .k-med{width:3px;height:14px;border-radius:1px;background:var(--ink)}
 
 /* percentiles: five facts as five cells, not one run-on sentence.
    auto-fit needs no media query — 5 columns at desktop, 3 at 360px. */
@@ -305,25 +372,72 @@ details.nums summary{cursor:pointer;color:var(--muted);font-size:var(--f-xs);
 details.nums summary:hover{color:var(--ink)}
 
 /* ---------- 7. system timing strips ---------------------------------------
-   Replaces the struck-through table bar. Same 0-200,000 x scale as the
-   histogram, so one .xax row serves both charts. Same SVG technique: no
-   overlapping grid items, no positioning of any kind.                       */
-ol.sys{list-style:none;margin:var(--s-3) 0 0;padding:0}
-ol.sys li{display:grid;grid-template-columns:minmax(10em,15em) minmax(0,1fr) 5em;
-  align-items:center;gap:var(--s-2) var(--s-3);padding:var(--s-2) 0;
-  border-bottom:1px solid var(--line);margin:0;max-width:none}
+   Ось ПРОПОРЦИОНАЛЬНАЯ (десятичный логарифм от 500 миль), а не линейная.
+   На линейной шкале 0–200 000 медианы 3 000 и 3 500 превращались в кляксы
+   у левого края, и главная находка сайта была не видна. Логарифм применён
+   ТОЛЬКО к положению отметок; ширина полосы кодирует отношение, поэтому оба
+   конца интервала печатаются словами рядом. Гистограмма остаётся линейной
+   навсегда — неравные корзины уже однажды сфабриковали здесь вывод.        */
+figure.sysfig{--sys-cols:minmax(8em,13em) minmax(0,1fr) 104px;--plot-span:2/3;
+  --strip-h:26px;--edge-pct:53.04%}
+
+.sys-head,.sys-axis{display:grid;grid-template-columns:var(--sys-cols);
+  gap:0 var(--s-3);align-items:end}
+.sys-head{margin-top:var(--s-3)}
+.sys-head .hd{font-family:var(--sans);font-size:var(--f-2xs);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted);padding-bottom:4px;
+  border-bottom:1px solid var(--line-strong)}
+.sys-head .hd-r{text-align:right}
+.band{grid-column:var(--plot-span);display:grid;
+  grid-template-columns:var(--edge-pct) calc(100% - var(--edge-pct));
+  font-size:var(--f-2xs);color:var(--muted);border-bottom:1px solid var(--line-strong)}
+.band>span{padding:3px 6px 4px 0;min-width:0;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.band-a{background:var(--warn);padding-left:4px}
+.band b{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+.band i{font-style:normal;letter-spacing:.05em;text-transform:uppercase}
+
+ol.sys{list-style:none;margin:0;padding:0}
+ol.sys li{display:grid;grid-template-columns:var(--sys-cols);gap:0 var(--s-3);
+  align-items:stretch;margin:0;padding:0;max-width:none;
+  border-bottom:1px solid var(--line)}
 ol.sys li:last-child{border-bottom:0}
-ol.sys .nm{font-size:var(--f-sm);line-height:1.3}
-ol.sys .mv{font-size:var(--f-xs);color:var(--muted);text-align:right;
+ol.sys .nm{grid-column:1;align-self:center;font-size:var(--f-sm);line-height:1.25;
+  padding:6px 0}
+ol.sys .ct{display:block;font-size:var(--f-2xs);color:var(--muted);
+  font-variant-numeric:tabular-nums;margin-top:1px}
+ol.sys .mv{grid-column:3;align-self:center;text-align:right;padding:6px 0;
   font-variant-numeric:tabular-nums}
-svg.strip{width:100%;height:16px}
-.strip .track{fill:var(--track)}
+ol.sys .mv b{display:block;font-size:var(--f-sm);font-weight:700;letter-spacing:-.01em}
+ol.sys .rg{display:block;font-size:var(--f-2xs);color:var(--muted);white-space:nowrap}
+
+svg.strip{grid-column:var(--plot-span);width:100%;height:100%;
+  min-height:var(--strip-h);display:block}
+.strip .zone{fill:var(--warn)}
+.strip .g{stroke:var(--line);stroke-width:1;fill:none}
+.strip .edge{stroke:var(--line-strong);stroke-width:1;stroke-dasharray:3 3}
 .strip .iqr{fill:var(--bar)}
 .strip .iqr-hi{fill:var(--bar-hi)}
-.strip .med{stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke}
-@media(max-width:560px){
-  ol.sys li{grid-template-columns:minmax(0,1fr) 5em;row-gap:var(--s-1)}
-  ol.sys .nm{grid-column:1/-1}
+.strip .clip{fill:var(--surface)}
+.strip .med{stroke:var(--tick);stroke-width:2}
+
+.ticks{grid-column:var(--plot-span);display:grid;
+  grid-template-columns:11.569% 11.569% 15.293% 11.569% 11.569% 15.293% 11.569% 11.569%;
+  margin-top:6px;font-size:var(--f-2xs);line-height:1.2;color:var(--muted);
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.ticks span{text-align:right;white-space:nowrap;min-width:0}
+.ticks .pair{display:flex;justify-content:space-between}
+.ticks i{font-style:normal}
+
+@media(max-width:700px){
+  figure.sysfig{--sys-cols:minmax(0,1fr) 104px;--plot-span:1/-1}
+  .sys-head{grid-template-columns:100%}
+  .sys-head .hd,.sys-axis .lbl{display:none}
+  ol.sys .nm{grid-column:1;grid-row:1}
+  ol.sys .mv{grid-column:2;grid-row:1}
+  ol.sys svg.strip{grid-row:2;height:var(--strip-h);margin-bottom:8px}
+  .ticks .pair i:first-child{display:none}
+  .band i{display:none}
 }
 
 /* ---------- 8. tables ------------------------------------------------------
@@ -336,8 +450,8 @@ svg.strip{width:100%;height:16px}
   background-image:
     linear-gradient(to right,var(--surface),transparent 28px),
     linear-gradient(to left,var(--surface),transparent 28px),
-    linear-gradient(to right,var(--shadow),transparent—px),
-    linear-gradient(to left,var(--shadow),transparent—px);
+    linear-gradient(to right,var(--shadow),transparent 14px),
+    linear-gradient(to left,var(--shadow),transparent 14px);
   background-position:0 0,100% 0,0 0,100% 0;
   background-repeat:no-repeat;
   background-size:36px 100%,36px 100%,14px 100%,14px 100%;
@@ -346,16 +460,22 @@ svg.strip{width:100%;height:16px}
 table{border-collapse:collapse;width:100%;font-size:var(--f-sm)}
 caption{text-align:left;font-size:var(--f-xs);color:var(--muted);
   padding:var(--s-2) var(--s-3) 0}
-thead th{text-align:left;vertical-align:bottom;font-size:12px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
-  white-space:normal;padding:12px var(--s-3);
-  border-bottom:2px solid var(--line-strong)}
+/* Утопленная шапка, зебра, табличные цифры и вес на первой числовой колонке —
+   той, которую сравнивают. Наведение подкрашено тёплым, чтобы читалось как
+   ВЫДЕЛЕНИЕ, а не как ещё одна ступень зебры. */
+thead th{text-align:left;vertical-align:bottom;font-size:var(--f-2xs);font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
+  background:var(--track);white-space:normal;padding:10px var(--s-3);
+  border-bottom:1px solid var(--line-strong)}
 thead th.num{text-align:right}
 td,tbody th{text-align:left;vertical-align:top;font-weight:400;
-  padding:11px var(--s-3);border-bottom:1px solid var(--line)}
+  padding:10px var(--s-3);border-bottom:1px solid var(--line);color:var(--ink)}
+tbody tr:nth-child(even)>*{background:var(--bg)}
 tbody tr:last-child>*{border-bottom:0}
-tbody tr:hover{background:var(--track)}
-.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+tbody tr:hover>*{background:var(--warn)}
+.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;
+  letter-spacing:-.01em}
+tbody td.num:first-of-type{font-weight:600}
 .sys-name{min-width:10ch}
 
 /* ---------- 9. quotes ----------------------------------------------------- */
@@ -380,15 +500,14 @@ blockquote.quote cite a{color:var(--muted)}
 ul.rel{list-style:none;padding:0;margin:var(--s-3) 0 var(--s-4);
   display:flex;flex-wrap:wrap;gap:10px}
 ul.rel li{margin:0;max-width:none}
-ul.rel a{display:block;padding:12px—px;line-height:1.35;font-size:var(--f-sm);
+ul.rel a{display:block;padding:12px 14px;line-height:1.35;font-size:var(--f-sm);
   color:var(--ink);text-decoration:none;background:var(--surface);
   border:1px solid var(--line-strong);border-radius:8px}   /* 45px tall */
 ul.rel a:hover{background:var(--track);border-color:var(--accent)}
 
 /* ---------- 12. index page ------------------------------------------------- */
-.idx-make{padding-top:var(--s-3);border-top:1px solid var(--line)}
 
-/* ----------–. ad slots ---------------------------------------------------
+/* ---------- 13. ad slots ---------------------------------------------------
    Reserved before the units exist, so insertion never shifts content.
    Never between the h1 and the histogram.                                   */
 .ad{display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -399,14 +518,13 @@ ul.rel a:hover{background:var(--track);border-color:var(--accent)}
 .ad>ins,.ad>iframe,.ad>div{max-width:100%}
 @media(max-width:479px){.ad{min-height:260px;margin:var(--s-5) 0}}
 
-/* ----------—. provenance strip and footer -------------------------------- */
+/* ---------- 14. provenance strip and footer -------------------------------- */
 .prov{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
-  margin:var(--s-6) 0 0;padding-top:var(--s-3);border-top:1px solid var(--line);
-  font-size:var(--f-xs);color:var(--muted)}
+  margin:var(--s-6) 0 0;font-size:var(--f-xs);color:var(--muted)}
 .prov a{color:var(--accent-ink)}
 
-footer{margin-top:var(--s-6);padding-top:var(--s-3);
-  border-top:1px solid var(--line-strong);color:var(--muted);font-size:var(--f-xs)}
+footer{margin-top:var(--s-6);padding-top:var(--s-4);
+  border-top:2px solid var(--ink);color:var(--muted);font-size:var(--f-xs)}
 footer p{margin:0 0 var(--s-2);max-width:var(--measure)}
 footer a{color:var(--muted)}
 
@@ -437,21 +555,40 @@ footer a{color:var(--muted)}
 /* ---------- главная: герой, поиск, марки ------------------------------------
    Всё в потоке. Выпадающий список результатов — обычный блок под формой,
    не оверлей: страница под ним сдвигается, и это честнее, чем перекрытие. */
-.hero{padding:var(--s-5) 0 var(--s-6);border-bottom:1px solid var(--line)}
-.hero h1{font-size:clamp(30px,5.2vw,44px);line-height:1.08;letter-spacing:-.025em;
-  margin:0 0 var(--s-3);max-width:16ch}
-.lede{font-size:var(--f-lg);line-height:1.45;color:var(--muted);margin:0 0 var(--s-5);
-  max-width:52ch}
+/* Линии у героя нет: отбивку даёт верхняя 3px-линия следующего экспоната.
+   Раньше здесь стояли две черты подряд — своя у героя и своя у заголовка. */
+.hero{padding:var(--s-4) 0 var(--s-6);border-bottom:0}
+.kick{font-family:var(--sans);font-size:var(--f-2xs);letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent-ink);margin:0 0 var(--s-2);max-width:none}
+.hero h1{font-size:clamp(30px,5.2vw,var(--f-3xl));line-height:1.06;
+  letter-spacing:-.024em;margin:0 0 var(--s-3);max-width:17ch}
+.lede{font-family:var(--sans);font-size:var(--f-lg);line-height:1.45;
+  color:var(--muted);margin:0 0 var(--s-4);max-width:46ch}
 .lede strong{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 
+/* Три числа как доводы. Точные и неокруглённые: 2,116,532 — это довод. */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:0;margin:var(--s-5) 0 0;border-top:var(--rule) solid var(--ink);max-width:none}
+.stats>div{padding:var(--s-3) var(--s-3) var(--s-3) 0;border-right:1px solid var(--line)}
+.stats>div:last-child{border-right:0;padding-right:0}
+.stats dt{font-size:var(--f-2xs);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted)}
+.stats dd{margin:var(--s-1) 0 0;max-width:none;font-weight:600;line-height:1;
+  font-size:clamp(24px,4.4vw,var(--f-2xl));letter-spacing:-.03em;
+  font-variant-numeric:tabular-nums}
+
+/* Граница поля в 2px чернилами — то, что говорит «это главный орган
+   управления», без тени и без градиента. */
 .qbox{display:flex;gap:var(--s-2);max-width:520px}
 .qbox input{flex:1 1 auto;min-width:0;font:inherit;font-size:var(--f-md);
-  padding:14px var(--s-3);border:2px solid var(--line-strong);border-radius:var(--radius);
+  padding:15px var(--s-3);border:2px solid var(--ink);border-radius:var(--radius);
   background:var(--surface);color:var(--ink)}
-.qbox input:focus-visible{outline:none;border-color:var(--accent)}
+.qbox input:focus-visible{outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--track)}
 .qbox input::placeholder{color:var(--muted)}
-.qbox button{font:inherit;font-weight:600;padding:14px var(--s-4);border:2px solid var(--accent);
-  border-radius:var(--radius);background:var(--accent);color:#fff;cursor:pointer;white-space:nowrap}
+.qbox button{flex:none;font:inherit;font-weight:600;padding:15px var(--s-4);
+  border:2px solid var(--accent);border-radius:var(--radius);background:var(--accent);
+  color:#fff;cursor:pointer;white-space:nowrap}
 .qbox button:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
 .qhint{font-size:var(--f-xs);color:var(--muted);margin:var(--s-2) 0 0;
   font-variant-numeric:tabular-nums}
@@ -471,28 +608,37 @@ footer a{color:var(--muted)}
 .qr-none{padding:12px var(--s-3);border:1px dashed var(--line-strong);
   border-radius:var(--radius);color:var(--muted);font-size:var(--f-sm);margin:0}
 
-.demo{padding:var(--s-6) 0;border-bottom:1px solid var(--line)}
-/* У секций свои границы, поэтому собственная линия заголовка здесь лишняя:
-   на экране получались ДВЕ горизонтальные черты в 78px друг от друга.
-   Хуже того, max-width обрезал и границу — линия выходила культёй в 260px. */
-.demo h2,#makes{border-top:none;padding-top:0;margin-top:0}
-.demo h2{max-width:30ch}
 .cta{font-weight:600}
 
-.makes{list-style:none;margin:var(--s-4) 0 var(--s-6);padding:0;
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:var(--s-2)}
-.makes li{margin:0}
-.makes a{display:block;padding:12px var(--s-3);border:1px solid var(--line);
-  border-radius:var(--radius);background:var(--surface);text-decoration:none;color:var(--ink)}
-.makes a:hover,.makes a:focus-visible{border-color:var(--accent);background:var(--track)}
-.mk{display:block;font-weight:600}
-.mk-n{display:block;font-size:var(--f-xs);color:var(--muted);
-  font-variant-numeric:tabular-nums;margin-top:2px}
+/* Указатель марок строками, а не карточками. Строка «3 generations · 2,278
+   complaints» переносилась в одних плитках и не переносилась в других —
+   ряд выходил рваным. Теперь это два поля фиксированной ширины, и каждая
+   строка ровно одна. Различие дают числа, а не рамки. */
+ul.makes{list-style:none;margin:var(--s-4) 0 var(--s-6);padding:0;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));
+  gap:0 var(--s-5);border-top:1px solid var(--line-strong);max-width:none}
+ul.makes li{margin:0;max-width:none;border-bottom:1px solid var(--line)}
+ul.makes a{display:grid;grid-template-columns:minmax(0,1fr) 2.4em 5.4em;
+  align-items:baseline;gap:var(--s-2);padding:10px 0;
+  text-decoration:none;color:var(--ink)}
+ul.makes a:hover .mk{text-decoration:underline;text-decoration-thickness:2px;
+  text-underline-offset:2px;color:var(--accent-ink)}
+.mk{font-size:var(--f-sm);font-weight:600;letter-spacing:-.006em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mk-g,.mk-n{font-size:var(--f-2xs);color:var(--muted);text-align:right;
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.mk-n{color:var(--ink)}
+.makes-key{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));
+  gap:0 var(--s-5);margin:var(--s-3) 0 0;max-width:none}
+.makes-key>span{display:grid;grid-template-columns:minmax(0,1fr) 2.4em 5.4em;
+  gap:var(--s-2);font-size:var(--f-2xs);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.makes-key i{font-style:normal;text-align:right}
 
 @media(max-width:479px){
   .qbox{flex-direction:column}
   .qbox button{width:100%}
-  .makes{grid-template-columns:1fr}
+  ul.makes,.makes-key{grid-template-columns:1fr}
 }
 
 /* Широкая колонка главной. Абзацы держит своя мера (68ch), поэтому шире
@@ -500,41 +646,36 @@ footer a{color:var(--muted)}
    нужна. Ниже 1180px разницы нет и правило не действует. */
 @media(min-width:1180px){
   .wrap.wide{max-width:1160px}
-  .wrap.wide .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);
+  /* Правая колонка больше не карточка в рамке: разница высот перестала быть
+     видимой коробкой, которая обрывается раньше соседней. Более высокий столбец
+     теперь справа по построению — поле, подпись и шесть строк. */
+  .wrap.wide .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,400px);
     gap:var(--s-6);align-items:start}
-  .wrap.wide .hero .lede{margin-bottom:0}
-  /* В левой колонке 636px — держать заголовок в 16ch и ломать его на три строки
-     незачем; в две строки он читается как одно высказывание. */
-  .wrap.wide .hero h1{max-width:22ch}
-  /* Левая часть — ОДИН элемент сетки. Пока заголовок и лид были двумя строками,
-     а карточка их перекрывала через grid-row:1/span 2, высокая карточка растягивала
-     первую строку и отрывала лид от заголовка на 135px. */
-  .wrap.wide .hero-find{margin:0;padding:var(--s-4);
-    border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+  .wrap.wide .hero-say{grid-column:1}
+  .wrap.wide .hero h1{max-width:20ch}
+  .wrap.wide .hero-find{grid-column:2;grid-row:1;margin:0;padding:0;
+    border:0;background:none}
   .wrap.wide .qbox,.wrap.wide .qr{max-width:none}
 }
 .hero-find{margin:var(--s-5) 0 0}
-.hero-find h2{font-size:var(--f-md);margin:0 0 var(--s-3);padding:0;border:none;
-  letter-spacing:0;text-transform:none}
-.creds{margin:var(--s-5) 0 0;padding:var(--s-4) 0 0;border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s-3) var(--s-4);
-  max-width:var(--measure)}
-.creds div{min-width:0}
-.creds dt{font-size:var(--f-xs);letter-spacing:.06em;text-transform:uppercase;
-  color:var(--muted);margin:0 0 2px}
-.creds dd{margin:0;font-size:var(--f-sm);line-height:1.35;max-width:none}
-@media(max-width:479px){.creds{grid-template-columns:1fr}}
 
-.qpop-h{font-size:var(--f-xs);letter-spacing:.06em;text-transform:uppercase;
-  color:var(--muted);margin:var(--s-4) 0 var(--s-2);max-width:none}
-.qpop{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-2)}
-.qpop li{margin:0;max-width:none}
-.qpop a{display:inline-block;padding:5px 10px;border:1px solid var(--line);
-  border-radius:999px;font-size:var(--f-sm);text-decoration:none;color:var(--ink);
-  background:var(--surface)}
-.qpop a:hover,.qpop a:focus-visible{border-color:var(--accent);background:var(--track)}
-.qpop a span{color:var(--muted);font-variant-numeric:tabular-nums}
+/* «Most reported» — строки в линейку, а не плашки-таблетки: таблетки это
+   типовая мебель готовых тем. */
+.qpop-h{font-size:var(--f-2xs);letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);margin:var(--s-4) 0 0;max-width:none}
+.qpop{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-strong)}
+.qpop li{margin:0;max-width:none;border-bottom:1px solid var(--line)}
+.qpop a{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s-2);
+  padding:10px 0;font-size:var(--f-sm);color:var(--ink);text-decoration:none}
+.qpop a:hover{color:var(--accent-ink);text-decoration:underline}
+.qpop a span{color:var(--muted);font-variant-numeric:tabular-nums;
+  font-size:var(--f-2xs);white-space:nowrap}
 """
+
+
+def _cur(key: str, active: str) -> str:
+    """aria-current на текущем разделе: читателю и чтецу экрана видно, где он."""
+    return ' aria-current="page"' if key and key == active else ""
 
 
 def strip_comments(css: str = "", js: str = "") -> str:
@@ -558,7 +699,7 @@ def strip_comments(css: str = "", js: str = "") -> str:
 
 
 def page_shell(title: str, desc: str, body: str, canonical: str,
-               script: str = "", wide: bool = False) -> str:
+               script: str = "", wide: bool = False, nav_key: str = "") -> str:
     # Скрипт подключается только там, где он нужен (поиск на главной).
     # Страницы поколений остаются полностью статичными.
     tail = f"<script>{strip_comments(js=script)}</script>" if script else ""
@@ -585,9 +726,15 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
 <a class="skip" href="#main">Skip to content</a>
 <div class="wrap{cls}">
 <header class="site">
-  <a class="brand" href="/">{SITE}</a>
-  <nav aria-label="Main"><a href="/">All vehicles</a><a href="/methodology/">Methodology</a>
-  <a href="/about/">About</a><a href="/privacy/">Privacy</a></nav>
+  <a class="brand" href="/"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"
+   focusable="false"><rect x="0" y="1" width="3" height="14" fill="currentColor"/><rect x="5.5"
+   y="6" width="3" height="9" fill="currentColor" opacity=".62"/><rect x="11" y="10" width="3"
+   height="5" fill="currentColor" opacity=".38"/></svg>{SITE}</a>
+  <span class="masthead-tag">{TAGLINE}</span>
+  <nav aria-label="Main"><a href="/"{_cur("home", nav_key)}>All vehicles</a><a
+  href="/methodology/"{_cur("method", nav_key)}>Methodology</a><a
+  href="/about/"{_cur("about", nav_key)}>About</a><a
+  href="/privacy/"{_cur("privacy", nav_key)}>Privacy</a></nav>
 </header>
 <main id="main">
 {body}
@@ -658,10 +805,13 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         _n = narrative.plain(x["system"])
         # в прозе «the brakes» нужен артикль, в подписи строки — нет
         x["display_name"] = re.sub(r"^the ", "", _n).capitalize()
-    strips = charts.system_strips(s["systems"])
+    # Пояснение переехало внутрь экспоната (.fig-sub). Раньше оно висело
+    # отдельным абзацем, и строка подписей оси налезала на следующий текст.
+    strips = charts.system_strips(
+        s["systems"],
+        kicker=f"Figure 2 &middot; {esc(make)} {esc(model)} {years}",
+        title="When each system fails")
     if strips:
-        B.append('<p class="meta">Each bar spans the middle half of reports for that system; '
-                 'the tick marks the median.</p>')
         B.append(strips)
     B.append('<div class="tw" tabindex="0" role="region" aria-label="Complaints by system">'
              '<table><caption class="vh">Complaints by vehicle system</caption><thead><tr>'
@@ -776,25 +926,26 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
 
     B = ['<div class="hero">',
          '<div class="hero-say">',
-         '<h1>Find out what breaks on your car — and when</h1>',
-         '<p class="lede">Owners filed '
-         f'<strong>{fmt(stats["complaints"])}</strong> complaints with US safety regulators. '
-         f'<strong>{fmt(stats["with_miles"])}</strong> of them recorded the odometer reading at '
-         'the moment the part failed. That second number is what makes this site possible.</p>',
-         # Основания доверять — фактами, а не значками. Заполняет низ левой колонки,
-         # где на широком экране оставалось ~180px пустоты рядом с высокой карточкой.
-         '<dl class="creds">'
-         '<div><dt>Source</dt><dd>US government records, public domain</dd></div>'
-         '<div><dt>Method</dt><dd>Published in full · <a href="/methodology/">read it</a></dd></div>'
-         '<div><dt>Code</dt><dd>Public · '
-         '<a href="https://github.com/bilingoplusllc/mileagecurve">every figure reproducible</a>'
-         '</dd></div>'
-         f'<div><dt>Updated</dt><dd>Monthly · {date.today().strftime("%d %B %Y")}</dd></div>'
+         f'<p class="kick">NHTSA complaint analysis &middot; {len(index)} vehicle generations</p>',
+         '<h1>Find out what breaks on your car &mdash; and when</h1>',
+         # Убрано «That second number is what makes this site possible» — сайт
+         # говорил о себе в самой дорогой строке страницы. Теперь строка говорит
+         # о том, чего у других нет.
+         '<p class="lede">Complaint databases tell you how many owners had a problem. '
+         'They almost never tell you at what mileage. This one does.</p>',
+         # Числа точные и неокруглённые, прямо из базы: 2,116,532 — это довод,
+         # а «2,1 млн» — реклама. Никаких отзывов, звёзд и логотипов, и НИКОГДА
+         # эмблемы NHTSA: страница «О проекте» прямо отрицает связь с ведомством.
+         '<dl class="stats">'
+         f'<div><dt>Complaints analysed</dt><dd>{fmt(stats["complaints"])}</dd></div>'
+         f'<div><dt>With an odometer reading</dt><dd>{fmt(stats["with_miles"])}</dd></div>'
+         f'<div><dt>Generations covered</dt><dd>{len(index)}</dd></div>'
          '</dl>',
          '</div>',
-         # Поиск живёт в собственной карточке: на широком экране она уходит вправо
-         # от заголовка, на узком — просто ложится под ним. Одна разметка на оба случая.
-         '<div class="hero-find"><h2>Look up a vehicle</h2>',
+         # Поиск без карточки: у поля своя граница в 2px, и этого достаточно,
+         # чтобы читалось как главный орган управления. Рамка вокруг только
+         # подчёркивала, что колонка кончается раньше соседней.
+         '<div class="hero-find">',
          search.search_markup()]
 
     # Под формой — реальные ссылки. Раньше правая колонка на широком экране
@@ -815,38 +966,46 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
     B.append('<p class="qpop-h">Most reported vehicles</p><ul class="qpop">')
     for p in top:
         B.append(f'<li><a href="{p["url"]}">{esc(names.display(p["make"]))} '
-                 f'{esc(names.display(p["model"]))} <span>{p["y0"]}–{p["y1"]}</span></a></li>')
+                 f'{esc(names.display(p["model"]))} <span>{p["y0"]}&#8211;{p["y1"]}</span></a></li>')
     B.append('</ul>')
     B.append('</div>')
     B.append('</div>')
 
-    # Демонстрация вместо объяснения: живой график на реальных данных
+    # Лучшая находка сайта — это его пронумерованный экспонат, а не абзац.
+    # Из текста ушло «a manufacturing defect that shows up almost immediately»:
+    # это утверждение о причине, которого данные не доказывают.
     if demo:
-        B.append('<section class="demo">')
-        B.append('<h2>Counts tell you a car has a problem. Timing tells you which problem.</h2>')
-        B.append('<p>Take the 2010–2015 Toyota Prius. Complaints about "brakes" look like one '
-                 'story until you separate them by system and plot when each was reported:</p>')
         for x in demo["systems"]:
             x["display_name"] = re.sub(r"^the ", "", narrative.plain(x["system"])).capitalize()
-        B.append(charts.system_strips(demo["systems"], limit=5))
-        B.append('<p>The hydraulic brake circuit fails at a median of '
-                 f'<strong>{fmt(names.round_miles(demo["hyd"]))} miles</strong> — a manufacturing '
-                 'defect that shows up almost immediately. The brakes as a whole wear out at '
-                 f'<strong>{fmt(names.round_miles(demo["svc"]))} miles</strong> — ordinary '
-                 'service life. Two different problems, one word in the database, and the middle '
-                 'half of each does not overlap the other.</p>'
-                 f'<p><a class="cta" href="{demo["url"]}">See the full Prius page →</a></p>')
-        B.append('</section>')
+        foot = ('<div class="fig-cols">'
+                '<p>The hydraulic brake circuit fails at a median of '
+                f'<b>{fmt(names.round_miles(demo["hyd"]))} miles</b>. The brakes as a whole '
+                f'at <b>{fmt(names.round_miles(demo["svc"]))} miles</b> &mdash; ordinary '
+                'service life.</p>'
+                '<p>Two different problems, one word in the database, and the middle half '
+                'of each does not overlap the other. '
+                f'<a class="cta" href="{demo["url"]}">See the full Prius page &rarr;</a></p>'
+                '</div>')
+        B.append(charts.system_strips(
+            demo["systems"], limit=5,
+            kicker=f'Figure 1 &middot; Toyota Prius 2010&ndash;2015 &middot; '
+                   f'{fmt(demo.get("n", 0))} reports',
+            title="Counts tell you a car has a problem. Timing tells you which problem.",
+            foot=foot))
 
-    # Марки, а не 318 чипов: иерархия появилась, ей и пользуемся
+    # Указатель марок, а не 28 одинаковых плиток. Различие дают сами числа
+    # в табличной колонке справа — Ford 149,119 против Lexus 198, — а не полоска,
+    # чью шкалу пришлось бы защищать.
     B.append(f'<h2 id="makes">Browse {len(index)} generations across {len(by_make)} makes</h2>')
+    B.append('<div class="makes-key" aria-hidden="true"><span><span>Make</span>'
+             '<i>Gens</i><i>Reports</i></span></div>')
     B.append('<ul class="makes">')
     for mk in sorted(by_make, key=lambda m: names.display(m)):
         rows = by_make[mk]
         n = sum(r["n"] for r in rows)
         B.append(f'<li><a href="/{slug(mk)}/"><span class="mk">{esc(names.display(mk))}</span>'
-                 f'<span class="mk-n">{len(rows)} generation{"s" if len(rows) != 1 else ""}'
-                 f' · {fmt(n)} complaints</span></a></li>')
+                 f'<span class="mk-g">{len(rows)}</span>'
+                 f'<span class="mk-n">{fmt(n)}</span></a></li>')
     B.append('</ul>')
 
     B.append('<p class="prov">Built from the '
@@ -937,7 +1096,7 @@ def render_about() -> str:
          "had a problem. They rarely tell you <em>when</em> — and for someone deciding whether to "
          "buy a used car, or whether to repair the one they have, timing is most of the answer.</p>"
          "<p>A transmission that fails at 36,000 miles is a design problem you will meet. One that "
-         "fails at—0,000 is a car that served its owner well. The same complaint count describes "
+         "fails at 140,000 is a car that served its owner well. The same complaint count describes "
          "both.</p></div>",
 
          "<h2>Editorial approach</h2>"
@@ -1072,6 +1231,7 @@ def main() -> int:
         svc = by.get("SERVICE BRAKES", {}).get("median_miles")
         if hyd and svc:
             demo = {"systems": d["systems"], "hyd": hyd, "svc": svc,
+                    "n": d["complaints_with_miles"],
                     "url": "/toyota-prius-2010-2015/"}
     except Exception:
         demo = None
@@ -1108,6 +1268,27 @@ def main() -> int:
     (DIST / "data").mkdir(exist_ok=True)
     (DIST / "data" / "generations.json").write_text(
         GENS.read_text(encoding="utf-8"), encoding="utf-8")
+
+    # --- шлюзы качества отгрузки ------------------------------------------
+    # Проверяем ОТРЕНДЕРЕННЫЕ страницы, а не исходник. Коммит 8fdb261, чинивший
+    # «испорченные экранирования», сам заменил в CSS литерал 14 на длинное тире:
+    # синтаксис Python остался валидным, а три объявления умерли на 318 страницах
+    # и никто этого не заметил. Кириллица — правило read-the-rendered-output:
+    # strip_comments() единственное, что держит русские комментарии вне вывода.
+    problems: list[str] = []
+    for f in sorted(DIST.rglob("*.html")):
+        t = f.read_text(encoding="utf-8")
+        rel = f.relative_to(DIST)
+        if re.search(r"[–—](?=px|\d*px)|\d[–—]px|:\s*[–—]", t):
+            problems.append(f"{rel}: тире там, где должна быть длина CSS")
+        if re.search(r"[Ѐ-ӿ]", t):
+            problems.append(f"{rel}: кириллица в отгружаемой странице")
+        if re.search(r"[\x00-\x08\x0b\x0c\x0e-\x1f]", t):
+            problems.append(f"{rel}: управляющий символ")
+    if problems:
+        for line in problems[:20]:
+            print(f"ШЛЮЗ: {line}")
+        raise SystemExit(f"сборка остановлена: проблем {len(problems)}")
 
     print(f"страниц поколений: {built}  | пропущено (мало данных): {skipped}")
     print(f"плюс: главная, {len(by_make)} хабов по маркам, methodology, about, privacy, contact, terms, 404, sitemap.xml, robots.txt, открытые данные")
