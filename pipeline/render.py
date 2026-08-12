@@ -59,7 +59,7 @@ def histogram_svg(bins: list[dict], shape: dict) -> str:
 
     parts = [
         f'<svg viewBox="0 0 {w} {h}" class="hist" role="img" '
-        f'aria-label="Распределение пробегов до отказа">'
+        f'aria-label="Distribution of mileage at failure">'
     ]
     # горизонтальная сетка
     for i in range(1, 5):
@@ -78,7 +78,7 @@ def histogram_svg(bins: list[dict], shape: dict) -> str:
             cls = "bar peak"
         elif shape.get("kind") == "late" and b["lo"] >= 100_000:
             cls = "bar peak"
-        title = f'{b["label"]}: {fmt(b["count"])} жалоб ({b["pct"]}%)'
+        title = f'{b["label"]}: {fmt(b["count"])} complaints ({b["pct"]}%)'
         parts.append(
             f'<g><title>{esc(title)}</title>'
             f'<rect x="{x + 1.5:.1f}" y="{y:.1f}" width="{bw - 3:.1f}" height="{max(bh, 1):.1f}" class="{cls}"/></g>')
@@ -94,42 +94,44 @@ def histogram_svg(bins: list[dict], shape: dict) -> str:
 
 # ---------------------------------------------------------------- prose from data
 def lead_paragraph(s: dict, gen: dict) -> str:
-    """Описательный текст, выведенный ИЗ ЧИСЕЛ. Не наполнитель — факты о выборке."""
+    """Вводный блок, выведенный ИЗ ЧИСЕЛ. Текст только английский — сайт для рынка США."""
     sh = s["shape"]
     name = f'{s["make"].title()} {s["model"].title()}'
-    n = fmt(s["complaints_with_miles"])
-    out = [f'Владельцы подали <strong>{fmt(s["complaints_total"])}</strong> жалоб в NHTSA '
-           f'на {name} {s["year_start"]}–{s["year_end"]}, и в <strong>{n}</strong> из них указан '
-           f'пробег, на котором отказ произошёл. Это позволяет увидеть не только <em>что</em> ломается, '
-           f'но и <em>когда</em>.']
+    out = [f'Owners filed <strong>{fmt(s["complaints_total"])}</strong> complaints with NHTSA '
+           f'about the {s["year_start"]}–{s["year_end"]} {name}, and '
+           f'<strong>{fmt(s["complaints_with_miles"])}</strong> of them record the mileage at '
+           f'which the failure happened. That is enough to show not just <em>what</em> fails, '
+           f'but <em>when</em>.']
 
     if sh.get("kind") == "bimodal":
-        out.append(f'Картина здесь двойная, и это главное, что стоит знать: {sh["note"]} '
-                   f'Две разные поломки под одним названием — одна заводская, другая от износа.')
+        out.append(f'This generation has two distinct failure patterns rather than one, which is '
+                   f'the most useful thing on this page. {sh["note"]} Two different problems share '
+                   f'one name in the complaint data — and an average of the two describes neither.')
     elif sh.get("kind") == "early":
-        out.append(f'{sh["note"]} Ранние отказы обычно означают конструктивный или производственный '
-                   f'дефект, а не износ.')
+        out.append(f'{sh["note"]} Failures clustered that early usually indicate a design or '
+                   f'manufacturing problem rather than wear.')
     elif sh.get("kind") == "late":
-        out.append(f'{sh["note"]} Это картина износа: машина доезжает до серьёзного пробега прежде, '
-                   f'чем начинаются проблемы.')
+        out.append(f'{sh["note"]} The car generally reaches substantial mileage before trouble '
+                   f'starts.')
     elif sh.get("median"):
-        out.append(f'{sh["note"]} Медиана — {fmt(sh["median"])} миль.')
+        out.append(f'{sh["note"]} The median is {fmt(sh["median"])} miles.')
 
     top = [x for x in s["systems"] if x.get("median_miles")][:3]
     if top:
-        bits = [f'{x["system"].lower()} ({x["share"]}% жалоб, обычно около {fmt(x["median_miles"])} миль)'
-                for x in top]
-        out.append("Чаще всего жалуются на " + ", ".join(bits) + ".")
+        bits = [f'{narrative.plain(x["system"])} ({x["share"]}% of complaints, typically around '
+                f'{fmt(x["median_miles"])} miles)' for x in top]
+        out.append("The most-reported areas are " + ", ".join(bits) + ".")
 
     if s["recalls_count"]:
-        sev = (f' Из них {s["severe_advisories"]} сопровождались тяжёлым предупреждением NHTSA.'
+        sev = (f' {s["severe_advisories"]} of them carry a severe NHTSA advisory.'
                if s["severe_advisories"] else "")
-        out.append(f'По этому поколению зарегистрировано {s["recalls_count"]} отзывных кампаний.{sev}')
+        out.append(f'{s["recalls_count"]} recall campaign'
+                   f'{"s" if s["recalls_count"] != 1 else ""} cover this generation.{sev}')
 
     if gen.get("mixed_years"):
         yrs = ", ".join(str(y) for y in gen["mixed_years"])
-        out.append(f'<mark>Важно: в {yrs} модельном году одновременно продавались обе версии, '
-                   f'и жалобы NHTSA по кузовам не разделены.</mark>')
+        out.append(f'<mark>Note: in {yrs}, both this generation and the previous one were sold '
+                   f'at the same time, and NHTSA complaints are not separated by body.</mark>')
 
     return "".join(f"<p>{p}</p>" for p in out)
 
@@ -231,10 +233,10 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         B.append('<div class="card">')
         B.append(histogram_svg(s["histogram"], s["shape"]))
         sh = s["shape"]
-        B.append(f'<p class="meta">10% отказов до {fmt(sh["p10"])} миль · '
-                 f'четверть до {fmt(sh["p25"])} · медиана {fmt(sh["median"])} · '
-                 f'три четверти до {fmt(sh["p75"])} · 90% до {fmt(sh["p90"])}. '
-                 f'Выборка: {fmt(s["complaints_with_miles"])} жалоб с указанным пробегом.</p>')
+        B.append(f'<p class="meta">10% of failures occur by {fmt(sh["p10"])} miles · '
+                 f'a quarter by {fmt(sh["p25"])} · median {fmt(sh["median"])} · '
+                 f'three quarters by {fmt(sh["p75"])} · 90% by {fmt(sh["p90"])}. '
+                 f'Based on {fmt(s["complaints_with_miles"])} complaints that record mileage.</p>')
         B.append("</div>")
 
     # системы

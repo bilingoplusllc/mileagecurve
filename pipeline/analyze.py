@@ -65,19 +65,22 @@ def _shape(vals: list[int]) -> dict:
     # Двугорбость: заметная доля и совсем ранних, и совсем поздних отказов при
     # относительно пустой середине. Это подпись «заводской брак + износ» — случай Prius 2010.
     mid = sum(1 for v in vs if 20_000 <= v <= 80_000) / len(vs)
+    # ВНИМАНИЕ: note попадает прямо на страницу — только по-английски.
     if early >= 0.15 and late >= 0.15 and mid < 0.45:
         kind = "bimodal"
-        note = (f"Два разных отказа: {early:.0%} машин ломается до 12 000 миль "
-                f"(похоже на заводской дефект), ещё {late:.0%} — после 100 000 (износ).")
+        note = (f"{early:.0%} of failures occur before 12,000 miles, which looks like a "
+                f"manufacturing defect, and a further {late:.0%} occur after 100,000, which "
+                f"looks like wear.")
     elif early >= 0.30:
         kind = "early"
-        note = f"Ранние отказы: {early:.0%} приходится на первые 12 000 миль."
+        note = f"{early:.0%} of failures fall within the first 12,000 miles."
     elif late >= 0.40:
         kind = "late"
-        note = f"Поздние отказы: {late:.0%} — после 100 000 миль, картина износа."
+        note = f"{late:.0%} of failures occur beyond 100,000 miles — a wear pattern."
     else:
         kind = "spread"
-        note = f"Отказы распределены широко, половина между {p25:,} и {p75:,} миль."
+        note = (f"Failures are spread across the mileage range, with the middle half between "
+                f"{p25:,} and {p75:,} miles.")
 
     return {
         "kind": kind, "note": note,
