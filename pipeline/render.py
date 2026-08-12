@@ -334,8 +334,12 @@ svg.hist{width:100%;height:clamp(220px,26vw,320px)}
 .hist .bar{fill:var(--bar)}
 .hist .bar-hi{fill:var(--bar-hi)}
 /* Прозрачность как канал кодировки запрещена: она не переживает печать
-   и читается как «менее достоверно», хотя означает другое. */
-.hist .over{fill:var(--line-strong)}
+   и читается как «менее достоверно», хотя означает другое. Но замена на
+   --line-strong дала 2,05:1 на белом и 2,17:1 в тёмной теме — ниже порога
+   3:1 для значимой графики. Столбик «200 000+» это те же данные, просто
+   за пределами шкалы, поэтому заливка та же, а отделяет его обводка. */
+.hist .over{fill:var(--bar);stroke:var(--ink);stroke-width:1;
+  vector-effect:non-scaling-stroke}
 .hist .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4;
   vector-effect:non-scaling-stroke}
 .hist .base{stroke:var(--line-strong);stroke-width:1;vector-effect:non-scaling-stroke}
@@ -372,7 +376,7 @@ svg.ruler{width:100%;height:18px;margin-top:6px}
 .brk-row .k{display:block;flex:none;width:14px;height:10px;border-radius:1px}
 .brk-row .k-hi{background:var(--bar-hi)}
 .brk-row .k-bar{background:var(--bar)}
-.brk-row .k-over{background:var(--line-strong)}
+.brk-row .k-over{background:var(--bar);box-shadow:inset 0 0 0 1px var(--ink)}
 /* Медиана на графике — это штрих, а не заливка. Правила для .k-med не было
    вовсе, поэтому в легенде на всех 318 страницах перед словом Median зияла
    пустота: образец выводился, но был невидим. */
@@ -541,7 +545,7 @@ ul.rel{list-style:none;padding:0;margin:var(--s-3) 0 var(--s-4);
 ul.rel li{margin:0;max-width:none}
 ul.rel a{display:block;padding:12px 14px;line-height:1.35;font-size:var(--f-sm);
   color:var(--ink);text-decoration:none;background:var(--surface);
-  border:1px solid var(--line-strong);border-radius:8px}   /* 45px tall */
+  border:1px solid var(--line-strong);border-radius:var(--radius)}   /* 45px tall */
 ul.rel a:hover{background:var(--track);border-color:var(--accent)}
 
 /* ---------- 12. index page ------------------------------------------------- */
@@ -720,6 +724,29 @@ ul.makes a:hover .mk{text-decoration:underline;text-decoration-thickness:2px;
   gap:var(--s-2);font-size:var(--f-2xs);letter-spacing:.08em;
   text-transform:uppercase;color:var(--muted)}
 .makes-key i{font-style:normal;text-align:right}
+
+/* Хаб марки: поколения строками с числами, тот же язык, что и указатель марок. */
+ul.gens{list-style:none;margin:0 0 var(--s-5);padding:0;
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+  gap:0 var(--s-5);border-top:1px solid var(--line-strong);max-width:none}
+ul.gens li{margin:0;max-width:none;border-bottom:1px solid var(--line)}
+ul.gens a{display:grid;grid-template-columns:minmax(0,1fr) 4.6em 5.4em;
+  align-items:baseline;gap:var(--s-2);padding:10px 0;
+  text-decoration:none;color:var(--ink)}
+ul.gens a:hover .gy{text-decoration:underline;text-decoration-thickness:2px;
+  text-underline-offset:2px;color:var(--accent-ink)}
+.gy{font-size:var(--f-sm);font-weight:600;font-variant-numeric:tabular-nums;
+  white-space:nowrap}
+.gn,.gm{font-size:var(--f-2xs);color:var(--muted);text-align:right;
+  white-space:nowrap;font-variant-numeric:tabular-nums}
+.gm{color:var(--ink)}
+.gen-key{display:grid;grid-template-columns:repeat(auto-fill,minmax(268px,1fr));
+  gap:0 var(--s-5);margin:var(--s-3) 0 0;max-width:none}
+.gen-key>span{display:grid;grid-template-columns:minmax(0,1fr) 4.6em 5.4em;
+  gap:var(--s-2);font-size:var(--f-2xs);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--muted)}
+.gen-key i{font-style:normal;text-align:right}
+@media(max-width:479px){ul.gens,.gen-key{grid-template-columns:1fr}}
 
 @media(max-width:479px){
   .qbox{flex-direction:column}
@@ -1315,9 +1342,14 @@ def main() -> int:
     models = json.loads(GENS.read_text(encoding="utf-8"))
     con = sqlite3.connect(DB)
 
+    # Чистим СОДЕРЖИМОЕ, а не сам каталог. В Windows папка, которая служит
+    # рабочим каталогом любому процессу, не удаляется, и сборка падала на
+    # rmtree, хотя всё содержимое уже было снесено.
     if DIST.exists():
-        shutil.rmtree(DIST)
-    DIST.mkdir(parents=True)
+        for item in DIST.iterdir():
+            shutil.rmtree(item) if item.is_dir() else item.unlink()
+    else:
+        DIST.mkdir(parents=True)
 
     built = skipped = 0
     index: list[dict] = []
@@ -1338,7 +1370,10 @@ def main() -> int:
             (out / "index.html").write_text(render_generation(s, g, m, gens), encoding="utf-8")
             index.append({"url": f"/{out.name}/", "make": m["make"], "model": m["model"],
                           "y0": g["year_start"], "y1": g["year_end"],
-                          "n": s["complaints_with_miles"], "shape": s["shape"].get("kind")})
+                          "n": s["complaints_with_miles"], "shape": s["shape"].get("kind"),
+                          # Медиана нужна хабу марки: без неё страница марки —
+                          # одни названия и диапазоны лет, выбирать не по чему.
+                          "median": s["shape"].get("median")})
             built += 1
             if args.limit and built >= args.limit:
                 break

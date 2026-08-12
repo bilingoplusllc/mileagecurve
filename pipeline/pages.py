@@ -49,11 +49,22 @@ def make_hub(make_raw: str, pages: list[dict], shell) -> str:
          f'model{"s" if models != 1 else ""}, built from {fmt(total)} complaints that record '
          f'mileage at failure.</p>']
 
+    # Раньше здесь были одни названия моделей и голые диапазоны лет: посетителю
+    # не по чему выбрать поколение. Теперь у каждой строки — сколько сообщений
+    # и на каком пробеге ломается, то есть ровно то, за чем сюда приходят.
     for model in sorted(by_model):
         rows = sorted(by_model[model], key=lambda p: p["y0"])
-        B.append(f'<h2>{esc(model)}</h2><ul class="rel">')
+        B.append(f'<h2>{esc(model)}</h2>')
+        B.append('<div class="gen-key" aria-hidden="true"><span><span>Generation</span>'
+                 '<i>Reports</i><i>Median</i></span></div>')
+        B.append('<ul class="gens">')
         for p in rows:
-            B.append(f'<li><a href="{p["url"]}">{p["y0"]}–{p["y1"]}</a></li>')
+            med = p.get("median")
+            med_txt = f"{names.round_miles(med):,}" if med else "&mdash;"
+            B.append(f'<li><a href="{p["url"]}">'
+                     f'<span class="gy">{p["y0"]}&#8211;{p["y1"]}</span>'
+                     f'<span class="gn">{fmt(p["n"])}</span>'
+                     f'<span class="gm">{med_txt}</span></a></li>')
         B.append("</ul>")
 
     B.append('<p class="prov">Every page here is generated from the NHTSA Office of Defects '
