@@ -50,6 +50,15 @@ jobs:
             echo "::error::Слишком мало страниц ($COUNT) — публикация остановлена"
             exit 1
           fi
+          # Языковой шлюз. 2026-08-12: русский текст утёк на все 321 страницу,
+          # структурные проверки этого не увидели. Урок — read-the-rendered-output.
+          CYR=$(grep -rlP '[\x{0400}-\x{04FF}]' dist --include='*.html' | wc -l)
+          if [ "$CYR" -gt 0 ]; then
+            echo "::error::Кириллица найдена на $CYR страницах — сайт англоязычный, публикация остановлена"
+            grep -rlP '[\x{0400}-\x{04FF}]' dist --include='*.html' | head -5
+            exit 1
+          fi
+          echo "языковая проверка пройдена"
 
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
