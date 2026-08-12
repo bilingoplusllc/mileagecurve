@@ -137,8 +137,11 @@ def main() -> int:
                     if y not in nxt["mixed_years"]:
                         nxt["mixed_years"].append(y)
                 nxt["mixed_year_note"] = (
-                    "В этот модельный год на рынке одновременно продавались обе версии; "
-                    "жалобы NHTSA не разделены по кузову.")
+                    # Поле уезжает в публичный generations.json, поэтому текст
+                    # английский: у этого файла нет отрисованного вида, и языковой
+                    # шлюз, проверявший только HTML, его не видел.
+                    "Both the outgoing and incoming generation were sold in this "
+                    "model year; NHTSA records do not separate them.")
                 overlaps.append(f"{m['make']} {m['model']}: {int(lo)}"
                                 + (f"–{int(hi)}" if hi > lo else "")
                                 + f" → отдан «{nxt.get('gen_label','?')}»")

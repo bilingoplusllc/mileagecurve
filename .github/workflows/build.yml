@@ -52,19 +52,19 @@ jobs:
           fi
           # Языковой шлюз. 2026-08-12: русский текст утёк на все 321 страницу,
           # структурные проверки этого не увидели. Урок — read-the-rendered-output.
-          CYR=$(grep -rlP '[\x{0400}-\x{04FF}]' dist --include='*.html' | wc -l)
+          CYR=$(grep -rlP '[\x{0400}-\x{04FF}]' dist | wc -l)
           if [ "$CYR" -gt 0 ]; then
             echo "::error::Кириллица найдена на $CYR страницах — сайт англоязычный, публикация остановлена"
-            grep -rlP '[\x{0400}-\x{04FF}]' dist --include='*.html' | head -5
+            grep -rlP '[\x{0400}-\x{04FF}]' dist | head -5
             exit 1
           fi
           echo "языковая проверка пройдена"
           # Шлюз на управляющие символы. Данные ODI читаются как latin-1, а писались
           # в чём-то ещё: 0x19 доехал до цитат владельцев как «I\x19ve owned».
-          CTL=$(grep -rlP '[\x00-\x08\x0B\x0C\x0E-\x1F]' dist --include='*.html' | wc -l)
+          CTL=$(grep -rlP '[\x00-\x08\x0B\x0C\x0E-\x1F]' dist | wc -l)
           if [ "$CTL" -gt 0 ]; then
             echo "::error::Управляющие символы на $CTL страницах — публикация остановлена"
-            grep -rlP '[\x00-\x08\x0B\x0C\x0E-\x1F]' dist --include='*.html' | head -5
+            grep -rlP '[\x00-\x08\x0B\x0C\x0E-\x1F]' dist | head -5
             exit 1
           fi
           # Каждый адрес должен отдавать своё. Одинаковый размер у главной и у страницы

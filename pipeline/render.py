@@ -15,7 +15,7 @@ import json
 import re
 import shutil
 import sqlite3
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 import analyze
@@ -803,6 +803,37 @@ QUOTE_REJECT = re.compile(
     r"|\b\d{2,6}\s+[a-z][a-z. ]{2,24}\b(?:blvd|street|st|ave|avenue|road|rd|drive|dr|lane|ln|hwy)\b",
     re.I)
 
+# Даты должны говорить о ДАННЫХ, а не о том, когда запустили сборку.
+# «NHTSA data through 13 August 2026» при свежайшей жалобе от 9 августа —
+# завышение на четыре дня, которое росло бы с каждой пересборкой без новых
+# данных. А политики заявляли правку при каждом деплое, что уничтожает
+# единственный смысл этого поля.
+def _snapshot_date() -> str:
+    """Когда данные были скачаны — из манифеста загрузки, не из часов."""
+    try:
+        mf = json.loads((ROOT / "data" / "manifest.json").read_text(encoding="utf-8"))
+        vals = [v.get("fetched_utc", "")[:10] for v in mf.values() if v.get("fetched_utc")]
+        if vals:
+            return min(vals)
+    except Exception:
+        pass
+    return date.today().isoformat()
+
+
+SNAPSHOT = _snapshot_date()
+# Заполняется в main() из самой свежей жалобы в базе: покрытие можно
+# обещать по последней ЗАПИСИ, а не по дате запуска сборки.
+DATA_THROUGH = ""
+POLICY_UPDATED = "2026-08-13"   # менять ТОЛЬКО когда правится текст политики
+
+# Один переключатель на весь рекламный стек. До подачи в AdSense сайт НЕ несёт
+# рекламы, не ставит своих кук и не имеет окна согласия — а политика утверждала
+# обратное всеми тремя пунктами сразу. Ставить True в том же коммите, где
+# появится идентификатор издателя в ads.txt.
+ADS_LIVE = False
+AD_DISCLOSURE = ("<p>This site carries third-party display advertising. Advertisers have no "
+                 "input into what is published.</p>") if ADS_LIVE else ""
+
 JUMP_SECTIONS = (("fails", "What fails, and when"), ("years", "By model year"),
                  ("recalls", "Recalls"), ("owners", "What owners reported"))
 
@@ -893,13 +924,12 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
   <nav class="foot-nav" aria-label="Site">
     <a href="/methodology/">Methodology</a><a href="/about/">About</a>
     <a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>
-    <a href="/contact/">Contact</a><a href="mailto:{CONTACT}">{CONTACT}</a></nav>
+    <a href="/contact/">Contact</a><a href="/privacy/#us-state-rights">Your privacy choices</a><a href="mailto:{CONTACT}">{CONTACT}</a></nav>
   <p>Data: <a href="https://www.nhtsa.gov/nhtsa-datasets-and-apis">NHTSA Office of Defects
-  Investigation</a>, public domain. Snapshot {date.today().isoformat()}.</p>
+  Investigation</a>, public domain. Snapshot {SNAPSHOT}.</p>
   <p>Published by {OWNER}. Complaint counts reflect what owners reported to NHTSA and are
   not a measure of failure rate per vehicle sold.</p>
-  <p>This site carries third-party display advertising. Advertisers have no input into
-  what is published.</p>
+  {AD_DISCLOSURE}
 </footer>
 </div>{tail}</body></html>"""
 
@@ -926,7 +956,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         bits.append(esc(plat))
     B.append(f'<p class="sub">{" · ".join(b for b in bits if b)}</p>')
 
-    B.append(f'<p class="dateline"><span><b>NHTSA data through {date.today().strftime("%d %B %Y")}</b></span>'
+    B.append(f'<p class="dateline"><span><b>NHTSA data through {DATA_THROUGH}</b></span>'
              f'<span>{fmt(s["complaints_total"])} complaints, {fmt(s["complaints_with_miles"])} with mileage</span>'
              f'<span><a href="/methodology/">Method</a></span></p>')
 
@@ -1056,7 +1086,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                 break
 
     B.append(f'<p class="prov">Built from {fmt(s["complaints_with_miles"])} NHTSA complaints with '
-             f'mileage · snapshot {date.today().isoformat()} · '
+             f'mileage · snapshot {SNAPSHOT} · '
              f'<a href="/data/generations.json">open data</a> · '
              f'<a href="https://github.com/bilingoplusllc/mileagecurve">reproduce this page</a></p>')
 
@@ -1265,7 +1295,7 @@ def render_methodology(stats: dict) -> str:
          "It is plain Python with no external dependencies: download the source files, build the "
          "database, render the site. Anyone can reproduce every figure on this site from the "
          "original government data.</p>"
-         f"<p>Data snapshot: {date.today().isoformat()}. Rebuilt monthly, as NHTSA publishes.</p>"]
+         f"<p>Data snapshot: {SNAPSHOT}. Rebuilt monthly, as NHTSA publishes.</p>"]
 
     return page_shell(f"Methodology — {SITE}",
                       "Sources, computation, and limitations of the MileageCurve reliability data.",
@@ -1315,18 +1345,26 @@ def render_privacy() -> str:
          "<h2>What we collect</h2>"
          "<p>This site is a set of static pages. It has no accounts, no logins, no comment "
          "system and no newsletter, and it never asks you for personal information.</p>"
-         "<p>Aggregate traffic measurement (page views, referrer, approximate country, device "
-         "type) is used to understand which pages are useful. Nothing on this site is used to "
-         "identify you personally.</p>",
+         "<p>The hosting provider keeps standard server request logs (page requested, referrer, "
+         "approximate location, browser type) for security and to see which pages are used. "
+         "There is no analytics script on this site and nothing here is used to identify you.</p>",
          "<h2>Advertising</h2>"
-         "<p>This site carries third-party display advertising. Advertising partners may set "
-         "cookies or use similar technology to serve and measure ads, including personalised ads "
-         "where you have consented to that. Visitors in the European Economic Area and the United "
-         "Kingdom are shown a consent choice before any non-essential cookie is set, and that "
-         "choice can be changed at any time.</p>"
+         "<p>This site does not yet carry advertising and sets no cookies of its own. When "
+         "advertising is added, partners may set cookies or use similar technology to serve and "
+         "measure ads. Visitors in the European Economic Area and the United Kingdom will be "
+         "shown a consent choice before any non-essential cookie is set, and that choice will be "
+         "changeable at any time. This page will be updated on the day that happens.</p>"
          '<p>You can opt out of personalised advertising from Google at '
          '<a href="https://adssettings.google.com">adssettings.google.com</a>, and from many other '
          'vendors at <a href="https://optout.aboutads.info">optout.aboutads.info</a>.</p>',
+         '<h2 id="us-state-rights">US state privacy rights</h2>'
+         "<p>Residents of California, Colorado, Connecticut, Virginia and other states with "
+         "comprehensive privacy laws have rights to access, correct and delete personal "
+         "information, and to opt out of its sale or of targeted advertising. This site does not "
+         "sell or share personal information and runs no advertising today. When advertising is "
+         "added, personalised ads count as sharing or targeted advertising under those laws, and "
+         "an opt-out will be published here before any ad is served. To exercise a right or ask "
+         f'what is held, write to <a href="mailto:{CONTACT}">{CONTACT}</a>.</p>',
          "<h2>Data about vehicles</h2>"
          "<p>The vehicle data shown here comes from public NHTSA records. NHTSA removes the "
          "identity of the person who filed, but complaint narratives are free text and can name "
@@ -1336,7 +1374,7 @@ def render_privacy() -> str:
          f'detail, <a href="mailto:{CONTACT}">tell us</a> and it comes down.</p>',
          "<h2>Contact</h2>"
          f'<p>Questions about this policy: <a href="mailto:{CONTACT}">{CONTACT}</a> ({OWNER}).</p>'
-         f"<p>Last updated {date.today().isoformat()}.</p>"]
+         f"<p>Last updated {POLICY_UPDATED}.</p>"]
     return page_shell(f"Privacy — {SITE}", "Privacy policy for MileageCurve.",
                       "\n".join(B), DOMAIN + "/privacy/")
 
@@ -1364,6 +1402,11 @@ def main() -> int:
 
     models = json.loads(GENS.read_text(encoding="utf-8"))
     con = sqlite3.connect(DB)
+
+    global DATA_THROUGH
+    _last = con.execute("SELECT MAX(date_filed) FROM complaints").fetchone()[0]
+    DATA_THROUGH = (datetime.strptime(_last, "%Y-%m-%d").strftime("%d %B %Y")
+                    if _last else date.today().strftime("%d %B %Y"))
 
     # Чистим СОДЕРЖИМОЕ, а не сам каталог. В Windows папка, которая служит
     # рабочим каталогом любому процессу, не удаляется, и сборка падала на
@@ -1476,10 +1519,12 @@ def main() -> int:
     # и никто этого не заметил. Кириллица — правило read-the-rendered-output:
     # strip_comments() единственное, что держит русские комментарии вне вывода.
     problems: list[str] = []
-    for f in sorted(DIST.rglob("*.html")):
+    SHIPPED = (".html", ".json", ".xml", ".txt", ".css", ".js")
+    for f in sorted(x for x in DIST.rglob("*") if x.suffix in SHIPPED):
         t = f.read_text(encoding="utf-8")
         rel = f.relative_to(DIST)
-        if re.search(r"[–—](?=px|\d*px)|\d[–—]px|:\s*[–—]", t):
+        # Проверка на тире осмысленна только в CSS, то есть в HTML.
+        if f.suffix == ".html" and re.search(r"[–—](?=px|\d*px)|\d[–—]px|:\s*[–—]", t):
             problems.append(f"{rel}: тире там, где должна быть длина CSS")
         if re.search(r"[Ѐ-ӿ]", t):
             problems.append(f"{rel}: кириллица в отгружаемой странице")
@@ -1487,7 +1532,7 @@ def main() -> int:
             problems.append(f"{rel}: управляющий символ")
         # Внутренние ссылки должны вести на существующие файлы. При частичной
         # сборке проверять нечего — там половины сайта нет по построению.
-        if not args.limit and not args.only:
+        if f.suffix == ".html" and not args.limit and not args.only:
             body = re.sub(r"<style>.*?</style>", "", t, flags=re.S)
             for href in sorted(set(re.findall(r'href="(/[^"#?]*)"', body))):
                 tgt = (DIST / href.strip("/") / "index.html") if href.endswith("/") \
