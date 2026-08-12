@@ -508,15 +508,54 @@ ul.rel a:hover{background:var(--track);border-color:var(--accent)}
 /* ---------- 12. index page ------------------------------------------------- */
 
 /* ---------- 13. ad slots ---------------------------------------------------
-   Reserved before the units exist, so insertion never shifts content.
-   Never between the h1 and the histogram.                                   */
+   Место резервируется заранее, поэтому вставка блока ничего не сдвигает.
+   ПРАВИЛО РАЗМЕЩЕНИЯ: рекламное место — всегда ПОСЛЕДНИЙ узел раздела и
+   непосредственный сосед сверху для <h2>. Реклама завершает раздел; она
+   никогда его не открывает, не отрывает заголовок от текста, не встаёт
+   между h1 и первым графиком и не лезет внутрь карточки, фигуры или таблицы.
+   Только ручные места: автоматические блоки AdSense вставляют неучтённые
+   единицы и ломают то самое обещание нулевого сдвига.
+   Заливка убрана: две серые плиты в 290px с подписью «Advertisement» и
+   пустотой внутри читаются как битые картинки — и человеком, и рецензентом. */
 .ad{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:var(--s-2);min-height:290px;margin:var(--s-6) 0;padding:var(--s-2);
-  background:var(--track);border-radius:var(--radius);overflow:hidden}
-/* 12px — нижняя граница по собственному правилу; при 11px подпись не читалась. */
-.ad-label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.ad>ins,.ad>iframe,.ad>div{max-width:100%}
-@media(max-width:479px){.ad{min-height:260px;margin:var(--s-5) 0}}
+  gap:var(--s-2);min-height:316px;margin:var(--s-6) 0;padding:var(--s-2) 0;
+  background:none;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  border-radius:0;overflow:hidden;max-width:none}
+.ad-label{font-size:var(--f-2xs);line-height:20px;letter-spacing:.12em;
+  text-transform:uppercase;font-weight:600;color:var(--muted)}
+.ad>ins,.ad>iframe,.ad>div{display:block;max-width:100%}
+@media(max-width:479px){.ad{min-height:286px;margin:var(--s-5) 0}}
+
+/* ---------- 13b. боковая колонка страницы поколения ------------------------
+   Липкость намеренно НЕ включена: любой предок, получивший overflow, тихо
+   превращает sticky в static — без ошибки и без видимого признака.
+   Включать отдельным шагом, вместе с проверкой предков.                     */
+.gen-grid{display:block}
+.rail{display:none}
+@media(min-width:1180px){
+  .wrap.gen{max-width:1180px}
+  .gen-grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;
+    gap:var(--s-7);align-items:start}
+  .gen-main{min-width:0}
+  .rail{display:block;grid-column:2;min-width:0}
+  .rail-in{border-top:var(--rule) solid var(--ink);padding-top:var(--s-3)}
+  .snap{margin:0 0 var(--s-5)}
+  .snap>div{display:flex;justify-content:space-between;align-items:baseline;
+    gap:var(--s-2);padding:7px 0;border-bottom:1px solid var(--line)}
+  .snap dt{font-size:var(--f-2xs);letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted)}
+  .snap dd{margin:0;max-width:none;font-size:var(--f-sm);font-weight:700;
+    font-variant-numeric:tabular-nums}
+  .jump-h{font-size:var(--f-2xs);letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin:0 0 var(--s-2);max-width:none}
+  .jump ul{list-style:none;margin:0 0 var(--s-5);padding:0;
+    border-top:1px solid var(--line)}
+  .jump li{margin:0;border-bottom:1px solid var(--line);max-width:none}
+  .jump a{display:block;padding:8px 0;font-size:var(--f-sm);color:var(--ink);
+    text-decoration:none}
+  .jump a:hover{color:var(--accent-ink);text-decoration:underline}
+  .ad-rail{min-height:636px;margin:0}
+}
 
 /* ---------- 14. provenance strip and footer -------------------------------- */
 .prov{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
@@ -527,6 +566,13 @@ footer{margin-top:var(--s-6);padding-top:var(--s-4);
   border-top:2px solid var(--ink);color:var(--muted);font-size:var(--f-xs)}
 footer p{margin:0 0 var(--s-2);max-width:var(--measure)}
 footer a{color:var(--muted)}
+/* /terms/ и /contact/ генерировались, но не были связаны ниоткуда —
+   частая и совершенно избежная причина отказа рекламной сети. */
+.foot-nav{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);
+  margin:0 0 var(--s-3);font-size:var(--f-sm)}
+.foot-nav a{color:var(--ink);text-decoration:none;
+  border-bottom:1px solid var(--line-strong);padding-bottom:1px}
+.foot-nav a:hover{border-bottom-color:var(--accent)}
 
 /* ---------- 15. motion ------------------------------------------------------ */
 @media(prefers-reduced-motion:no-preference){
@@ -673,6 +719,25 @@ ul.makes a:hover .mk{text-decoration:underline;text-decoration-thickness:2px;
 """
 
 
+JUMP_SECTIONS = (("fails", "What fails, and when"), ("years", "By model year"),
+                 ("recalls", "Recalls"), ("owners", "What owners reported"))
+
+
+def _jump(parts: list[str]) -> str:
+    """Оглавление собирается по тем разделам, которые на странице ЕСТЬ.
+
+    У машины без отзывов раздела «Recalls» нет, и жёсткий список вёл бы
+    в пустоту — на части страниц из 318.
+    """
+    page = "\n".join(parts)
+    items = [f'<li><a href="#{k}">{t}</a></li>'
+             for k, t in JUMP_SECTIONS if f'id="{k}"' in page]
+    if len(items) < 2:
+        return ""
+    return ('<nav class="jump" aria-label="On this page">'
+            '<p class="jump-h">On this page</p><ul>' + "".join(items) + "</ul></nav>")
+
+
 def _cur(key: str, active: str) -> str:
     """aria-current на текущем разделе: читателю и чтецу экрана видно, где он."""
     return ' aria-current="page"' if key and key == active else ""
@@ -699,14 +764,15 @@ def strip_comments(css: str = "", js: str = "") -> str:
 
 
 def page_shell(title: str, desc: str, body: str, canonical: str,
-               script: str = "", wide: bool = False, nav_key: str = "") -> str:
+               script: str = "", wide: bool = False, gen: bool = False,
+               nav_key: str = "") -> str:
     # Скрипт подключается только там, где он нужен (поиск на главной).
     # Страницы поколений остаются полностью статичными.
     tail = f"<script>{strip_comments(js=script)}</script>" if script else ""
     # Широкая колонка — только для главной. Замер 2026-08-12: при окне 1425px
     # сетка из 28 марок стояла в три колонки внутри 832px, а по краям пустовало
     # по 297px. Текст остаётся в своей мере (68ch) — шире идут только сетка и график.
-    cls = " wide" if wide else ""
+    cls = " wide" if wide else (" gen" if gen else "")
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -740,12 +806,16 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
 {body}
 </main>
 <footer>
+  <nav class="foot-nav" aria-label="Site">
+    <a href="/methodology/">Methodology</a><a href="/about/">About</a>
+    <a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>
+    <a href="/contact/">Contact</a><a href="mailto:{CONTACT}">{CONTACT}</a></nav>
   <p>Data: <a href="https://www.nhtsa.gov/nhtsa-datasets-and-apis">NHTSA Office of Defects
   Investigation</a>, public domain. Snapshot {date.today().isoformat()}.</p>
-  <p><a href="/methodology/">Methodology</a> · <a href="/about/">About</a> ·
-  <a href="/privacy/">Privacy</a> · <a href="mailto:{CONTACT}">{CONTACT}</a></p>
-  <p>{OWNER}. Complaint counts reflect what owners reported to NHTSA and are not a measure of
-  failure rate per vehicle sold.</p>
+  <p>Published by {OWNER}. Complaint counts reflect what owners reported to NHTSA and are
+  not a measure of failure rate per vehicle sold.</p>
+  <p>This site carries third-party display advertising. Advertisers have no input into
+  what is published.</p>
 </footer>
 </div>{tail}</body></html>"""
 
@@ -800,7 +870,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     B.append(f'<div class="card finding">{lead_paragraph(s, gen)}</div>')
 
     # Системы: полоски + таблица
-    B.append("<h2>What fails, and when</h2>")
+    B.append('<h2 id="fails">What fails, and when</h2>')
     for x in s["systems"]:
         _n = narrative.plain(x["system"])
         # в прозе «the brakes» нужен артикль, в подписи строки — нет
@@ -845,7 +915,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                      f'<p>{esc(it.get("description", ""))}</p></div>')
 
     if len(s["by_year"]) > 1:
-        B.append("<h2>By model year</h2>")
+        B.append('<h2 id="years">By model year</h2>')
         B.append('<div class="tw" tabindex="0" role="region" aria-label="Complaints by model year">'
                  '<table><caption class="vh">Complaints by model year</caption><thead><tr>'
                  '<th scope="col">Year</th><th scope="col" class="num">Complaints</th>'
@@ -857,7 +927,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         B.append("</tbody></table></div>")
 
     if s["recalls"]:
-        B.append(f'<h2>Recalls ({s["recalls_count"]})</h2>')
+        B.append(f'<h2 id="recalls">Recalls ({s["recalls_count"]})</h2>')
         B.append('<div class="tw" tabindex="0" role="region" aria-label="Recall campaigns">'
                  '<table><caption class="vh">Recall campaigns</caption><thead><tr>'
                  '<th scope="col">Campaign</th><th scope="col">Date</th>'
@@ -874,7 +944,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         B.append('<div class="ad"><span class="ad-label">Advertisement</span></div>')
 
     if s["quotes"]:
-        B.append("<h2>What owners reported</h2>")
+        B.append('<h2 id="owners">What owners reported</h2>')
         seen = set()
         shown = 0
         for q in s["quotes"]:
@@ -905,7 +975,29 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
             B.append(f'<li><a href="{u}">{esc(model)} {g["year_start"]}–{g["year_end"]}</a></li>')
         B.append("</ul>")
 
-    return page_shell(title, desc, "\n".join(B), f"{DOMAIN}/{slug_self}/")
+    # Боковая колонка. При окне 1568 текст занимал 680px, а 888 простаивало —
+    # для сайта, живущего с рекламы, это ещё и место, где стоит рекламный блок.
+    # ПРАВИЛО: над первым рекламным местом всегда стоит редакционный блок.
+    # Колонка, открывающаяся баннером 300x600, читается рецензентом сети как
+    # рекламная ферма. Липкость (position:sticky) НЕ включаем: в этом коде уже
+    # трижды ломалось позиционирование, и включать её нужно отдельным шагом.
+    med = sh.get("median") if isinstance(sh, dict) else None
+    body = ['<div class="gen-grid"><div class="gen-main">'] + B + [
+        '</div>',
+        '<aside class="rail" aria-label="Summary and related">',
+        '<div class="rail-in">',
+        '<dl class="snap">',
+        f'<div><dt>Complaints</dt><dd>{fmt(s["complaints_total"])}</dd></div>',
+        f'<div><dt>With mileage</dt><dd>{fmt(s["complaints_with_miles"])}</dd></div>',
+        f'<div><dt>Median at failure</dt><dd>'
+        f'{fmt(names.round_miles(med)) if med else "&mdash;"}</dd></div>',
+        f'<div><dt>Recalls</dt><dd>{s["recalls_count"]}</dd></div>',
+        '</dl>',
+        _jump(B),
+        '<div class="ad ad-rail"><span class="ad-label">Advertisement</span></div>',
+        '</div></aside></div>']
+
+    return page_shell(title, desc, "\n".join(body), f"{DOMAIN}/{slug_self}/", gen=True)
 
 
 # ---------------------------------------------------------------- institutional pages
