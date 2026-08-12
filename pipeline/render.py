@@ -19,6 +19,8 @@ from datetime import date
 from pathlib import Path
 
 import analyze
+import charts
+import names
 import narrative
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -49,54 +51,12 @@ def fmt(n) -> str:
     return f"{int(n):,}".replace(",", ",") if n is not None else "—"
 
 
-# ---------------------------------------------------------------- histogram SVG
-def histogram_svg(bins: list[dict], shape: dict) -> str:
-    """Гистограмма пробегов до отказа. Главный дифференциатор — рисуем аккуратно."""
-    w, h, pad_l, pad_b, pad_t = 720, 260, 44, 46, 14
-    plot_w, plot_h = w - pad_l - 12, h - pad_b - pad_t
-    mx = max((b["count"] for b in bins), default=1) or 1
-    bw = plot_w / len(bins)
-
-    parts = [
-        f'<svg viewBox="0 0 {w} {h}" class="hist" role="img" '
-        f'aria-label="Distribution of mileage at failure">'
-    ]
-    # горизонтальная сетка
-    for i in range(1, 5):
-        y = pad_t + plot_h * i / 4
-        parts.append(f'<line x1="{pad_l}" y1="{y:.1f}" x2="{w - 12}" y2="{y:.1f}" class="grid"/>')
-
-    for i, b in enumerate(bins):
-        bh = (b["count"] / mx) * plot_h
-        x = pad_l + i * bw
-        y = pad_t + plot_h - bh
-        # выделяем корзины, формирующие сигнал
-        cls = "bar"
-        if shape.get("kind") == "bimodal" and (b["hi"] <= 12_000 or b["lo"] >= 100_000):
-            cls = "bar peak"
-        elif shape.get("kind") == "early" and b["hi"] <= 12_000:
-            cls = "bar peak"
-        elif shape.get("kind") == "late" and b["lo"] >= 100_000:
-            cls = "bar peak"
-        title = f'{b["label"]}: {fmt(b["count"])} complaints ({b["pct"]}%)'
-        parts.append(
-            f'<g><title>{esc(title)}</title>'
-            f'<rect x="{x + 1.5:.1f}" y="{y:.1f}" width="{bw - 3:.1f}" height="{max(bh, 1):.1f}" class="{cls}"/></g>')
-        if i % 2 == 0:
-            parts.append(
-                f'<text x="{x + bw / 2:.1f}" y="{h - pad_b + 16}" class="xl">{esc(b["label"])}</text>')
-
-    parts.append(f'<text x="{pad_l - 8}" y="{pad_t + 4}" class="yl">{fmt(mx)}</text>')
-    parts.append(f'<text x="{pad_l - 8}" y="{pad_t + plot_h}" class="yl">0</text>')
-    parts.append("</svg>")
-    return "".join(parts)
-
 
 # ---------------------------------------------------------------- prose from data
 def lead_paragraph(s: dict, gen: dict) -> str:
     """Вводный блок, выведенный ИЗ ЧИСЕЛ. Текст только английский — сайт для рынка США."""
     sh = s["shape"]
-    name = f'{s["make"].title()} {s["model"].title()}'
+    name = f'{names.display(s["make"])} {names.display(s["model"])}'
     out = [f'Owners filed <strong>{fmt(s["complaints_total"])}</strong> complaints with NHTSA '
            f'about the {s["year_start"]}–{s["year_end"]} {name}, and '
            f'<strong>{fmt(s["complaints_with_miles"])}</strong> of them record the mileage at '
@@ -119,7 +79,7 @@ def lead_paragraph(s: dict, gen: dict) -> str:
     top = [x for x in s["systems"] if x.get("median_miles")][:3]
     if top:
         bits = [f'{narrative.plain(x["system"])} ({x["share"]}% of complaints, typically around '
-                f'{fmt(x["median_miles"])} miles)' for x in top]
+                f'{fmt(names.round_miles(x["median_miles"]))} miles)' for x in top]
         out.append("The most-reported areas are " + ", ".join(bits) + ".")
 
     if s["recalls_count"]:
@@ -138,53 +98,337 @@ def lead_paragraph(s: dict, gen: dict) -> str:
 
 # ---------------------------------------------------------------- page
 CSS = """
-:root{--bg:#fbfbfa;--surface:#fff;--ink:#1a1d1c;--muted:#5d6663;--line:#e2e6e4;
---accent:#0f6e5e;--accent-ink:#0b5347;--peak:#c2542b;--warn:#f5efe0;--track:#eef1f0}
-@media(prefers-color-scheme:dark){:root{--bg:#111413;--surface:#191d1c;--ink:#e6eae8;
---muted:#9aa5a1;--line:#2a302e;--accent:#4fc0aa;--accent-ink:#7ad6c4;--peak:#e08862;
---warn:#2b2519;--track:#232827}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.65 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
-.wrap{max-width:860px;margin:0 auto;padding:28px 20px 80px}
-a{color:var(--accent-ink)}
-header.site{border-bottom:1px solid var(--line);margin-bottom:32px;padding-bottom:14px;
-display:flex;justify-content:space-between;align-items:baseline;gap:16px;flex-wrap:wrap}
-header.site .brand{font-weight:700;font-size:18px;letter-spacing:-.01em;text-decoration:none;color:var(--ink)}
-header.site .tag{color:var(--muted);font-size:13.5px}
-h1{font-size:clamp(25px,4vw,33px);line-height:1.2;margin:0 0 4px;letter-spacing:-.02em}
-.sub{color:var(--muted);margin:0 0 26px;font-size:15px}
-h2{font-size:20px;margin:38px 0 10px;letter-spacing:-.01em}
-h3{font-size:16px;margin:22px 0 6px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:18px 20px;margin:16px 0}
-.finding{border-left:3px solid var(--accent);background:var(--surface)}
-mark{background:var(--warn);color:inherit;padding:1px 4px;border-radius:3px}
-svg.hist{width:100%;height:auto;display:block;margin:6px 0 2px}
-.hist .bar{fill:var(--accent);opacity:.82}
-.hist .bar.peak{fill:var(--peak);opacity:.95}
-.hist .grid{stroke:var(--line);stroke-width:1}
-.hist .xl{fill:var(--muted);font-size:10.5px;text-anchor:middle}
-.hist .yl{fill:var(--muted);font-size:10.5px;text-anchor:end}
-table{border-collapse:collapse;width:100%;font-size:14.5px}
-.tw{overflow-x:auto;border:1px solid var(--line);border-radius:11px;background:var(--surface);margin:14px 0}
-th{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);
-padding:11px 14px;border-bottom:1px solid var(--line);white-space:nowrap;font-weight:600}
-td{padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
-tr:last-child td{border-bottom:none}
-.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.bar-cell{position:relative;min-width:120px}
-.bar-cell i{position:absolute;left:0;top:50%;transform:translateY(-50%);height:6px;
-border-radius:3px;background:var(--accent);opacity:.35}
-.quote{border-left:2px solid var(--line);padding:2px 0 2px 14px;margin:12px 0;color:var(--muted);font-size:14.5px}
-.quote b{color:var(--ink);font-weight:600}
-.pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;
-background:var(--track);color:var(--muted);margin-right:6px}
-.pill.danger{background:var(--peak);color:#fff;opacity:.9}
-ul.rel{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px}
-ul.rel a{display:inline-block;padding:6px 12px;border:1px solid var(--line);border-radius:8px;
-text-decoration:none;background:var(--surface);font-size:14px}
-footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+/* ===========================================================================
+   MileageCurve — complete stylesheet. Replaces the current CSS block entirely.
+   Vanilla CSS. No external requests, no JS, no framework, no build step.
+
+   HOUSE RULE, enforced: this file contains ZERO `position:absolute` and zero
+   `float`. Every composition — bars, legends, scroll cues, the visually-hidden
+   helper — is in normal flow. Grep this block for "absolute": no hits.
+   =========================================================================== */
+
+/* ---------- 1. tokens ------------------------------------------------------
+   Light is the base. Dark redefines only what changes. Every contrast figure
+   below is measured, not guessed.                                          */
+:root{
+  color-scheme:light dark;
+
+  --bg:#fbfbfa; --surface:#ffffff;
+  --ink:#181c1b;          /* 16.9:1 on --bg */
+  --muted:#5a6360;        /*  6.0:1 on --bg */
+  --line:#d5dbd9;         /*  1.40:1 on --surface — hairlines are now visible */
+  --line-strong:#adb8b4;  /*  2.05:1 on --surface — structural edges */
+  --track:#eef1f0; --warn:#f6f1e6;
+
+  --accent:#0f6e5e; --accent-ink:#0b5347;   /* links 8.6:1 on --bg */
+  --peak:#a8401f;                            /* 6.1:1 on --surface */
+
+  /* chart ink: separated in LIGHTNESS, not hue, so the encoding survives
+     greyscale, print and every colour-vision deficiency.
+     --bar 3.3:1 on surface · --bar-hi 3.5:1 on --bar · --bar-hi 10:1 on surface */
+  --bar:#7e938e; --bar-hi:#0b4238;
+
+  /* severe advisories. Never `opacity` on a text-bearing element. */
+  --danger-bg:#8c2f0e; --danger-fg:#ffffff; --danger-ring:#8c2f0e;  /* 8.3:1 */
+
+  --shadow:rgba(20,30,28,.13);
+
+  --f-xs:13px; --f-sm:15px; --f-md:17px; --f-lg:21px; --f-xl:26px; --f-2xl:33px;
+  --s-1:4px; --s-2:8px; --s-3:16px; --s-4:24px; --s-5:32px; --s-6:48px; --s-7:64px;
+  --measure:68ch;   /* ~578px at 17px — 66-70 characters */
+  --radius:10px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#111413; --surface:#191d1c;
+  --ink:#e6eae8;          /* 15.3:1 */
+  --muted:#9aa5a1;        /*  7.3:1 */
+  --line:#2f3634;         /*  1.38:1 on --surface */
+  --line-strong:#4a5451;  /*  2.21:1 on --surface */
+  --track:#232827; --warn:#2a2419;
+
+  --accent:#4fc0aa; --accent-ink:#7ad6c4; --peak:#f0a882;
+  --bar:#5c6b67; --bar-hi:#7fe0c8;        /* 3.5:1 between them */
+
+  --danger-bg:transparent; --danger-fg:#f0a882; --danger-ring:#f0a882;  /* 8.7:1 */
+  --shadow:rgba(0,0,0,.55);
+}}
+
+/* ---------- 2. base ------------------------------------------------------- */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font:var(--f-md)/1.55 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+img,svg{display:block;max-width:100%}
+
+.wrap{max-width:880px;margin:0 auto;padding:var(--s-4) var(--s-4) var(--s-7)}
+@media(max-width:479px){.wrap{padding-left:var(--s-3);padding-right:var(--s-3)}}
+
+/* Reading measure is decoupled from the container: text narrows, figures stay
+   wide. One shared left edge for prose and figures — nothing is centred, so
+   nothing can look adrift. */
+p,li,dd,blockquote,.note,.meta,.sub{max-width:var(--measure)}
+.tw,figure.chart,ol.sys,.ad,ul.rel,.pct,.prov,table{max-width:none}
+
+p{margin:0 0 var(--s-5)}            /* 32px gap > 26.4px leading */
+p:last-child{margin-bottom:0}
+ul,ol{margin:0 0 var(--s-5);padding-left:var(--s-4)}
+li{margin:0 0 var(--s-2)}
+strong{font-weight:600}
+a{color:var(--accent-ink);text-underline-offset:2px;text-decoration-thickness:1px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:3px}
+
+/* visually hidden — no `position`, so it cannot escape flow */
+.vh{display:block;width:1px;height:1px;padding:0;border:0;overflow:hidden;
+  white-space:nowrap;clip-path:inset(50%)}
+.skip{display:inline-block;width:1px;height:1px;overflow:hidden;
+  white-space:nowrap;clip-path:inset(50%)}
+.skip:focus-visible{width:auto;height:auto;overflow:visible;clip-path:none;
+  padding:var(--s-2) var(--s-3);margin-bottom:var(--s-2);background:var(--surface);
+  border:1px solid var(--accent);border-radius:var(--radius);text-decoration:none}
+
+/* ---------- 3. header, nav, breadcrumbs ----------------------------------- */
+header.site{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s-2) var(--s-4);
+  padding-bottom:var(--s-3);margin-bottom:var(--s-4);
+  border-bottom:1px solid var(--line-strong)}
+header.site .brand{font-weight:700;font-size:19px;letter-spacing:-.015em;
+  text-decoration:none;color:var(--ink)}
+header.site .tag{color:var(--muted);font-size:var(--f-xs)}
+header.site nav{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
+  margin-left:auto;font-size:var(--f-sm)}
+header.site nav a{color:var(--muted);text-decoration:none;padding-bottom:2px;
+  border-bottom:1px solid transparent}
+header.site nav a:hover{color:var(--ink);border-bottom-color:var(--accent)}
+@media(max-width:560px){
+  header.site .tag{display:none}
+  header.site nav{margin-left:0;width:100%}
+}
+
+.crumbs{display:flex;flex-wrap:wrap;gap:var(--s-1) var(--s-2);list-style:none;
+  padding:0;margin:0 0 var(--s-2);font-size:var(--f-xs);color:var(--muted)}
+.crumbs li{margin:0}
+.crumbs a{color:var(--muted)}
+.crumbs li+li::before{content:"\203A";margin-right:var(--s-2);color:var(--line-strong)}
+
+/* ---------- 4. page title, dateline, headings ----------------------------- */
+h1{font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.15;letter-spacing:-.022em;
+  font-weight:700;margin:0 0 var(--s-2);max-width:none}
+.h1-years{font-weight:400;color:var(--muted)}
+.sub{color:var(--muted);font-size:var(--f-sm);margin:0 0 var(--s-3)}
+
+.dateline{display:flex;flex-wrap:wrap;align-items:baseline;gap:var(--s-1) var(--s-3);
+  font-size:var(--f-xs);color:var(--muted);margin:0 0 var(--s-4);
+  padding-bottom:var(--s-3);border-bottom:1px solid var(--line);max-width:none}
+.dateline b{font-weight:600;color:var(--ink)}
+.dateline a{color:var(--muted)}
+.dateline span+span::before{content:"\00B7";margin-right:var(--s-3);color:var(--line-strong)}
+
+h2{font-size:var(--f-xl);line-height:1.2;letter-spacing:-.018em;font-weight:600;
+  margin:var(--s-6) 0 var(--s-3);padding-top:var(--s-4);
+  border-top:1px solid var(--line);max-width:none}
+h3{font-size:var(--f-lg);line-height:1.3;letter-spacing:-.01em;font-weight:600;
+  margin:var(--s-5) 0 var(--s-2);max-width:none}
+:is(h1,h2,h3)+*{margin-top:0}
+
+/* ---------- 5. cards ------------------------------------------------------ */
+.card{background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:var(--s-4) var(--s-5);margin:var(--s-4) 0}
+.card>:first-child{margin-top:0}
+.card>:last-child{margin-bottom:0}
+/* accent rule as an inset shadow: no 3px-into-1px miter on the rounded corner */
+.finding{box-shadow:inset 3px 0 0 var(--accent)}
+
+.verdict{font-size:var(--f-lg);line-height:1.4;margin:0 0 var(--s-4);
+  max-width:var(--measure)}
+
+.note{background:var(--warn);border-left:3px solid var(--peak);
+  border-radius:0 var(--radius) var(--radius) 0;padding:var(--s-3) var(--s-4);
+  margin:var(--s-4) 0;font-size:var(--f-sm)}
+.note>:last-child{margin-bottom:0}
+mark{background:var(--warn);color:inherit;padding:0 3px;border-radius:2px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+/* ---------- 6. histogram figure -------------------------------------------
+   The SVG carries geometry only — no <text>. All labels are HTML siblings, so
+   they are true CSS px at every viewport instead of scaling to 4px at 360.
+   viewBox is 0 0 1000 100 with preserveAspectRatio="none": y is fixed by the
+   CSS height, x stretches. Rectangles are immune to x-stretch; strokes are
+   pinned with vector-effect. Never put a diagonal or a circle in here.      */
+figure.chart{margin:0 0 var(--s-4);padding:0}
+svg.hist{width:100%;height:clamp(180px,24vw,240px)}
+.hist .zone{fill:var(--warn)}
+.hist .bar{fill:var(--bar)}
+.hist .bar-hi{fill:var(--bar-hi)}
+.hist .over{fill:var(--bar);opacity:.55}
+.hist .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4;
+  vector-effect:non-scaling-stroke}
+.hist .base{stroke:var(--line-strong);stroke-width:1;vector-effect:non-scaling-stroke}
+.hist .med{stroke:var(--ink);stroke-width:2;stroke-dasharray:3 3;opacity:.55;
+  vector-effect:non-scaling-stroke}
+
+/* x axis: 8 tracks of 11.85% mirror the 948/1000 plot area, so a right-aligned
+   label in track k sits exactly on the k x 25,000-mile boundary. The remaining
+   5.2% is the gap plus the detached 200k+ bar, labelled in the legend below. */
+.xax{display:grid;grid-template-columns:repeat(8,11.85%);margin-top:var(--s-2);
+  font-size:12px;line-height:1.2;color:var(--muted);font-variant-numeric:tabular-nums}
+.xax span{text-align:right;white-space:nowrap}
+@media(max-width:479px){.xax .q{visibility:hidden}}  /* 8 labels -> 4 */
+
+/* legend: names what each ink means, in words. Text is the only fully
+   colour-blind-safe channel, so it carries the encoding and hue reinforces. */
+.brk-row{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-4);list-style:none;
+  padding:0;margin:var(--s-3) 0 0;font-size:var(--f-xs);color:var(--ink)}
+.brk-row li{display:flex;align-items:center;gap:var(--s-2);margin:0;max-width:none}
+.brk-row .k{display:block;flex:none;width:14px;height:10px;border-radius:2px}
+.brk-row .k-hi{background:var(--bar-hi)}
+.brk-row .k-bar{background:var(--bar)}
+.brk-row .k-over{background:var(--bar);opacity:.55}
+
+/* percentiles: five facts as five cells, not one run-on sentence.
+   auto-fit needs no media query — 5 columns at desktop, 3 at 360px. */
+.pct{display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:1px;
+  margin:var(--s-3) 0 0;background:var(--line);border:1px solid var(--line);
+  border-radius:var(--radius);overflow:hidden}
+.pct>div{background:var(--surface);padding:var(--s-2) var(--s-2) 10px;text-align:center}
+.pct dt{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.pct dd{margin:var(--s-1) 0 0;max-width:none;font-size:16px;letter-spacing:-.01em;
+  font-variant-numeric:tabular-nums}
+.pct .mid dd{font-weight:700;color:var(--accent-ink)}
+
+.meta{font-size:var(--f-xs);color:var(--muted);margin:var(--s-3) 0 0}
+
+details.nums{margin-top:var(--s-3)}
+details.nums summary{cursor:pointer;color:var(--muted);font-size:var(--f-xs);
+  padding:var(--s-1) 0}
+details.nums summary:hover{color:var(--ink)}
+
+/* ---------- 7. system timing strips ---------------------------------------
+   Replaces the struck-through table bar. Same 0-200,000 x scale as the
+   histogram, so one .xax row serves both charts. Same SVG technique: no
+   overlapping grid items, no positioning of any kind.                       */
+ol.sys{list-style:none;margin:var(--s-3) 0 0;padding:0}
+ol.sys li{display:grid;grid-template-columns:minmax(10em,15em) minmax(0,1fr) 5em;
+  align-items:center;gap:var(--s-2) var(--s-3);padding:var(--s-2) 0;
+  border-bottom:1px solid var(--line);margin:0;max-width:none}
+ol.sys li:last-child{border-bottom:0}
+ol.sys .nm{font-size:var(--f-sm);line-height:1.3}
+ol.sys .mv{font-size:var(--f-xs);color:var(--muted);text-align:right;
+  font-variant-numeric:tabular-nums}
+svg.strip{width:100%;height:16px}
+.strip .track{fill:var(--track)}
+.strip .iqr{fill:var(--bar)}
+.strip .iqr-hi{fill:var(--bar-hi)}
+.strip .med{stroke:var(--ink);stroke-width:2;vector-effect:non-scaling-stroke}
+@media(max-width:560px){
+  ol.sys li{grid-template-columns:minmax(0,1fr) 5em;row-gap:var(--s-1)}
+  ol.sys .nm{grid-column:1/-1}
+}
+
+/* ---------- 8. tables ------------------------------------------------------
+   The four gradients are a pure-CSS horizontal scroll cue: the two `local`
+   layers are surface-coloured masks pinned to the content, the two `scroll`
+   layers are shadows pinned to the box. When the table is fully visible the
+   masks cover the shadows; when it can scroll, the shadow shows. No JS.     */
+.tw{overflow-x:auto;margin:var(--s-3) 0;background:var(--surface);
+  border:1px solid var(--line-strong);border-radius:var(--radius);
+  background-image:
+    linear-gradient(to right,var(--surface),transparent 28px),
+    linear-gradient(to left,var(--surface),transparent 28px),
+    linear-gradient(to right,var(--shadow),transparent 14px),
+    linear-gradient(to left,var(--shadow),transparent 14px);
+  background-position:0 0,100% 0,0 0,100% 0;
+  background-repeat:no-repeat;
+  background-size:36px 100%,36px 100%,14px 100%,14px 100%;
+  background-attachment:local,local,scroll,scroll}
+
+table{border-collapse:collapse;width:100%;font-size:var(--f-sm)}
+caption{text-align:left;font-size:var(--f-xs);color:var(--muted);
+  padding:var(--s-2) var(--s-3) 0}
+thead th{text-align:left;vertical-align:bottom;font-size:12px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  white-space:normal;padding:12px var(--s-3);
+  border-bottom:2px solid var(--line-strong)}
+thead th.num{text-align:right}
+td,tbody th{text-align:left;vertical-align:top;font-weight:400;
+  padding:11px var(--s-3);border-bottom:1px solid var(--line)}
+tbody tr:last-child>*{border-bottom:0}
+tbody tr:hover{background:var(--track)}
+.num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.sys-name{min-width:10ch}
+
+/* ---------- 9. quotes ----------------------------------------------------- */
+blockquote.quote{margin:var(--s-4) 0;padding:0 0 0 var(--s-3);
+  border-left:2px solid var(--line-strong);font-size:var(--f-sm);color:var(--ink)}
+blockquote.quote p{margin:0;max-width:var(--measure)}
+blockquote.quote cite{display:block;margin-top:var(--s-2);font-style:normal;
+  font-size:var(--f-xs);color:var(--muted)}
+blockquote.quote cite a{color:var(--muted)}
+
+/* ---------- 10. tags and advisories --------------------------------------- */
+.tag{display:inline-block;margin:0 var(--s-1) 0 0;padding:2px 10px;
+  border-radius:99px;background:var(--track);color:var(--muted);
+  font-size:var(--f-xs);line-height:1.4;vertical-align:baseline}
+.tag-weak{background:transparent;box-shadow:inset 0 0 0 1px var(--line-strong)}
+.alert{display:inline-block;margin:0 var(--s-1) 0 0;padding:2px 10px;
+  border-radius:99px;background:var(--danger-bg);color:var(--danger-fg);
+  box-shadow:inset 0 0 0 1px var(--danger-ring);
+  font-size:var(--f-xs);font-weight:600;line-height:1.4;vertical-align:baseline}
+
+/* ---------- 11. link chips (related generations, index) -------------------- */
+ul.rel{list-style:none;padding:0;margin:var(--s-3) 0 var(--s-4);
+  display:flex;flex-wrap:wrap;gap:10px}
+ul.rel li{margin:0;max-width:none}
+ul.rel a{display:block;padding:12px 14px;line-height:1.35;font-size:var(--f-sm);
+  color:var(--ink);text-decoration:none;background:var(--surface);
+  border:1px solid var(--line-strong);border-radius:8px}   /* 45px tall */
+ul.rel a:hover{background:var(--track);border-color:var(--accent)}
+
+/* ---------- 12. index page ------------------------------------------------- */
+.idx-make{padding-top:var(--s-3);border-top:1px solid var(--line)}
+
+/* ---------- 13. ad slots ---------------------------------------------------
+   Reserved before the units exist, so insertion never shifts content.
+   Never between the h1 and the histogram.                                   */
+.ad{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:var(--s-2);min-height:290px;margin:var(--s-6) 0;padding:var(--s-2);
+  background:var(--track);border-radius:var(--radius);overflow:hidden}
+.ad-label{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.ad>ins,.ad>iframe,.ad>div{max-width:100%}
+@media(max-width:479px){.ad{min-height:260px;margin:var(--s-5) 0}}
+
+/* ---------- 14. provenance strip and footer -------------------------------- */
+.prov{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
+  margin:var(--s-6) 0 0;padding-top:var(--s-3);border-top:1px solid var(--line);
+  font-size:var(--f-xs);color:var(--muted)}
+.prov a{color:var(--accent-ink)}
+
+footer{margin-top:var(--s-6);padding-top:var(--s-3);
+  border-top:1px solid var(--line-strong);color:var(--muted);font-size:var(--f-xs)}
+footer p{margin:0 0 var(--s-2);max-width:var(--measure)}
 footer a{color:var(--muted)}
-.meta{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+/* ---------- 15. motion ------------------------------------------------------ */
+@media(prefers-reduced-motion:no-preference){
+  ul.rel a,tbody tr,header.site nav a{
+    transition:background-color .12s ease,border-color .12s ease,color .12s ease}
+}
+
+/* ---------- 16. print -------------------------------------------------------
+   Someone comparing two cars in a dealership forecourt is a real user.     */
+@media print{
+  :root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#3f3f3f;
+    --line:#c2c2c2;--line-strong:#767676;--track:#eeeeee;--warn:#f2f2f2;
+    --accent:#000;--accent-ink:#000;--peak:#000;
+    --bar:#b8b8b8;--bar-hi:#252525;
+    --danger-bg:transparent;--danger-fg:#000;--danger-ring:#000;--shadow:transparent}
+  body{background:#fff;font-size:10.5pt}
+  .ad,ul.rel,header.site nav,.skip,.crumbs{display:none}
+  .tw{overflow:visible;background-image:none}
+  .card,.tw,figure.chart,blockquote.quote,ol.sys li,.pct{break-inside:avoid}
+  h2,h3{break-after:avoid}
+  details.nums>*{display:block}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:8pt;color:#555}
+}
 """
 
 
@@ -192,21 +436,34 @@ def page_shell(title: str, desc: str, body: str, canonical: str) -> str:
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <link rel="canonical" href="{esc(canonical)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{SITE}">
+<meta property="og:title" content="{esc(title)}">
+<meta property="og:description" content="{esc(desc)}">
+<meta property="og:url" content="{esc(canonical)}">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f6e5e'/%3E%3Crect x='3' y='4' width='2.4' height='8' fill='%23fff'/%3E%3Crect x='6.6' y='8' width='2.4' height='4' fill='%23fff' opacity='.7'/%3E%3Crect x='10.2' y='9.5' width='2.4' height='2.5' fill='%23fff' opacity='.5'/%3E%3C/svg%3E">
 <style>{CSS}</style>
-</head><body><div class="wrap">
+</head><body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="wrap">
 <header class="site">
   <a class="brand" href="/">{SITE}</a>
-  <span class="tag">{TAGLINE}</span>
+  <nav aria-label="Main"><a href="/">All vehicles</a><a href="/methodology/">Methodology</a>
+  <a href="/about/">About</a><a href="/privacy/">Privacy</a></nav>
 </header>
+<main id="main">
 {body}
+</main>
 <footer>
-  <p>Data: <a href="https://www.nhtsa.gov/nhtsa-datasets-and-apis">NHTSA Office of Defects Investigation</a>,
-  public domain. Snapshot {date.today().isoformat()}.
-  <a href="/methodology/">Methodology</a> · <a href="/about/">About</a> ·
-  <a href="mailto:{CONTACT}">{CONTACT}</a></p>
+  <p>Data: <a href="https://www.nhtsa.gov/nhtsa-datasets-and-apis">NHTSA Office of Defects
+  Investigation</a>, public domain. Snapshot {date.today().isoformat()}.</p>
+  <p><a href="/methodology/">Methodology</a> · <a href="/about/">About</a> ·
+  <a href="/privacy/">Privacy</a> · <a href="mailto:{CONTACT}">{CONTACT}</a></p>
   <p>{OWNER}. Complaint counts reflect what owners reported to NHTSA and are not a measure of
   failure rate per vehicle sold.</p>
 </footer>
@@ -214,106 +471,156 @@ def page_shell(title: str, desc: str, body: str, canonical: str) -> str:
 
 
 def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict]) -> str:
-    make, model = s["make"].title(), s["model"].title()
+    make, model = names.display(s["make"]), names.display(s["model"])
     years = f'{s["year_start"]}–{s["year_end"]}'
     title = f"{make} {model} {years} — what breaks and at what mileage"
     desc = (f'{fmt(s["complaints_with_miles"])} NHTSA complaints with mileage for the '
-            f'{years} {make} {model}: failure-mileage distribution, systems, recalls.')
+            f'{years} {make} {model}: when each system fails, recalls, and what it means '
+            f'if you are buying one.')
+    slug_self = slug(s["make"], s["model"], s["year_start"], s["year_end"])
+    make_slug = slug(s["make"])
+    sh = s["shape"]
 
-    B = [f"<h1>{esc(f'{make} {model}')} <span style='font-weight:400;color:var(--muted)'>{years}</span></h1>"]
+    B = [f'<ol class="crumbs"><li><a href="/">Home</a></li>'
+         f'<li><a href="/{make_slug}/">{esc(make)}</a></li>'
+         f'<li>{esc(model)} {years}</li></ol>']
+    B.append(f'<h1>{esc(make)} {esc(model)} <span class="h1-years">{years}</span></h1>')
+
     plat = gen.get("platform_code")
-    B.append(f'<p class="sub">{esc(gen.get("gen_label","")) }'
-             + (f' · {esc(plat)}' if plat else "")
-             + f' · {fmt(s["complaints_total"])} complaints, {fmt(s["complaints_with_miles"])} with mileage</p>')
+    bits = [esc(gen.get("gen_label", ""))]
+    if plat and plat.split()[0] not in (gen.get("gen_label") or ""):
+        bits.append(esc(plat))
+    B.append(f'<p class="sub">{" · ".join(b for b in bits if b)}</p>')
+
+    B.append(f'<p class="dateline"><span><b>NHTSA data through {date.today().strftime("%d %B %Y")}</b></span>'
+             f'<span>{fmt(s["complaints_total"])} complaints, {fmt(s["complaints_with_miles"])} with mileage</span>'
+             f'<span><a href="/methodology/">Method</a></span></p>')
+
+    # Однострочный вывод — первое, что читают
+    if sh.get("note"):
+        note = sh["note"]
+        B.append(f'<p class="verdict">On this generation, {note[0].lower() + note[1:]}</p>')
+
+    # ГЛАВНОЕ НА СТРАНИЦЕ — график идёт выше сгиба
+    if s["histogram"]:
+        B.append(charts.histogram(s["histogram"], sh, s["complaints_with_miles"],
+                                  f"{make} {model} {years}"))
+        B.append(charts.percentiles(sh))
+        top_bin = max(s["histogram"]["bins"], key=lambda b: b["count"], default=None)
+        extra = (f'Tallest bin: {fmt(top_bin["count"])} complaints between {fmt(top_bin["lo"])} '
+                 f'and {fmt(top_bin["hi"])} miles. ' if top_bin and top_bin["count"] else "")
+        B.append(f'<p class="meta">{extra}Based on {fmt(s["complaints_with_miles"])} complaints '
+                 f'that record mileage. Bin width {fmt(s["histogram"]["width"])} miles.</p>')
+        B.append(charts.bins_table(s["histogram"]))
+
+    B.append('<p class="note">What this can and cannot tell you: these are complaints owners '
+             'chose to file, not a failure rate. Popular models accumulate more of them simply '
+             'by being common. <a href="/methodology/">How this is built</a>.</p>')
 
     B.append(f'<div class="card finding">{lead_paragraph(s, gen)}</div>')
 
-    if s["histogram"]:
-        B.append("<h2>When failures happen</h2>")
-        B.append('<div class="card">')
-        B.append(histogram_svg(s["histogram"], s["shape"]))
-        sh = s["shape"]
-        B.append(f'<p class="meta">10% of failures occur by {fmt(sh["p10"])} miles · '
-                 f'a quarter by {fmt(sh["p25"])} · median {fmt(sh["median"])} · '
-                 f'three quarters by {fmt(sh["p75"])} · 90% by {fmt(sh["p90"])}. '
-                 f'Based on {fmt(s["complaints_with_miles"])} complaints that record mileage.</p>')
-        B.append("</div>")
-
-    # системы
+    # Системы: полоски + таблица
     B.append("<h2>What fails, and when</h2>")
-    B.append('<div class="tw"><table><tr><th>System</th><th class="num">Complaints</th>'
-             '<th class="num">Share</th><th class="num">Typical mileage</th>'
-             '<th class="num">Middle half</th></tr>')
-    mxs = max((x["count"] for x in s["systems"]), default=1)
+    for x in s["systems"]:
+        x["display_name"] = narrative.plain(x["system"]).capitalize()
+    strips = charts.system_strips(s["systems"])
+    if strips:
+        B.append('<p class="meta">Each bar spans the middle half of reports for that system; '
+                 'the tick marks the median.</p>')
+        B.append(strips)
+    B.append('<div class="tw" tabindex="0" role="region" aria-label="Complaints by system">'
+             '<table><caption class="vh">Complaints by vehicle system</caption><thead><tr>'
+             '<th scope="col">System</th><th scope="col" class="num">Complaints</th>'
+             '<th scope="col" class="num">Share</th><th scope="col" class="num">Median</th>'
+             '<th scope="col" class="num">25–75%</th></tr></thead><tbody>')
     for x in s["systems"][:10]:
-        med = fmt(x["median_miles"]) if x.get("median_miles") else "—"
-        rng = (f'{fmt(x["p25_miles"])}–{fmt(x["p75_miles"])}'
+        med = fmt(names.round_miles(x["median_miles"])) if x.get("median_miles") else "—"
+        rng = (f'{fmt(names.round_miles(x["p25_miles"]))}–{fmt(names.round_miles(x["p75_miles"]))}'
                if x.get("p25_miles") else "—")
-        wpct = x["count"] / mxs * 100
-        B.append(f'<tr><td class="bar-cell"><i style="width:{wpct:.0f}%"></i>'
-                 f'<span style="position:relative">{esc(x["system"].title())}</span></td>'
+        B.append(f'<tr><td class="sys-name">{esc(x["display_name"])}</td>'
                  f'<td class="num">{fmt(x["count"])}</td><td class="num">{x["share"]}%</td>'
                  f'<td class="num">{med}</td><td class="num">{rng}</td></tr>')
-    B.append("</table></div>")
+    B.append("</tbody></table></div>")
+    B.append('<div class="ad"><span class="ad-label">Advertisement</span></div>')
 
-    # по годам
-    if len(s["by_year"]) > 1:
-        B.append("<h2>By model year</h2>")
-        B.append('<div class="tw"><table><tr><th>Year</th><th class="num">Complaints</th>'
-                 '<th class="num">With mileage</th></tr>')
-        for y in s["by_year"]:
-            mixed = " <span class='pill'>mixed</span>" if y["year"] in (gen.get("mixed_years") or []) else ""
-            B.append(f'<tr><td>{y["year"]}{mixed}</td><td class="num">{fmt(y["complaints"])}</td>'
-                     f'<td class="num">{fmt(y["with_miles"])}</td></tr>')
-        B.append("</table></div>")
-
-    # содержательный разбор, выведенный из данных (narrative.py)
     for heading, block in narrative.full_analysis(s, gen):
         B.append(f"<h2>{esc(heading)}</h2>")
         B.append(block)
 
-    # известные дефекты
     issues = gen.get("known_issues") or []
     if issues:
         B.append("<h2>Documented problems</h2>")
         for it in issues:
-            weak = ' <span class="pill">forum-sourced</span>' if it.get("source_strength") == "weak" else ""
-            yrs = f' <span class="pill">{esc(it["affected_years"])}</span>' if it.get("affected_years") else ""
-            B.append(f'<div class="card"><h3>{esc(it.get("component","—"))}{yrs}{weak}</h3>'
-                     f'<p>{esc(it.get("description",""))}</p></div>')
+            tags = ""
+            if it.get("affected_years"):
+                tags += f' <span class="tag">{esc(it["affected_years"].replace("-", "–"))}</span>'
+            if it.get("source_strength") == "weak":
+                tags += ' <span class="tag tag-weak">forum-sourced</span>'
+            B.append(f'<div class="card"><h3>{esc(names.display(it.get("component", "—")))}{tags}</h3>'
+                     f'<p>{esc(it.get("description", ""))}</p></div>')
 
-    # отзывы
+    if len(s["by_year"]) > 1:
+        B.append("<h2>By model year</h2>")
+        B.append('<div class="tw" tabindex="0" role="region" aria-label="Complaints by model year">'
+                 '<table><caption class="vh">Complaints by model year</caption><thead><tr>'
+                 '<th scope="col">Year</th><th scope="col" class="num">Complaints</th>'
+                 '<th scope="col" class="num">With mileage</th></tr></thead><tbody>')
+        for y in s["by_year"]:
+            mixed = ' <span class="tag">mixed</span>' if y["year"] in (gen.get("mixed_years") or []) else ""
+            B.append(f'<tr><td>{y["year"]}{mixed}</td><td class="num">{fmt(y["complaints"])}</td>'
+                     f'<td class="num">{fmt(y["with_miles"])}</td></tr>')
+        B.append("</tbody></table></div>")
+
     if s["recalls"]:
         B.append(f'<h2>Recalls ({s["recalls_count"]})</h2>')
-        B.append('<div class="tw"><table><tr><th>Campaign</th><th>Date</th><th>Component</th></tr>')
+        B.append('<div class="tw" tabindex="0" role="region" aria-label="Recall campaigns">'
+                 '<table><caption class="vh">Recall campaigns</caption><thead><tr>'
+                 '<th scope="col">Campaign</th><th scope="col">Date</th>'
+                 '<th scope="col">Component</th></tr></thead><tbody>')
         for r in s["recalls"][:25]:
             flags = ""
             if r["do_not_drive"]:
-                flags += ' <span class="pill danger">do not drive</span>'
+                flags += ' <span class="alert">do not drive</span>'
             if r["park_outside"]:
-                flags += ' <span class="pill danger">park outside</span>'
+                flags += ' <span class="alert">park outside</span>'
             B.append(f'<tr><td>{esc(r["campaign"])}{flags}</td><td>{esc(r["report_date"] or "—")}</td>'
-                     f'<td>{esc((r["component"] or "—").title())}</td></tr>')
-        B.append("</table></div>")
+                     f'<td>{esc(names.display(r["component"] or "—"))}</td></tr>')
+        B.append("</tbody></table></div>")
+        B.append('<div class="ad"><span class="ad-label">Advertisement</span></div>')
 
-    # цитаты
     if s["quotes"]:
         B.append("<h2>What owners reported</h2>")
-        for q in s["quotes"][:4]:
-            B.append(f'<div class="quote"><b>{q["year"]} · {fmt(q["miles"])} miles · '
-                     f'{esc((q["system"] or "").title())}</b><br>{esc(q["text"])}…</div>')
+        seen = set()
+        shown = 0
+        for q in s["quotes"]:
+            txt = names.sentence_case((q["text"] or "").strip())
+            key = txt[:80].lower()
+            if not txt or key in seen:
+                continue
+            seen.add(key)
+            miles_bit = (f' · {fmt(names.round_miles(q["miles"]))} miles'
+                         if q["miles"] and q["miles"] > 1 else "")
+            B.append(f'<blockquote class="quote"><p>{esc(names.truncate_words(txt, 320))}</p>'
+                     f'<cite>{q["year"]}{miles_bit} · '
+                     f'{esc(narrative.plain(q["system"] or "").capitalize())}</cite></blockquote>')
+            shown += 1
+            if shown >= 4:
+                break
 
-    # соседние поколения — внутренние ссылки, ~3 на 1000 слов (PLAYBOOK §7)
+    B.append(f'<p class="prov">Built from {fmt(s["complaints_with_miles"])} NHTSA complaints with '
+             f'mileage · snapshot {date.today().isoformat()} · '
+             f'<a href="/data/generations.json">open data</a> · '
+             f'<a href="https://github.com/bilingoplusllc/mileagecurve">reproduce this page</a></p>')
+
     rel = [g for g in siblings if g is not gen]
     if rel:
         B.append("<h2>Other generations</h2><ul class='rel'>")
         for g in rel:
             u = f'/{slug(s["make"], s["model"], g["year_start"], g["year_end"])}/'
-            B.append(f'<li><a href="{u}">{make} {model} {g["year_start"]}–{g["year_end"]}</a></li>')
+            B.append(f'<li><a href="{u}">{esc(model)} {g["year_start"]}–{g["year_end"]}</a></li>')
         B.append("</ul>")
 
-    canonical = f'{DOMAIN}/{slug(s["make"], s["model"], s["year_start"], s["year_end"])}/'
-    return page_shell(title, desc, "\n".join(B), canonical)
+    return page_shell(title, desc, "\n".join(B), f"{DOMAIN}/{slug_self}/")
 
 
 # ---------------------------------------------------------------- institutional pages

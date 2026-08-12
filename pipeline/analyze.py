@@ -20,12 +20,31 @@ from pathlib import Path
 
 DB = Path(__file__).resolve().parent.parent / "data" / "mileagecurve.db"
 
-# Границы корзин гистограммы, мили. Шаг 10к до 150к, дальше крупнее — хвост длинный и разреженный.
-BINS = [0, 5_000, 10_000, 20_000, 30_000, 40_000, 50_000, 60_000, 70_000, 80_000,
-        90_000, 100_000, 120_000, 140_000, 160_000, 200_000, 500_000]
+# ВАЖНО — исправлено 2026-08-12 после аудита.
+#
+# Раньше корзины были неравной ширины (5к в начале, 20к и 40к ближе к хвосту), а
+# рисовались одинаковой шириной. Это ФАБРИКОВАЛО второй горб: у Prius 2010–2015
+# «пик после 100 000 миль» существовал только потому, что корзина 100–120к вдвое
+# шире соседних, а 160–200к вчетверо. При равномерных корзинах плотность падает
+# монотонно: 159,9 → 19,2 → 14,0 → 13,0 → 7,3 жалоб на 1000 миль.
+#
+# Теперь корзины РАВНОМЕРНЫЕ, поэтому высота столбика = плотность с точностью до
+# множителя, и график не врёт. Хвост за 200к не выбрасывается — он выносится
+# отдельным столбиком с подписью.
+HIST_DOMAIN = 200_000        # основная область графика
+DEFECT_EDGE = 12_000         # граница «заводской брак» против износа
 
 MIN_FOR_HISTOGRAM = 30
 MIN_FOR_SYSTEM_STATS = 10
+
+
+def choose_bin_width(n: int) -> int:
+    """Ширина корзины под объём выборки: мало данных — шире корзина, иначе шум."""
+    if n >= 1200:
+        return 5_000
+    if n >= 300:
+        return 10_000
+    return 20_000
 
 
 def _quantile(sorted_vals: list[int], q: float) -> int:
@@ -35,26 +54,30 @@ def _quantile(sorted_vals: list[int], q: float) -> int:
     return sorted_vals[idx]
 
 
-def _histogram(vals: list[int]) -> list[dict]:
-    counts = [0] * (len(BINS) - 1)
+def _histogram(vals: list[int]) -> dict:
+    """Равномерные корзины. Высота столбика пропорциональна плотности — график честен."""
+    w = choose_bin_width(len(vals))
+    nb = HIST_DOMAIN // w
+    counts = [0] * nb
+    over = 0
     for v in vals:
-        for i in range(len(BINS) - 1):
-            if BINS[i] <= v < BINS[i + 1]:
-                counts[i] += 1
-                break
-    total = sum(counts) or 1
-    out = []
-    for i, c in enumerate(counts):
-        lo, hi = BINS[i], BINS[i + 1]
-        label = f"{lo // 1000}–{hi // 1000}k" if hi < 500_000 else f"{lo // 1000}k+"
-        out.append({"lo": lo, "hi": hi, "label": label, "count": c, "pct": round(c / total * 100, 1)})
-    return out
+        if v >= HIST_DOMAIN:
+            over += 1
+        else:
+            counts[min(v // w, nb - 1)] += 1
+    n = len(vals) or 1
+    return {
+        "width": w,
+        "bins": [{"lo": i * w, "hi": (i + 1) * w, "count": c, "pct": round(c / n * 100, 1)}
+                 for i, c in enumerate(counts)],
+        "overflow": {"lo": HIST_DOMAIN, "count": over, "pct": round(over / n * 100, 1)},
+    }
 
 
 def _shape(vals: list[int]) -> dict:
     """Определяет форму распределения — это то, чего не публикует ни один конкурент."""
     if len(vals) < MIN_FOR_HISTOGRAM:
-        return {"kind": "insufficient", "note": "мало данных для формы распределения"}
+        return {"kind": "insufficient", "note": "Too few complaints record mileage to describe the shape."}
     vs = sorted(vals)
     med = statistics.median(vs)
     p10, p25, p75, p90 = (_quantile(vs, q) for q in (0.10, 0.25, 0.75, 0.90))
@@ -62,19 +85,25 @@ def _shape(vals: list[int]) -> dict:
     early = sum(1 for v in vs if v <= 12_000) / len(vs)
     late = sum(1 for v in vs if v >= 100_000) / len(vs)
 
-    # Двугорбость: заметная доля и совсем ранних, и совсем поздних отказов при
-    # относительно пустой середине. Это подпись «заводской брак + износ» — случай Prius 2010.
-    mid = sum(1 for v in vs if 20_000 <= v <= 80_000) / len(vs)
+    # Классификация по ПЛОТНОСТИ (жалоб на 1000 миль), а не по долям окон разной ширины.
+    # Старые пороги сравнивали долю 12-тысячного окна с долей 400-тысячного как
+    # сопоставимые величины, поэтому «двугорбым» объявлялось почти любое распределение
+    # с длинным правым хвостом. Исправлено 2026-08-12 после аудита; см. MEMORY.md.
     # ВНИМАНИЕ: note попадает прямо на страницу — только по-английски.
-    if early >= 0.15 and late >= 0.15 and mid < 0.45:
+    def dens(lo: int, hi: int) -> float:
+        return sum(1 for v in vs if lo <= v < hi) / ((hi - lo) / 1000)
+
+    d_early, d_mid, d_late = dens(0, 12_000), dens(20_000, 80_000), dens(100_000, 200_000)
+
+    if d_mid > 0 and d_early >= 3 * d_mid and d_late >= 1.3 * d_mid:
         kind = "bimodal"
-        note = (f"{early:.0%} of failures occur before 12,000 miles, which looks like a "
-                f"manufacturing defect, and a further {late:.0%} occur after 100,000, which "
-                f"looks like wear.")
-    elif early >= 0.30:
+        note = (f"failures concentrate at two separate points in the vehicle's life: "
+                f"{early:.0%} before 12,000 miles, and a second concentration beyond 100,000.")
+    elif d_mid > 0 and d_early >= 3 * d_mid:
         kind = "early"
-        note = f"{early:.0%} of failures fall within the first 12,000 miles."
-    elif late >= 0.40:
+        note = (f"{early:.0%} of failures fall within the first 12,000 miles — a rate roughly "
+                f"{d_early / d_mid:.0f} times higher than during the rest of the car's life.")
+    elif d_mid > 0 and d_late >= 1.3 * d_mid:
         kind = "late"
         note = f"{late:.0%} of failures occur beyond 100,000 miles — a wear pattern."
     else:
@@ -82,10 +111,14 @@ def _shape(vals: list[int]) -> dict:
         note = (f"Failures are spread across the mileage range, with the middle half between "
                 f"{p25:,} and {p75:,} miles.")
 
+    density = {"early_per_1k": round(d_early, 1), "mid_per_1k": round(d_mid, 1),
+               "late_per_1k": round(d_late, 1)}
+
     return {
         "kind": kind, "note": note,
         "p10": p10, "p25": p25, "median": int(med), "p75": p75, "p90": p90,
         "early_share": round(early, 3), "late_share": round(late, 3),
+        "density": density,
     }
 
 
