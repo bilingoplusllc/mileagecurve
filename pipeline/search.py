@@ -34,7 +34,12 @@ SEARCH_JS = r"""
   if (!box) return;
   var out = document.getElementById('qr');
   var form = document.getElementById('qf');
+  var hint = document.getElementById('qh');
   var idx = null, loading = false, lastQuery = '', active = -1;
+
+  // The hint sits after the results in the DOM so it survives without JS.
+  // Once results are on screen it is pushed below them and reads as stray text.
+  function showHint(on) { if (hint) hint.hidden = !on; }
 
   // The index loads on first focus, not on page load: most visits arrive from
   // search directly on a generation page and never touch this box.
@@ -90,11 +95,11 @@ SEARCH_JS = r"""
   }
 
   function render(list, q) {
-    if (!q) { out.innerHTML = ''; out.hidden = true; active = -1; return; }
+    if (!q) { out.innerHTML = ''; out.hidden = true; active = -1; showHint(true); return; }
     if (!list.length) {
       out.innerHTML = '<p class="qr-none">Nothing matches “' + esc(q) + '”. ' +
         'Try just the model name, or <a href="/">browse by make</a>.</p>';
-      out.hidden = false; return;
+      out.hidden = false; showHint(false); return;
     }
     var h = '<ul class="qr-list" role="listbox">';
     for (var i = 0; i < list.length; i++) {
@@ -107,7 +112,7 @@ SEARCH_JS = r"""
            ' reports with mileage</span></a></li>';
     }
     out.innerHTML = h + '</ul>';
-    out.hidden = false; active = -1;
+    out.hidden = false; active = -1; showHint(false);
   }
 
   function esc(s) {
