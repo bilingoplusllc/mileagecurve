@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import statistics
 
+import names
+
 # Пороги, по которым система считается «ранней» или «поздней» относительно машины в целом
 EARLY_RATIO = 0.65   # медиана системы заметно ниже медианы по машине
 LATE_RATIO = 1.45
@@ -82,11 +84,12 @@ def systems_narrative(s: dict) -> str:
         f"below show which parts of the car run ahead of that and which run behind."))
 
     for i, x in enumerate(ranked):
-        med = x["median_miles"]
+        med = names.round_miles(x["median_miles"])
         ratio = med / overall if overall else 1
         name = plain(x["system"])
         share = x["share"]
-        rng = (f"{fmt(x['p25_miles'])} and {fmt(x['p75_miles'])} miles"
+        rng = (f"{fmt(names.round_miles(x['p25_miles']))} and "
+               f"{fmt(names.round_miles(x['p75_miles']))} miles"
                if x.get("p25_miles") else None)
 
         # согласование числа: «the brakes account», но «the engine accounts»
@@ -201,9 +204,9 @@ def recalls_narrative(s: dict) -> str:
             comps[key] = comps.get(key, 0) + 1
     top = sorted(comps.items(), key=lambda kv: -kv[1])[:3]
     if top and top[0][1] > 1:
-        names = ", ".join(f"{plain(k)} ({v})" for k, v in top)
+        campaign_areas = ", ".join(f"{plain(k)} ({v})" for k, v in top)
         out.append(_p(
-            f"The campaigns cluster around {names}. Repeated recalls against the same area of "
+            f"The campaigns cluster around {campaign_areas}. Repeated recalls against the same area of "
             f"the car generally mean the first remedy did not fully resolve the underlying "
             f"problem."))
 
@@ -273,22 +276,26 @@ def guidance_narrative(s: dict) -> str:
             f"<em>when</em>. {sh['late_pct']}% of reported failures occur beyond "
             f"100,000 miles, so an example approaching that figure is approaching the range where "
             f"other owners started reporting problems. The middle half of all failures falls "
-            f"between {fmt(sh['p25'])} and {fmt(sh['p75'])} miles."))
+            f"between {fmt(names.round_miles(sh['p25']))} and "
+            f"{fmt(names.round_miles(sh['p75']))} miles."))
     else:
         out.append(_p(
             f"For a buyer, failures on this generation are spread rather than concentrated: the "
-            f"middle half falls between {fmt(sh['p25'])} and {fmt(sh['p75'])} miles, with a "
-            f"median of {fmt(sh['median'])}. There is no single mileage threshold to watch, which "
+            f"middle half falls between {fmt(names.round_miles(sh['p25']))} and "
+            f"{fmt(names.round_miles(sh['p75']))} miles, with a "
+            f"median of {fmt(names.round_miles(sh['median']))}. There is no single mileage "
+            f"threshold to watch, which "
             f"means condition and maintenance records are more informative than the odometer."))
 
     top = [x for x in s["systems"] if x.get("median_miles")][:2]
     if top:
-        names = " and ".join(plain(x["system"]) for x in top)
+        top_systems = " and ".join(plain(x["system"]) for x in top)
         earliest = min(top, key=lambda x: x["median_miles"])
         out.append(_p(
-            f"On inspection, {names} are where this generation's reports concentrate, so those "
+            f"On inspection, {top_systems} are where this generation's reports concentrate, so those "
             f"are the areas worth a specific look. {plain(earliest['system']).capitalize()} in "
-            f"particular shows a median failure mileage of {fmt(earliest['median_miles'])}, which "
+            f"particular shows a median failure mileage of "
+            f"{fmt(names.round_miles(earliest['median_miles']))}, which "
             f"gives a concrete number to compare against the odometer of any car you are "
             f"considering."))
 

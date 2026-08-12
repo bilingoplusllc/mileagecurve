@@ -92,8 +92,10 @@ def render_404(shell) -> str:
          '<a href="/">list of makes</a> — every generation covered here is linked from there.</p>'
          '<p>If you followed a link from somewhere else and it should work, '
          f'<a href="mailto:{CONTACT}">tell us</a> and we will fix it.</p></div>']
+    # Ни индексации, ни канонического адреса: канонический вёл на /404.html,
+    # который редиректом возвращает на /404 — замкнутая петля для робота.
     return shell(f"Page not found — {SITE}", "That address does not match anything on this site.",
-                 "\n".join(B), f"{DOMAIN}/404.html")
+                 "\n".join(B), "", robots="noindex")
 
 
 def render_contact(shell) -> str:

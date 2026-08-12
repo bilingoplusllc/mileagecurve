@@ -102,8 +102,11 @@ def _shape(vals: list[int]) -> dict:
                 f"{early_pct}% before 12,000 miles, and a second concentration beyond 100,000.")
     elif d_mid > 0 and d_early >= 3 * d_mid:
         kind = "early"
-        note = (f"{early_pct}% of failures fall within the first 12,000 miles — a rate roughly "
-                f"{d_early / d_mid:.0f} times higher than during the rest of the car's life.")
+        # Не «rate»: знаменателя у нас нет и сайт об этом прямо говорит.
+        # Это плотность сообщений на милю пробега в двух окнах.
+        note = (f"{early_pct}% of complaints that record mileage fall within the first "
+                f"12,000 miles, against {d_mid:.0f} reports per 1,000 miles between "
+                f"20,000 and 80,000.")
     elif d_mid > 0 and d_late >= 1.3 * d_mid:
         kind = "late"
         note = (f"{int(round(late * 100))}% of failures occur beyond 100,000 miles"
@@ -157,7 +160,7 @@ def generation_stats(con: sqlite3.Connection, make: str, model: str,
 
     # По модельным годам — видно, какой год внутри поколения хуже
     by_year = [{"year": y, "complaints": c, "with_miles": wm,
-                "median_miles": int(m) if m else None}
+                "mean_miles": int(m) if m else None}   # СРЕДНЕЕ, не медиана
                for y, c, wm, m in con.execute(
         "SELECT year, COUNT(*), SUM(miles IS NOT NULL), "
         "  (SELECT AVG(miles) FROM complaints c2 WHERE c2.make=c.make AND c2.model=c.model "

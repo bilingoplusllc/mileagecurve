@@ -35,7 +35,7 @@ SEARCH_JS = r"""
   var out = document.getElementById('qr');
   var form = document.getElementById('qf');
   var hint = document.getElementById('qh');
-  var idx = null, loading = false, lastQuery = '', active = -1;
+  var idx = null, loading = false, pending = [], lastQuery = '', active = -1;
 
   // The hint sits after the results in the DOM so it survives without JS.
   // Once results are on screen it is pushed below them and reads as stray text.
@@ -45,15 +45,19 @@ SEARCH_JS = r"""
   // search directly on a generation page and never touch this box.
   function load(cb) {
     if (idx) { cb(); return; }
+    pending.push(cb);
     if (loading) return;
     loading = true;
     var x = new XMLHttpRequest();
     x.open('GET', '/search-index.json', true);
     x.onload = function () {
+      if (x.status && x.status >= 400) { loading = false; pending = []; return; }
       try { idx = JSON.parse(x.responseText); } catch (e) { idx = []; }
-      loading = false; cb();
+      loading = false;
+      var q = pending; pending = [];
+      for (var i = 0; i < q.length; i++) q[i]();
     };
-    x.onerror = function () { loading = false; };
+    x.onerror = function () { loading = false; pending = []; };
     x.send();
   }
 
@@ -101,12 +105,12 @@ SEARCH_JS = r"""
         'Try just the model name, or <a href="/">browse by make</a>.</p>';
       out.hidden = false; showHint(false); return;
     }
-    var h = '<ul class="qr-list" role="listbox">';
+    var h = '<ul class="qr-list">';
     for (var i = 0; i < list.length; i++) {
       var r = list[i];
       // toLocaleString() with no argument follows the visitor's browser locale and
       // would print "8 278" on a US site. The audience is American; pin en-US.
-      h += '<li role="option"><a href="' + r[4] + '"><span class="qr-car">' +
+      h += '<li><a href="' + r[4] + '"><span class="qr-car">' +
            esc(r[0] + ' ' + r[1]) + '</span> <span class="qr-yr">' + r[2] + '–' + r[3] +
            '</span> <span class="qr-n">' + r[5].toLocaleString('en-US') +
            ' reports with mileage</span></a></li>';
@@ -153,7 +157,7 @@ SEARCH_JS = r"""
     var items = out.querySelectorAll('.qr-list a');
     if (e.key === 'ArrowDown' && items.length) {
       e.preventDefault(); active = Math.min(active + 1, items.length - 1); items[active].focus();
-    } else if (e.key === 'Escape') { box.value = ''; render([], ''); }
+    } else if (e.key === 'Escape') { box.value = ''; lastQuery = ''; render([], ''); }
   });
   out.addEventListener('keydown', function (e) {
     var items = out.querySelectorAll('.qr-list a');
@@ -174,15 +178,15 @@ SEARCH_JS = r"""
 """
 
 
-def search_markup() -> str:
+def search_markup(n: int) -> str:
     """Форма поиска. Работает и без JS: action ведёт на полный список."""
     return (
-        '<form class="qbox" id="qf" action="/" method="get" role="search">'
+        '<form class="qbox" id="qf" action="/#makes" method="get" role="search">'
         '<label class="vh" for="q">Find a vehicle</label>'
         '<input id="q" name="q" type="search" autocomplete="off" spellcheck="false" '
         'placeholder="Try “2013 Escape” or “Prius”" aria-describedby="qh">'
         '<button type="submit">Find</button>'
         '</form>'
         '<div id="qr" class="qr" hidden></div>'
-        '<p class="qhint" id="qh">318 generations · type a model, or a year and a model</p>'
+        f'<p class="qhint" id="qh">{n:,} generations &middot; type a model, or a year and a model</p>'
     )

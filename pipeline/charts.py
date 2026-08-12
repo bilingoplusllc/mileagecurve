@@ -285,7 +285,7 @@ def system_strips(systems: list[dict], limit: int = 7,
             '<span class="hd hd-r">Median</span></div>'
             f'<ol class="sys">{"".join(items)}</ol>{axis_row_log()}')
 
-    sub = ('Bar spans the middle half of reports; the pale tick is the median. '
+    sub = ('Bar spans the middle half of reports; the notch inside each bar is the median. '
            'Miles at failure on a proportional scale &mdash; equal distances are '
            'equal ratios, not equal miles.')
     return (f'<figure class="fig sysfig">'

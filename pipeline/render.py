@@ -513,7 +513,7 @@ thead th{text-align:left;vertical-align:bottom;font-size:var(--f-2xs);font-weigh
 thead th.num{text-align:right}
 td,tbody th{text-align:left;vertical-align:top;font-weight:400;
   padding:10px var(--s-3);border-bottom:1px solid var(--line);color:var(--ink)}
-tbody tr:nth-child(even)>*{background:var(--bg)}
+tbody tr:nth-child(even)>*{background:var(--track)}
 tbody tr:last-child>*{border-bottom:0}
 tbody tr:hover>*{background:var(--warn)}
 .num{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;
@@ -629,7 +629,7 @@ footer a{color:var(--muted)}
   :root{--bg:#fff;--surface:#fff;--ink:#000;--muted:#3f3f3f;
     --line:#c2c2c2;--line-strong:#767676;--track:#eeeeee;--warn:#f2f2f2;
     --accent:#000;--accent-ink:#000;--peak:#000;
-    --bar:#b8b8b8;--bar-hi:#252525;
+    --bar:#b8b8b8;--bar-hi:#252525;--tick:#fff;
     --danger-bg:transparent;--danger-fg:#000;--danger-ring:#000;--shadow:transparent}
   body{background:#fff;font-size:10.5pt}
   .gen-grid{display:block}
@@ -673,12 +673,14 @@ footer a{color:var(--muted)}
 .qbox input{flex:1 1 auto;min-width:0;font:inherit;font-size:var(--f-md);
   padding:15px var(--s-3);border:2px solid var(--ink);border-radius:var(--radius);
   background:var(--surface);color:var(--ink)}
-.qbox input:focus-visible{outline:none;border-color:var(--accent);
-  box-shadow:0 0 0 3px var(--track)}
+/* Ни outline:none, ни собственного кольца: кольцо на --track давало 1,10:1,
+   то есть было невидимо, а в тёмной теме граница при фокусе ещё и тускнела.
+   Работает глобальное правило :focus-visible. */
+.qbox input:focus-visible{border-color:var(--accent)}
 .qbox input::placeholder{color:var(--muted)}
 .qbox button{flex:none;font:inherit;font-weight:600;padding:15px var(--s-4);
   border:2px solid var(--accent);border-radius:var(--radius);background:var(--accent);
-  color:#fff;cursor:pointer;white-space:nowrap}
+  color:var(--bg);cursor:pointer;white-space:nowrap}
 .qbox button:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
 .qhint{font-size:var(--f-xs);color:var(--muted);margin:var(--s-2) 0 0;
   font-variant-numeric:tabular-nums}
@@ -833,6 +835,10 @@ POLICY_UPDATED = "2026-08-13"   # менять ТОЛЬКО когда прав�
 ADS_LIVE = False
 AD_DISCLOSURE = ("<p>This site carries third-party display advertising. Advertisers have no "
                  "input into what is published.</p>") if ADS_LIVE else ""
+# Подпись «Advertisement» над пустой коробкой читается как битая картинка.
+# Резерв высоты остаётся — это и есть обещание отсутствия сдвига макета.
+AD_LABEL = '<span class="ad-label">Advertisement</span>' if ADS_LIVE else ""
+ADS_TXT = "google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0\n"  # вместе с ADS_LIVE
 
 JUMP_SECTIONS = (("fails", "What fails, and when"), ("years", "By model year"),
                  ("recalls", "Recalls"), ("owners", "What owners reported"))
@@ -880,7 +886,7 @@ def strip_comments(css: str = "", js: str = "") -> str:
 
 def page_shell(title: str, desc: str, body: str, canonical: str,
                script: str = "", wide: bool = False, gen: bool = False,
-               nav_key: str = "") -> str:
+               nav_key: str = "", robots: str = "", crumbs=None) -> str:
     # Скрипт подключается только там, где он нужен (поиск на главной).
     # Страницы поколений остаются полностью статичными.
     tail = f"<script>{strip_comments(js=script)}</script>" if script else ""
@@ -888,20 +894,36 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
     # сетка из 28 марок стояла в три колонки внутри 832px, а по краям пустовало
     # по 297px. Текст остаётся в своей мере (68ch) — шире идут только сетка и график.
     cls = " wide" if wide else (" gen" if gen else "")
+    # Страница 404 не должна ни индексироваться, ни объявлять канонический адрес:
+    # /404 отдавала код 200 с телом «не найдено» и канонический вёл на /404.html,
+    # который редиректом возвращает на /404.
+    robots_tag = f'<meta name="robots" content="{robots}">' if robots else         '<meta name="robots" content="max-image-preview:large">'
+    canon = (f'<link rel="canonical" href="{esc(canonical)}">'
+             f'<meta property="og:url" content="{esc(canonical)}">') if canonical else ""
+    ld = ""
+    if crumbs:
+        items = [{"@type": "ListItem", "position": i, "name": n,
+                  **({"item": DOMAIN + u} if u else {})}
+                 for i, (n, u) in enumerate(crumbs, 1)]
+        ld = ('<script type="application/ld+json">'
+              + json.dumps({"@context": "https://schema.org", "@type": "BreadcrumbList",
+                            "itemListElement": items},
+                           ensure_ascii=False, separators=(",", ":"))
+              + "</script>")
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light dark">
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
-<link rel="canonical" href="{esc(canonical)}">
+{robots_tag}{canon}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="{SITE}">
 <meta property="og:title" content="{esc(title)}">
 <meta property="og:description" content="{esc(desc)}">
-<meta property="og:url" content="{esc(canonical)}">
-<meta name="twitter:card" content="summary">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f6e5e'/%3E%3Crect x='3' y='4' width='2.4' height='8' fill='%23fff'/%3E%3Crect x='6.6' y='8' width='2.4' height='4' fill='%23fff' opacity='.7'/%3E%3Crect x='10.2' y='9.5' width='2.4' height='2.5' fill='%23fff' opacity='.5'/%3E%3C/svg%3E">
+{ld}
 <style>{strip_comments(css=CSS)}</style>
 </head><body>
 <a class="skip" href="#main">Skip to content</a>
@@ -937,7 +959,10 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
 def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict]) -> str:
     make, model = names.display(s["make"]), names.display(s["model"])
     years = f'{s["year_start"]}–{s["year_end"]}'
-    title = f"{make} {model} {years} — what breaks and at what mileage"
+    head = f"{make} {model} {years}"
+    # 54 заголовка вылезали за 60 знаков и обрезались в выдаче.
+    title = (f"{head} — what breaks and at what mileage" if len(head) <= 26
+             else f"{head} — common problems by mileage")
     desc = (f'{fmt(s["complaints_with_miles"])} NHTSA complaints with mileage for the '
             f'{years} {make} {model}: when each system fails, recalls, and what it means '
             f'if you are buying one.')
@@ -1015,7 +1040,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                  f'<td class="num">{fmt(x["count"])}</td><td class="num">{x["share"]}%</td>'
                  f'<td class="num">{med}</td><td class="num">{rng}</td></tr>')
     B.append("</tbody></table></div>")
-    B.append('<div class="ad"><span class="ad-label">Advertisement</span></div>')
+    B.append(f'<div class="ad">{AD_LABEL}</div>')
 
     for heading, block in narrative.full_analysis(s, gen):
         B.append(f"<h2>{esc(heading)}</h2>")
@@ -1060,7 +1085,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
             B.append(f'<tr><td>{esc(r["campaign"])}{flags}</td><td>{esc(r["report_date"] or "—")}</td>'
                      f'<td>{esc(names.display(r["component"] or "—"))}</td></tr>')
         B.append("</tbody></table></div>")
-        B.append('<div class="ad"><span class="ad-label">Advertisement</span></div>')
+        B.append(f'<div class="ad">{AD_LABEL}</div>')
 
     if s["quotes"]:
         B.append('<h2 id="owners">What owners reported</h2>')
@@ -1117,10 +1142,14 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         f'<div><dt>Recalls</dt><dd>{s["recalls_count"]}</dd></div>',
         '</dl>',
         _jump(B),
-        '<div class="ad ad-rail"><span class="ad-label">Advertisement</span></div>',
+        f'<div class="ad ad-rail">{AD_LABEL}</div>',
         '</div></aside></div>']
 
-    return page_shell(title, desc, "\n".join(body), f"{DOMAIN}/{slug_self}/", gen=True)
+    # Крошки машинам: видимый <ol class="crumbs"> есть на 346 страницах,
+    # но Google читает не его, а разметку.
+    crumbs = [("Home", "/"), (make, f"/{slug(s['make'])}/"), (f"{model} {years}", None)]
+    return page_shell(title, desc, "\n".join(body), f"{DOMAIN}/{slug_self}/",
+                      gen=True, crumbs=crumbs)
 
 
 # ---------------------------------------------------------------- institutional pages
@@ -1161,7 +1190,7 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
          # чтобы читалось как главный орган управления. Рамка вокруг только
          # подчёркивала, что колонка кончается раньше соседней.
          '<div class="hero-find">',
-         search.search_markup()]
+         search.search_markup(len(index))]
 
     # Под формой — реальные ссылки. Раньше правая колонка на широком экране
     # заканчивалась карточкой, и под ней оставалось ~190px пустоты.
@@ -1233,7 +1262,7 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
     return page_shell(f"{SITE} — {TAGLINE}",
                       f"When failures happen on {len(index)} US vehicle generations, from "
                       f"{fmt(stats['with_miles'])} NHTSA complaints that record mileage.",
-                      "\n".join(B), DOMAIN + "/", script=search.SEARCH_JS, wide=True)
+                      "\n".join(B), DOMAIN + "/", script=search.SEARCH_JS, wide=True, nav_key="home")
 
 
 def render_methodology(stats: dict) -> str:
@@ -1273,9 +1302,15 @@ def render_methodology(stats: dict) -> str:
          "values above 500,000 or at or below zero are discarded as data-entry errors. A "
          "distribution is only drawn when at least 30 complaints carry mileage, and a page is "
          f"only published at {MIN_WITH_MILES} or more.</p>"
-         "<p>The shape label — early, late, spread, or two separate populations — is derived "
-         "mechanically from the share of failures below 12,000 miles, above 100,000, and in "
-         "between. No judgement is applied.</p>",
+         # Описывался алгоритм, который сняли как раз потому, что он фабриковал
+         # вывод: доли окон разной ширины сравнивались как сопоставимые.
+         # Классификация давно идёт по ПЛОТНОСТИ, а ярлыка «две популяции»
+         # не получает ни одна страница из 318.
+         "<p>The shape label — early, late or spread — is derived mechanically from "
+         "complaint density (reports per 1,000 miles) in three windows: 0&#8211;12,000, "
+         "20,000&#8211;80,000 and 100,000&#8211;200,000 miles. Density, not share, because "
+         "windows of different width are not comparable as shares. No judgement is "
+         "applied.</p>",
 
          "<h2>What these numbers are not</h2>"
          "<div class='card'><p><strong>They are not a failure rate.</strong> Complaint counts "
@@ -1299,7 +1334,7 @@ def render_methodology(stats: dict) -> str:
 
     return page_shell(f"Methodology — {SITE}",
                       "Sources, computation, and limitations of the MileageCurve reliability data.",
-                      "\n".join(B), DOMAIN + "/methodology/")
+                      "\n".join(B), DOMAIN + "/methodology/", nav_key="method")
 
 
 def render_about() -> str:
@@ -1336,7 +1371,7 @@ def render_about() -> str:
          f'<p>{OWNER} · <a href="mailto:{CONTACT}">{CONTACT}</a></p>']
 
     return page_shell(f"About — {SITE}", f"About {SITE}, published by {OWNER}.",
-                      "\n".join(B), DOMAIN + "/about/")
+                      "\n".join(B), DOMAIN + "/about/", nav_key="about")
 
 
 def render_privacy() -> str:
@@ -1376,7 +1411,7 @@ def render_privacy() -> str:
          f'<p>Questions about this policy: <a href="mailto:{CONTACT}">{CONTACT}</a> ({OWNER}).</p>'
          f"<p>Last updated {POLICY_UPDATED}.</p>"]
     return page_shell(f"Privacy — {SITE}", "Privacy policy for MileageCurve.",
-                      "\n".join(B), DOMAIN + "/privacy/")
+                      "\n".join(B), DOMAIN + "/privacy/", nav_key="privacy")
 
 
 def write_page(path: Path, content: str) -> None:
@@ -1503,9 +1538,11 @@ def main() -> int:
     (DIST / "sitemap.xml").write_text(render_sitemap(index), encoding="utf-8")
     (DIST / "robots.txt").write_text(
         f"User-agent: *\nAllow: /\n\nSitemap: {DOMAIN}/sitemap.xml\n", encoding="utf-8")
-    # ads.txt заполняется после одобрения AdSense — идентификатор издателя туда же
-    (DIST / "ads.txt").write_text(
-        "# AdSense publisher line goes here once the account is approved\n", encoding="utf-8")
+    # Пустой ads.txt — это ПОЛОЖИТЕЛЬНОЕ заявление, что ни один продавец рекламы
+    # не уполномочен. Отсутствие файла означает «неизвестно, действуйте».
+    # До одобрения AdSense файл не выкладывается вовсе.
+    if ADS_LIVE:
+        (DIST / "ads.txt").write_text(ADS_TXT, encoding="utf-8")
 
     # Открытые данные: выгрузка агрегатов — ссылочная приманка (PLAYBOOK §7)
     (DIST / "data").mkdir(exist_ok=True)
