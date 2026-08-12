@@ -489,6 +489,22 @@ footer a{color:var(--muted)}
   .qbox button{width:100%}
   .makes{grid-template-columns:1fr}
 }
+
+/* Широкая колонка главной. Абзацы держит своя мера (68ch), поэтому шире
+   расходятся только сетка марок и график — то есть ровно то, чему ширина
+   нужна. Ниже 1180px разницы нет и правило не действует. */
+@media(min-width:1180px){
+  .wrap.wide{max-width:1160px}
+  .wrap.wide .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,420px);
+    gap:var(--s-6);align-items:start}
+  .wrap.wide .hero .lede{margin-bottom:0}
+  .wrap.wide .hero-find{grid-column:2;grid-row:1/span 2;padding:var(--s-4);
+    border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+  .wrap.wide .qbox,.wrap.wide .qr{max-width:none}
+}
+.hero-find{margin:var(--s-5) 0 0}
+.hero-find h2{font-size:var(--f-md);margin:0 0 var(--s-3);padding:0;border:none;
+  letter-spacing:0;text-transform:none}
 """
 
 
@@ -513,10 +529,14 @@ def strip_comments(css: str = "", js: str = "") -> str:
 
 
 def page_shell(title: str, desc: str, body: str, canonical: str,
-               script: str = "") -> str:
+               script: str = "", wide: bool = False) -> str:
     # Скрипт подключается только там, где он нужен (поиск на главной).
     # Страницы поколений остаются полностью статичными.
     tail = f"<script>{strip_comments(js=script)}</script>" if script else ""
+    # Широкая колонка — только для главной. Замер 2026-08-12: при окне 1425px
+    # сетка из 28 марок стояла в три колонки внутри 832px, а по краям пустовало
+    # по 297px. Текст остаётся в своей мере (68ch) — шире идут только сетка и график.
+    cls = " wide" if wide else ""
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
@@ -534,7 +554,7 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
 <style>{strip_comments(css=CSS)}</style>
 </head><body>
 <a class="skip" href="#main">Skip to content</a>
-<div class="wrap">
+<div class="wrap{cls}">
 <header class="site">
   <a class="brand" href="/">{SITE}</a>
   <nav aria-label="Main"><a href="/">All vehicles</a><a href="/methodology/">Methodology</a>
@@ -731,7 +751,11 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
          f'<strong>{fmt(stats["complaints"])}</strong> complaints with US safety regulators. '
          f'<strong>{fmt(stats["with_miles"])}</strong> of them recorded the odometer reading at '
          'the moment the part failed. That second number is what makes this site possible.</p>',
+         # Поиск живёт в собственной карточке: на широком экране она уходит вправо
+         # от заголовка, на узком — просто ложится под ним. Одна разметка на оба случая.
+         '<div class="hero-find"><h2>Look up a vehicle</h2>',
          search.search_markup(),
+         '</div>',
          '</div>']
 
     # Демонстрация вместо объяснения: живой график на реальных данных
@@ -773,7 +797,7 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
     return page_shell(f"{SITE} — {TAGLINE}",
                       f"When failures happen on {len(index)} US vehicle generations, from "
                       f"{fmt(stats['with_miles'])} NHTSA complaints that record mileage.",
-                      "\n".join(B), DOMAIN + "/", script=search.SEARCH_JS)
+                      "\n".join(B), DOMAIN + "/", script=search.SEARCH_JS, wide=True)
 
 
 def render_methodology(stats: dict) -> str:
