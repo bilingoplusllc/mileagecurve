@@ -1,0 +1,2864 @@
+[
+ {
+  "url": "/ford-f-150-1992-1996/",
+  "make": "FORD",
+  "model": "F-150",
+  "y0": 1992,
+  "y1": 1996,
+  "n": 583,
+  "shape": "late"
+ },
+ {
+  "url": "/ford-f-150-1997-2003/",
+  "make": "FORD",
+  "model": "F-150",
+  "y0": 1997,
+  "y1": 2003,
+  "n": 5060,
+  "shape": "late"
+ },
+ {
+  "url": "/ford-f-150-2004-2008/",
+  "make": "FORD",
+  "model": "F-150",
+  "y0": 2004,
+  "y1": 2008,
+  "n": 4834,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-f-150-2009-2014/",
+  "make": "FORD",
+  "model": "F-150",
+  "y0": 2009,
+  "y1": 2014,
+  "n": 9918,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-f-150-2015-2020/",
+  "make": "FORD",
+  "model": "F-150",
+  "y0": 2015,
+  "y1": 2020,
+  "n": 5591,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-f-150-2021-2025/",
+  "make": "FORD",
+  "model": "F-150",
+  "y0": 2021,
+  "y1": 2025,
+  "n": 569,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-malibu-1997-2003/",
+  "make": "CHEVROLET",
+  "model": "MALIBU",
+  "y0": 1997,
+  "y1": 2003,
+  "n": 3240,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-malibu-2004-2007/",
+  "make": "CHEVROLET",
+  "model": "MALIBU",
+  "y0": 2004,
+  "y1": 2007,
+  "n": 4489,
+  "shape": "late"
+ },
+ {
+  "url": "/chevrolet-malibu-2008-2012/",
+  "make": "CHEVROLET",
+  "model": "MALIBU",
+  "y0": 2008,
+  "y1": 2012,
+  "n": 6843,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-malibu-2013-2015/",
+  "make": "CHEVROLET",
+  "model": "MALIBU",
+  "y0": 2013,
+  "y1": 2015,
+  "n": 1574,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-malibu-2016-2025/",
+  "make": "CHEVROLET",
+  "model": "MALIBU",
+  "y0": 2016,
+  "y1": 2025,
+  "n": 2277,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-camry-1992-1996/",
+  "make": "TOYOTA",
+  "model": "CAMRY",
+  "y0": 1992,
+  "y1": 1996,
+  "n": 293,
+  "shape": "late"
+ },
+ {
+  "url": "/toyota-camry-1997-2001/",
+  "make": "TOYOTA",
+  "model": "CAMRY",
+  "y0": 1997,
+  "y1": 2001,
+  "n": 1006,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-camry-2002-2006/",
+  "make": "TOYOTA",
+  "model": "CAMRY",
+  "y0": 2002,
+  "y1": 2006,
+  "n": 3107,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/toyota-camry-2007-2011/",
+  "make": "TOYOTA",
+  "model": "CAMRY",
+  "y0": 2007,
+  "y1": 2011,
+  "n": 5795,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/toyota-camry-2012-2017/",
+  "make": "TOYOTA",
+  "model": "CAMRY",
+  "y0": 2012,
+  "y1": 2017,
+  "n": 1850,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-camry-2018-2024/",
+  "make": "TOYOTA",
+  "model": "CAMRY",
+  "y0": 2018,
+  "y1": 2024,
+  "n": 871,
+  "shape": "early"
+ },
+ {
+  "url": "/chrysler-town-and-country-1996-2000/",
+  "make": "CHRYSLER",
+  "model": "TOWN AND COUNTRY",
+  "y0": 1996,
+  "y1": 2000,
+  "n": 833,
+  "shape": "late"
+ },
+ {
+  "url": "/chrysler-town-and-country-2001-2007/",
+  "make": "CHRYSLER",
+  "model": "TOWN AND COUNTRY",
+  "y0": 2001,
+  "y1": 2007,
+  "n": 2875,
+  "shape": "spread"
+ },
+ {
+  "url": "/chrysler-town-and-country-2008-2016/",
+  "make": "CHRYSLER",
+  "model": "TOWN AND COUNTRY",
+  "y0": 2008,
+  "y1": 2016,
+  "n": 7212,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-rogue-2008-2013/",
+  "make": "NISSAN",
+  "model": "ROGUE",
+  "y0": 2008,
+  "y1": 2013,
+  "n": 2469,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-rogue-2014-2020/",
+  "make": "NISSAN",
+  "model": "ROGUE",
+  "y0": 2014,
+  "y1": 2020,
+  "n": 2530,
+  "shape": "early"
+ },
+ {
+  "url": "/nissan-rogue-2021-2025/",
+  "make": "NISSAN",
+  "model": "ROGUE",
+  "y0": 2021,
+  "y1": 2025,
+  "n": 354,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-impala-2000-2005/",
+  "make": "CHEVROLET",
+  "model": "IMPALA",
+  "y0": 2000,
+  "y1": 2005,
+  "n": 4414,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-impala-2006-2013/",
+  "make": "CHEVROLET",
+  "model": "IMPALA",
+  "y0": 2006,
+  "y1": 2013,
+  "n": 5447,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-impala-2014-2020/",
+  "make": "CHEVROLET",
+  "model": "IMPALA",
+  "y0": 2014,
+  "y1": 2020,
+  "n": 1283,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-odyssey-1995-1998/",
+  "make": "HONDA",
+  "model": "ODYSSEY",
+  "y0": 1995,
+  "y1": 1998,
+  "n": 108,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-odyssey-1999-2004/",
+  "make": "HONDA",
+  "model": "ODYSSEY",
+  "y0": 1999,
+  "y1": 2004,
+  "n": 3492,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-odyssey-2005-2010/",
+  "make": "HONDA",
+  "model": "ODYSSEY",
+  "y0": 2005,
+  "y1": 2010,
+  "n": 3360,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-odyssey-2011-2017/",
+  "make": "HONDA",
+  "model": "ODYSSEY",
+  "y0": 2011,
+  "y1": 2017,
+  "n": 1307,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-odyssey-2018-2025/",
+  "make": "HONDA",
+  "model": "ODYSSEY",
+  "y0": 2018,
+  "y1": 2025,
+  "n": 781,
+  "shape": "early"
+ },
+ {
+  "url": "/ford-mustang-1994-2004/",
+  "make": "FORD",
+  "model": "MUSTANG",
+  "y0": 1994,
+  "y1": 2004,
+  "n": 734,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/ford-mustang-2005-2014/",
+  "make": "FORD",
+  "model": "MUSTANG",
+  "y0": 2005,
+  "y1": 2014,
+  "n": 2795,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-mustang-2015-2023/",
+  "make": "FORD",
+  "model": "MUSTANG",
+  "y0": 2015,
+  "y1": 2023,
+  "n": 1089,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-outback-1995-1999/",
+  "make": "SUBARU",
+  "model": "OUTBACK",
+  "y0": 1995,
+  "y1": 1999,
+  "n": 185,
+  "shape": "late"
+ },
+ {
+  "url": "/subaru-outback-2000-2004/",
+  "make": "SUBARU",
+  "model": "OUTBACK",
+  "y0": 2000,
+  "y1": 2004,
+  "n": 515,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-outback-2005-2009/",
+  "make": "SUBARU",
+  "model": "OUTBACK",
+  "y0": 2005,
+  "y1": 2009,
+  "n": 1066,
+  "shape": "late"
+ },
+ {
+  "url": "/subaru-outback-2010-2014/",
+  "make": "SUBARU",
+  "model": "OUTBACK",
+  "y0": 2010,
+  "y1": 2014,
+  "n": 1698,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/subaru-outback-2015-2019/",
+  "make": "SUBARU",
+  "model": "OUTBACK",
+  "y0": 2015,
+  "y1": 2019,
+  "n": 2610,
+  "shape": "early"
+ },
+ {
+  "url": "/subaru-outback-2020-2025/",
+  "make": "SUBARU",
+  "model": "OUTBACK",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 679,
+  "shape": "early"
+ },
+ {
+  "url": "/chevrolet-traverse-2009-2017/",
+  "make": "CHEVROLET",
+  "model": "TRAVERSE",
+  "y0": 2009,
+  "y1": 2017,
+  "n": 3713,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-traverse-2018-2023/",
+  "make": "CHEVROLET",
+  "model": "TRAVERSE",
+  "y0": 2018,
+  "y1": 2023,
+  "n": 525,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-explorer-1991-1994/",
+  "make": "FORD",
+  "model": "EXPLORER",
+  "y0": 1991,
+  "y1": 1994,
+  "n": 224,
+  "shape": "late"
+ },
+ {
+  "url": "/ford-explorer-1995-2001/",
+  "make": "FORD",
+  "model": "EXPLORER",
+  "y0": 1995,
+  "y1": 2001,
+  "n": 1867,
+  "shape": "late"
+ },
+ {
+  "url": "/ford-explorer-2002-2005/",
+  "make": "FORD",
+  "model": "EXPLORER",
+  "y0": 2002,
+  "y1": 2005,
+  "n": 6093,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-explorer-2006-2010/",
+  "make": "FORD",
+  "model": "EXPLORER",
+  "y0": 2006,
+  "y1": 2010,
+  "n": 1260,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-explorer-2011-2019/",
+  "make": "FORD",
+  "model": "EXPLORER",
+  "y0": 2011,
+  "y1": 2019,
+  "n": 9738,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-explorer-2020-2025/",
+  "make": "FORD",
+  "model": "EXPLORER",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 796,
+  "shape": "early"
+ },
+ {
+  "url": "/honda-accord-1994-1997/",
+  "make": "HONDA",
+  "model": "ACCORD",
+  "y0": 1994,
+  "y1": 1997,
+  "n": 434,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-accord-1998-2002/",
+  "make": "HONDA",
+  "model": "ACCORD",
+  "y0": 1998,
+  "y1": 2002,
+  "n": 3909,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-accord-2003-2007/",
+  "make": "HONDA",
+  "model": "ACCORD",
+  "y0": 2003,
+  "y1": 2007,
+  "n": 4461,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-accord-2008-2012/",
+  "make": "HONDA",
+  "model": "ACCORD",
+  "y0": 2008,
+  "y1": 2012,
+  "n": 3033,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-accord-2013-2017/",
+  "make": "HONDA",
+  "model": "ACCORD",
+  "y0": 2013,
+  "y1": 2017,
+  "n": 3156,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-accord-2018-2022/",
+  "make": "HONDA",
+  "model": "ACCORD",
+  "y0": 2018,
+  "y1": 2022,
+  "n": 1394,
+  "shape": "early"
+ },
+ {
+  "url": "/honda-cr-v-1997-2001/",
+  "make": "HONDA",
+  "model": "CR-V",
+  "y0": 1997,
+  "y1": 2001,
+  "n": 283,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-cr-v-2002-2006/",
+  "make": "HONDA",
+  "model": "CR-V",
+  "y0": 2002,
+  "y1": 2006,
+  "n": 2060,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-cr-v-2007-2011/",
+  "make": "HONDA",
+  "model": "CR-V",
+  "y0": 2007,
+  "y1": 2011,
+  "n": 2241,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-cr-v-2012-2016/",
+  "make": "HONDA",
+  "model": "CR-V",
+  "y0": 2012,
+  "y1": 2016,
+  "n": 2270,
+  "shape": "early"
+ },
+ {
+  "url": "/honda-cr-v-2017-2022/",
+  "make": "HONDA",
+  "model": "CR-V",
+  "y0": 2017,
+  "y1": 2022,
+  "n": 3253,
+  "shape": "early"
+ },
+ {
+  "url": "/honda-cr-v-2023-2025/",
+  "make": "HONDA",
+  "model": "CR-V",
+  "y0": 2023,
+  "y1": 2025,
+  "n": 114,
+  "shape": "early"
+ },
+ {
+  "url": "/ford-edge-2007-2014/",
+  "make": "FORD",
+  "model": "EDGE",
+  "y0": 2007,
+  "y1": 2014,
+  "n": 8222,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-edge-2015-2024/",
+  "make": "FORD",
+  "model": "EDGE",
+  "y0": 2015,
+  "y1": 2024,
+  "n": 2802,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-corolla-1998-2002/",
+  "make": "TOYOTA",
+  "model": "COROLLA",
+  "y0": 1998,
+  "y1": 2002,
+  "n": 378,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-corolla-2003-2008/",
+  "make": "TOYOTA",
+  "model": "COROLLA",
+  "y0": 2003,
+  "y1": 2008,
+  "n": 2584,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-corolla-2009-2013/",
+  "make": "TOYOTA",
+  "model": "COROLLA",
+  "y0": 2009,
+  "y1": 2013,
+  "n": 2733,
+  "shape": "early"
+ },
+ {
+  "url": "/toyota-corolla-2014-2019/",
+  "make": "TOYOTA",
+  "model": "COROLLA",
+  "y0": 2014,
+  "y1": 2019,
+  "n": 1002,
+  "shape": "early"
+ },
+ {
+  "url": "/toyota-corolla-2020-2025/",
+  "make": "TOYOTA",
+  "model": "COROLLA",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 177,
+  "shape": "early"
+ },
+ {
+  "url": "/hyundai-elantra-1996-2000/",
+  "make": "HYUNDAI",
+  "model": "ELANTRA",
+  "y0": 1996,
+  "y1": 2000,
+  "n": 210,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-elantra-2001-2006/",
+  "make": "HYUNDAI",
+  "model": "ELANTRA",
+  "y0": 2001,
+  "y1": 2006,
+  "n": 1257,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/hyundai-elantra-2007-2010/",
+  "make": "HYUNDAI",
+  "model": "ELANTRA",
+  "y0": 2007,
+  "y1": 2010,
+  "n": 1229,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-elantra-2011-2016/",
+  "make": "HYUNDAI",
+  "model": "ELANTRA",
+  "y0": 2011,
+  "y1": 2016,
+  "n": 2778,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-elantra-2017-2020/",
+  "make": "HYUNDAI",
+  "model": "ELANTRA",
+  "y0": 2017,
+  "y1": 2020,
+  "n": 708,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-tahoe-1995-1999/",
+  "make": "CHEVROLET",
+  "model": "TAHOE",
+  "y0": 1995,
+  "y1": 1999,
+  "n": 569,
+  "shape": "late"
+ },
+ {
+  "url": "/chevrolet-tahoe-2000-2006/",
+  "make": "CHEVROLET",
+  "model": "TAHOE",
+  "y0": 2000,
+  "y1": 2006,
+  "n": 2333,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-tahoe-2007-2014/",
+  "make": "CHEVROLET",
+  "model": "TAHOE",
+  "y0": 2007,
+  "y1": 2014,
+  "n": 2731,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-tahoe-2015-2020/",
+  "make": "CHEVROLET",
+  "model": "TAHOE",
+  "y0": 2015,
+  "y1": 2020,
+  "n": 934,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-tahoe-2021-2025/",
+  "make": "CHEVROLET",
+  "model": "TAHOE",
+  "y0": 2021,
+  "y1": 2025,
+  "n": 213,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-optima-2001-2005/",
+  "make": "KIA",
+  "model": "OPTIMA",
+  "y0": 2001,
+  "y1": 2005,
+  "n": 810,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-optima-2006-2010/",
+  "make": "KIA",
+  "model": "OPTIMA",
+  "y0": 2006,
+  "y1": 2010,
+  "n": 700,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/kia-optima-2011-2015/",
+  "make": "KIA",
+  "model": "OPTIMA",
+  "y0": 2011,
+  "y1": 2015,
+  "n": 3557,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-optima-2016-2020/",
+  "make": "KIA",
+  "model": "OPTIMA",
+  "y0": 2016,
+  "y1": 2020,
+  "n": 717,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-charger-2006-2010/",
+  "make": "DODGE",
+  "model": "CHARGER",
+  "y0": 2006,
+  "y1": 2010,
+  "n": 3049,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-charger-2011-2023/",
+  "make": "DODGE",
+  "model": "CHARGER",
+  "y0": 2011,
+  "y1": 2023,
+  "n": 2840,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-acadia-2007-2016/",
+  "make": "GMC",
+  "model": "ACADIA",
+  "y0": 2007,
+  "y1": 2016,
+  "n": 3593,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-acadia-2017-2023/",
+  "make": "GMC",
+  "model": "ACADIA",
+  "y0": 2017,
+  "y1": 2023,
+  "n": 957,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-grand-cherokee-1993-1998/",
+  "make": "JEEP",
+  "model": "GRAND CHEROKEE",
+  "y0": 1993,
+  "y1": 1998,
+  "n": 1021,
+  "shape": "late"
+ },
+ {
+  "url": "/jeep-grand-cherokee-1999-2004/",
+  "make": "JEEP",
+  "model": "GRAND CHEROKEE",
+  "y0": 1999,
+  "y1": 2004,
+  "n": 5053,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-grand-cherokee-2005-2010/",
+  "make": "JEEP",
+  "model": "GRAND CHEROKEE",
+  "y0": 2005,
+  "y1": 2010,
+  "n": 5191,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-grand-cherokee-2011-2020/",
+  "make": "JEEP",
+  "model": "GRAND CHEROKEE",
+  "y0": 2011,
+  "y1": 2020,
+  "n": 8252,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-grand-cherokee-2021-2025/",
+  "make": "JEEP",
+  "model": "GRAND CHEROKEE",
+  "y0": 2021,
+  "y1": 2025,
+  "n": 243,
+  "shape": "early"
+ },
+ {
+  "url": "/chevrolet-silverado-1500-1988-1998/",
+  "make": "CHEVROLET",
+  "model": "SILVERADO 1500",
+  "y0": 1988,
+  "y1": 1998,
+  "n": 345,
+  "shape": "late"
+ },
+ {
+  "url": "/chevrolet-silverado-1500-1999-2006/",
+  "make": "CHEVROLET",
+  "model": "SILVERADO 1500",
+  "y0": 1999,
+  "y1": 2006,
+  "n": 4742,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-silverado-1500-2007-2013/",
+  "make": "CHEVROLET",
+  "model": "SILVERADO 1500",
+  "y0": 2007,
+  "y1": 2013,
+  "n": 2373,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-silverado-1500-2014-2018/",
+  "make": "CHEVROLET",
+  "model": "SILVERADO 1500",
+  "y0": 2014,
+  "y1": 2018,
+  "n": 3743,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-silverado-1500-2019-2025/",
+  "make": "CHEVROLET",
+  "model": "SILVERADO 1500",
+  "y0": 2019,
+  "y1": 2025,
+  "n": 1414,
+  "shape": "early"
+ },
+ {
+  "url": "/nissan-altima-1998-2001/",
+  "make": "NISSAN",
+  "model": "ALTIMA",
+  "y0": 1998,
+  "y1": 2001,
+  "n": 306,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-altima-2002-2006/",
+  "make": "NISSAN",
+  "model": "ALTIMA",
+  "y0": 2002,
+  "y1": 2006,
+  "n": 4056,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-altima-2007-2012/",
+  "make": "NISSAN",
+  "model": "ALTIMA",
+  "y0": 2007,
+  "y1": 2012,
+  "n": 4116,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-altima-2013-2018/",
+  "make": "NISSAN",
+  "model": "ALTIMA",
+  "y0": 2013,
+  "y1": 2018,
+  "n": 4516,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-altima-2019-2025/",
+  "make": "NISSAN",
+  "model": "ALTIMA",
+  "y0": 2019,
+  "y1": 2025,
+  "n": 173,
+  "shape": "early"
+ },
+ {
+  "url": "/jeep-cherokee-1984-2001/",
+  "make": "JEEP",
+  "model": "CHEROKEE",
+  "y0": 1984,
+  "y1": 2001,
+  "n": 855,
+  "shape": "late"
+ },
+ {
+  "url": "/jeep-cherokee-2014-2023/",
+  "make": "JEEP",
+  "model": "CHEROKEE",
+  "y0": 2014,
+  "y1": 2023,
+  "n": 8836,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-rav4-2001-2005/",
+  "make": "TOYOTA",
+  "model": "RAV4",
+  "y0": 2001,
+  "y1": 2005,
+  "n": 1483,
+  "shape": "late"
+ },
+ {
+  "url": "/toyota-rav4-2006-2012/",
+  "make": "TOYOTA",
+  "model": "RAV4",
+  "y0": 2006,
+  "y1": 2012,
+  "n": 3336,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-rav4-2013-2018/",
+  "make": "TOYOTA",
+  "model": "RAV4",
+  "y0": 2013,
+  "y1": 2018,
+  "n": 1191,
+  "shape": "early"
+ },
+ {
+  "url": "/toyota-rav4-2019-2025/",
+  "make": "TOYOTA",
+  "model": "RAV4",
+  "y0": 2019,
+  "y1": 2025,
+  "n": 796,
+  "shape": "early"
+ },
+ {
+  "url": "/nissan-sentra-2000-2006/",
+  "make": "NISSAN",
+  "model": "SENTRA",
+  "y0": 2000,
+  "y1": 2006,
+  "n": 1149,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-sentra-2007-2012/",
+  "make": "NISSAN",
+  "model": "SENTRA",
+  "y0": 2007,
+  "y1": 2012,
+  "n": 934,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/nissan-sentra-2013-2019/",
+  "make": "NISSAN",
+  "model": "SENTRA",
+  "y0": 2013,
+  "y1": 2019,
+  "n": 1952,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-sentra-2020-2025/",
+  "make": "NISSAN",
+  "model": "SENTRA",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 138,
+  "shape": "early"
+ },
+ {
+  "url": "/chevrolet-cruze-2011-2015/",
+  "make": "CHEVROLET",
+  "model": "CRUZE",
+  "y0": 2011,
+  "y1": 2015,
+  "n": 3648,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-cruze-2016-2019/",
+  "make": "CHEVROLET",
+  "model": "CRUZE",
+  "y0": 2016,
+  "y1": 2019,
+  "n": 498,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-ram-1500-1994-2001/",
+  "make": "DODGE",
+  "model": "RAM 1500",
+  "y0": 1994,
+  "y1": 2001,
+  "n": 2303,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-ram-1500-2002-2008/",
+  "make": "DODGE",
+  "model": "RAM 1500",
+  "y0": 2002,
+  "y1": 2008,
+  "n": 5220,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-ram-1500-2009-2010/",
+  "make": "DODGE",
+  "model": "RAM 1500",
+  "y0": 2009,
+  "y1": 2010,
+  "n": 1190,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-taurus-1996-1999/",
+  "make": "FORD",
+  "model": "TAURUS",
+  "y0": 1996,
+  "y1": 1999,
+  "n": 870,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-taurus-2000-2007/",
+  "make": "FORD",
+  "model": "TAURUS",
+  "y0": 2000,
+  "y1": 2007,
+  "n": 6212,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-taurus-2008-2009/",
+  "make": "FORD",
+  "model": "TAURUS",
+  "y0": 2008,
+  "y1": 2009,
+  "n": 283,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-taurus-2010-2019/",
+  "make": "FORD",
+  "model": "TAURUS",
+  "y0": 2010,
+  "y1": 2019,
+  "n": 1598,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-tucson-2005-2009/",
+  "make": "HYUNDAI",
+  "model": "TUCSON",
+  "y0": 2005,
+  "y1": 2009,
+  "n": 497,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/hyundai-tucson-2010-2015/",
+  "make": "HYUNDAI",
+  "model": "TUCSON",
+  "y0": 2010,
+  "y1": 2015,
+  "n": 789,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-tucson-2016-2021/",
+  "make": "HYUNDAI",
+  "model": "TUCSON",
+  "y0": 2016,
+  "y1": 2021,
+  "n": 2053,
+  "shape": "early"
+ },
+ {
+  "url": "/hyundai-tucson-2022-2025/",
+  "make": "HYUNDAI",
+  "model": "TUCSON",
+  "y0": 2022,
+  "y1": 2025,
+  "n": 132,
+  "shape": "early"
+ },
+ {
+  "url": "/ford-escape-2001-2007/",
+  "make": "FORD",
+  "model": "ESCAPE",
+  "y0": 2001,
+  "y1": 2007,
+  "n": 5288,
+  "shape": "late"
+ },
+ {
+  "url": "/ford-escape-2008-2012/",
+  "make": "FORD",
+  "model": "ESCAPE",
+  "y0": 2008,
+  "y1": 2012,
+  "n": 8940,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-escape-2013-2019/",
+  "make": "FORD",
+  "model": "ESCAPE",
+  "y0": 2013,
+  "y1": 2019,
+  "n": 8278,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-escape-2020-2025/",
+  "make": "FORD",
+  "model": "ESCAPE",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 724,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-sonata-1999-2005/",
+  "make": "HYUNDAI",
+  "model": "SONATA",
+  "y0": 1999,
+  "y1": 2005,
+  "n": 1389,
+  "shape": "late"
+ },
+ {
+  "url": "/hyundai-sonata-2006-2010/",
+  "make": "HYUNDAI",
+  "model": "SONATA",
+  "y0": 2006,
+  "y1": 2010,
+  "n": 3175,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-sonata-2011-2014/",
+  "make": "HYUNDAI",
+  "model": "SONATA",
+  "y0": 2011,
+  "y1": 2014,
+  "n": 6796,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-sonata-2015-2019/",
+  "make": "HYUNDAI",
+  "model": "SONATA",
+  "y0": 2015,
+  "y1": 2019,
+  "n": 1754,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/hyundai-sonata-2020-2025/",
+  "make": "HYUNDAI",
+  "model": "SONATA",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 135,
+  "shape": "early"
+ },
+ {
+  "url": "/dodge-durango-1998-2003/",
+  "make": "DODGE",
+  "model": "DURANGO",
+  "y0": 1998,
+  "y1": 2003,
+  "n": 4865,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-durango-2004-2009/",
+  "make": "DODGE",
+  "model": "DURANGO",
+  "y0": 2004,
+  "y1": 2009,
+  "n": 3960,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-durango-2011-2025/",
+  "make": "DODGE",
+  "model": "DURANGO",
+  "y0": 2011,
+  "y1": 2025,
+  "n": 3821,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-grand-caravan-1996-2000/",
+  "make": "DODGE",
+  "model": "GRAND CARAVAN",
+  "y0": 1996,
+  "y1": 2000,
+  "n": 1200,
+  "shape": "late"
+ },
+ {
+  "url": "/dodge-grand-caravan-2001-2007/",
+  "make": "DODGE",
+  "model": "GRAND CARAVAN",
+  "y0": 2001,
+  "y1": 2007,
+  "n": 2592,
+  "shape": "spread"
+ },
+ {
+  "url": "/dodge-grand-caravan-2008-2020/",
+  "make": "DODGE",
+  "model": "GRAND CARAVAN",
+  "y0": 2008,
+  "y1": 2020,
+  "n": 5882,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-equinox-2005-2009/",
+  "make": "CHEVROLET",
+  "model": "EQUINOX",
+  "y0": 2005,
+  "y1": 2009,
+  "n": 2869,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-equinox-2010-2017/",
+  "make": "CHEVROLET",
+  "model": "EQUINOX",
+  "y0": 2010,
+  "y1": 2017,
+  "n": 4451,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-equinox-2018-2024/",
+  "make": "CHEVROLET",
+  "model": "EQUINOX",
+  "y0": 2018,
+  "y1": 2024,
+  "n": 651,
+  "shape": "early"
+ },
+ {
+  "url": "/kia-sorento-2003-2009/",
+  "make": "KIA",
+  "model": "SORENTO",
+  "y0": 2003,
+  "y1": 2009,
+  "n": 1829,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-sorento-2011-2015/",
+  "make": "KIA",
+  "model": "SORENTO",
+  "y0": 2011,
+  "y1": 2015,
+  "n": 4302,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-sorento-2016-2020/",
+  "make": "KIA",
+  "model": "SORENTO",
+  "y0": 2016,
+  "y1": 2020,
+  "n": 1168,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-sorento-2021-2025/",
+  "make": "KIA",
+  "model": "SORENTO",
+  "y0": 2021,
+  "y1": 2025,
+  "n": 103,
+  "shape": "early"
+ },
+ {
+  "url": "/toyota-highlander-2001-2007/",
+  "make": "TOYOTA",
+  "model": "HIGHLANDER",
+  "y0": 2001,
+  "y1": 2007,
+  "n": 1442,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-highlander-2008-2013/",
+  "make": "TOYOTA",
+  "model": "HIGHLANDER",
+  "y0": 2008,
+  "y1": 2013,
+  "n": 1311,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/toyota-highlander-2014-2019/",
+  "make": "TOYOTA",
+  "model": "HIGHLANDER",
+  "y0": 2014,
+  "y1": 2019,
+  "n": 885,
+  "shape": "early"
+ },
+ {
+  "url": "/toyota-highlander-2020-2025/",
+  "make": "TOYOTA",
+  "model": "HIGHLANDER",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 183,
+  "shape": "early"
+ },
+ {
+  "url": "/kia-soul-2010-2013/",
+  "make": "KIA",
+  "model": "SOUL",
+  "y0": 2010,
+  "y1": 2013,
+  "n": 1198,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-soul-2014-2019/",
+  "make": "KIA",
+  "model": "SOUL",
+  "y0": 2014,
+  "y1": 2019,
+  "n": 2381,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-soul-2020-2025/",
+  "make": "KIA",
+  "model": "SOUL",
+  "y0": 2020,
+  "y1": 2025,
+  "n": 340,
+  "shape": "early"
+ },
+ {
+  "url": "/volkswagen-jetta-1993-1998/",
+  "make": "VOLKSWAGEN",
+  "model": "JETTA",
+  "y0": 1993,
+  "y1": 1998,
+  "n": 170,
+  "shape": "spread"
+ },
+ {
+  "url": "/volkswagen-jetta-1999-2004/",
+  "make": "VOLKSWAGEN",
+  "model": "JETTA",
+  "y0": 1999,
+  "y1": 2004,
+  "n": 2156,
+  "shape": "spread"
+ },
+ {
+  "url": "/volkswagen-jetta-2005-2010/",
+  "make": "VOLKSWAGEN",
+  "model": "JETTA",
+  "y0": 2005,
+  "y1": 2010,
+  "n": 3645,
+  "shape": "spread"
+ },
+ {
+  "url": "/volkswagen-jetta-2011-2018/",
+  "make": "VOLKSWAGEN",
+  "model": "JETTA",
+  "y0": 2011,
+  "y1": 2018,
+  "n": 2619,
+  "shape": "spread"
+ },
+ {
+  "url": "/volkswagen-jetta-2019-2025/",
+  "make": "VOLKSWAGEN",
+  "model": "JETTA",
+  "y0": 2019,
+  "y1": 2025,
+  "n": 443,
+  "shape": "early"
+ },
+ {
+  "url": "/bmw-3-series-1999-2005/",
+  "make": "BMW",
+  "model": "3 SERIES",
+  "y0": 1999,
+  "y1": 2005,
+  "n": 295,
+  "shape": "late"
+ },
+ {
+  "url": "/bmw-3-series-2006-2011/",
+  "make": "BMW",
+  "model": "3 SERIES",
+  "y0": 2006,
+  "y1": 2011,
+  "n": 547,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-focus-2000-2007/",
+  "make": "FORD",
+  "model": "FOCUS",
+  "y0": 2000,
+  "y1": 2007,
+  "n": 6507,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-focus-2008-2011/",
+  "make": "FORD",
+  "model": "FOCUS",
+  "y0": 2008,
+  "y1": 2011,
+  "n": 1022,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-focus-2012-2018/",
+  "make": "FORD",
+  "model": "FOCUS",
+  "y0": 2012,
+  "y1": 2018,
+  "n": 12107,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-wrangler-1997-2006/",
+  "make": "JEEP",
+  "model": "WRANGLER",
+  "y0": 1997,
+  "y1": 2006,
+  "n": 2446,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-wrangler-2007-2017/",
+  "make": "JEEP",
+  "model": "WRANGLER",
+  "y0": 2007,
+  "y1": 2017,
+  "n": 6125,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-wrangler-2018-2025/",
+  "make": "JEEP",
+  "model": "WRANGLER",
+  "y0": 2018,
+  "y1": 2025,
+  "n": 2787,
+  "shape": "early"
+ },
+ {
+  "url": "/honda-civic-1996-2000/",
+  "make": "HONDA",
+  "model": "CIVIC",
+  "y0": 1996,
+  "y1": 2000,
+  "n": 601,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-civic-2001-2005/",
+  "make": "HONDA",
+  "model": "CIVIC",
+  "y0": 2001,
+  "y1": 2005,
+  "n": 2436,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-civic-2006-2011/",
+  "make": "HONDA",
+  "model": "CIVIC",
+  "y0": 2006,
+  "y1": 2011,
+  "n": 4056,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-civic-2012-2015/",
+  "make": "HONDA",
+  "model": "CIVIC",
+  "y0": 2012,
+  "y1": 2015,
+  "n": 1195,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-civic-2016-2021/",
+  "make": "HONDA",
+  "model": "CIVIC",
+  "y0": 2016,
+  "y1": 2021,
+  "n": 1474,
+  "shape": "early"
+ },
+ {
+  "url": "/honda-civic-2022-2025/",
+  "make": "HONDA",
+  "model": "CIVIC",
+  "y0": 2022,
+  "y1": 2025,
+  "n": 116,
+  "shape": "early"
+ },
+ {
+  "url": "/toyota-prius-2001-2003/",
+  "make": "TOYOTA",
+  "model": "PRIUS",
+  "y0": 2001,
+  "y1": 2003,
+  "n": 387,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-prius-2004-2009/",
+  "make": "TOYOTA",
+  "model": "PRIUS",
+  "y0": 2004,
+  "y1": 2009,
+  "n": 7289,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-prius-2010-2015/",
+  "make": "TOYOTA",
+  "model": "PRIUS",
+  "y0": 2010,
+  "y1": 2015,
+  "n": 3988,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/toyota-prius-2016-2022/",
+  "make": "TOYOTA",
+  "model": "PRIUS",
+  "y0": 2016,
+  "y1": 2022,
+  "n": 301,
+  "shape": "early"
+ },
+ {
+  "url": "/nissan-pathfinder-1987-1995/",
+  "make": "NISSAN",
+  "model": "PATHFINDER",
+  "y0": 1987,
+  "y1": 1995,
+  "n": 121,
+  "shape": "late"
+ },
+ {
+  "url": "/nissan-pathfinder-1996-2004/",
+  "make": "NISSAN",
+  "model": "PATHFINDER",
+  "y0": 1996,
+  "y1": 2004,
+  "n": 964,
+  "shape": "late"
+ },
+ {
+  "url": "/nissan-pathfinder-2005-2012/",
+  "make": "NISSAN",
+  "model": "PATHFINDER",
+  "y0": 2005,
+  "y1": 2012,
+  "n": 3771,
+  "shape": "late"
+ },
+ {
+  "url": "/nissan-pathfinder-2013-2020/",
+  "make": "NISSAN",
+  "model": "PATHFINDER",
+  "y0": 2013,
+  "y1": 2020,
+  "n": 2029,
+  "shape": "early"
+ },
+ {
+  "url": "/chevrolet-trailblazer-2002-2009/",
+  "make": "CHEVROLET",
+  "model": "TRAILBLAZER",
+  "y0": 2002,
+  "y1": 2009,
+  "n": 6784,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-fiesta-2011-2019/",
+  "make": "FORD",
+  "model": "FIESTA",
+  "y0": 2011,
+  "y1": 2019,
+  "n": 3342,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-sienna-1998-2003/",
+  "make": "TOYOTA",
+  "model": "SIENNA",
+  "y0": 1998,
+  "y1": 2003,
+  "n": 752,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-sienna-2004-2010/",
+  "make": "TOYOTA",
+  "model": "SIENNA",
+  "y0": 2004,
+  "y1": 2010,
+  "n": 5474,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-sienna-2011-2020/",
+  "make": "TOYOTA",
+  "model": "SIENNA",
+  "y0": 2011,
+  "y1": 2020,
+  "n": 1260,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-forester-1998-2002/",
+  "make": "SUBARU",
+  "model": "FORESTER",
+  "y0": 1998,
+  "y1": 2002,
+  "n": 269,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-forester-2003-2008/",
+  "make": "SUBARU",
+  "model": "FORESTER",
+  "y0": 2003,
+  "y1": 2008,
+  "n": 716,
+  "shape": "late"
+ },
+ {
+  "url": "/subaru-forester-2009-2013/",
+  "make": "SUBARU",
+  "model": "FORESTER",
+  "y0": 2009,
+  "y1": 2013,
+  "n": 682,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-forester-2014-2018/",
+  "make": "SUBARU",
+  "model": "FORESTER",
+  "y0": 2014,
+  "y1": 2018,
+  "n": 2105,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-forester-2019-2024/",
+  "make": "SUBARU",
+  "model": "FORESTER",
+  "y0": 2019,
+  "y1": 2024,
+  "n": 952,
+  "shape": "early"
+ },
+ {
+  "url": "/cadillac-escalade-2002-2006/",
+  "make": "CADILLAC",
+  "model": "ESCALADE",
+  "y0": 2002,
+  "y1": 2006,
+  "n": 310,
+  "shape": "late"
+ },
+ {
+  "url": "/cadillac-escalade-2007-2014/",
+  "make": "CADILLAC",
+  "model": "ESCALADE",
+  "y0": 2007,
+  "y1": 2014,
+  "n": 418,
+  "shape": "late"
+ },
+ {
+  "url": "/cadillac-escalade-2015-2020/",
+  "make": "CADILLAC",
+  "model": "ESCALADE",
+  "y0": 2015,
+  "y1": 2020,
+  "n": 199,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/ford-fusion-2006-2012/",
+  "make": "FORD",
+  "model": "FUSION",
+  "y0": 2006,
+  "y1": 2012,
+  "n": 13502,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-fusion-2013-2020/",
+  "make": "FORD",
+  "model": "FUSION",
+  "y0": 2013,
+  "y1": 2020,
+  "n": 6011,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-maxima-1995-1999/",
+  "make": "NISSAN",
+  "model": "MAXIMA",
+  "y0": 1995,
+  "y1": 1999,
+  "n": 245,
+  "shape": "late"
+ },
+ {
+  "url": "/nissan-maxima-2000-2003/",
+  "make": "NISSAN",
+  "model": "MAXIMA",
+  "y0": 2000,
+  "y1": 2003,
+  "n": 804,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-maxima-2004-2008/",
+  "make": "NISSAN",
+  "model": "MAXIMA",
+  "y0": 2004,
+  "y1": 2008,
+  "n": 3252,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-maxima-2009-2014/",
+  "make": "NISSAN",
+  "model": "MAXIMA",
+  "y0": 2009,
+  "y1": 2014,
+  "n": 1037,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-maxima-2016-2023/",
+  "make": "NISSAN",
+  "model": "MAXIMA",
+  "y0": 2016,
+  "y1": 2023,
+  "n": 218,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-expedition-1997-2002/",
+  "make": "FORD",
+  "model": "EXPEDITION",
+  "y0": 1997,
+  "y1": 2002,
+  "n": 2507,
+  "shape": "late"
+ },
+ {
+  "url": "/ford-expedition-2003-2006/",
+  "make": "FORD",
+  "model": "EXPEDITION",
+  "y0": 2003,
+  "y1": 2006,
+  "n": 1632,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-expedition-2007-2017/",
+  "make": "FORD",
+  "model": "EXPEDITION",
+  "y0": 2007,
+  "y1": 2017,
+  "n": 1339,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-expedition-2018-2024/",
+  "make": "FORD",
+  "model": "EXPEDITION",
+  "y0": 2018,
+  "y1": 2024,
+  "n": 630,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-pilot-2003-2008/",
+  "make": "HONDA",
+  "model": "PILOT",
+  "y0": 2003,
+  "y1": 2008,
+  "n": 2420,
+  "shape": "late"
+ },
+ {
+  "url": "/honda-pilot-2009-2015/",
+  "make": "HONDA",
+  "model": "PILOT",
+  "y0": 2009,
+  "y1": 2015,
+  "n": 1105,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-pilot-2016-2022/",
+  "make": "HONDA",
+  "model": "PILOT",
+  "y0": 2016,
+  "y1": 2022,
+  "n": 2089,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-cobalt-2005-2010/",
+  "make": "CHEVROLET",
+  "model": "COBALT",
+  "y0": 2005,
+  "y1": 2010,
+  "n": 8138,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-tacoma-1995-2004/",
+  "make": "TOYOTA",
+  "model": "TACOMA",
+  "y0": 1995,
+  "y1": 2004,
+  "n": 2112,
+  "shape": "late"
+ },
+ {
+  "url": "/toyota-tacoma-2005-2015/",
+  "make": "TOYOTA",
+  "model": "TACOMA",
+  "y0": 2005,
+  "y1": 2015,
+  "n": 3800,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/toyota-tacoma-2016-2023/",
+  "make": "TOYOTA",
+  "model": "TACOMA",
+  "y0": 2016,
+  "y1": 2023,
+  "n": 853,
+  "shape": "early"
+ },
+ {
+  "url": "/gmc-sierra-1500-1999-2006/",
+  "make": "GMC",
+  "model": "SIERRA 1500",
+  "y0": 1999,
+  "y1": 2006,
+  "n": 1412,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-sierra-1500-2007-2013/",
+  "make": "GMC",
+  "model": "SIERRA 1500",
+  "y0": 2007,
+  "y1": 2013,
+  "n": 1083,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-sierra-1500-2014-2018/",
+  "make": "GMC",
+  "model": "SIERRA 1500",
+  "y0": 2014,
+  "y1": 2018,
+  "n": 1849,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-sierra-1500-2019-2025/",
+  "make": "GMC",
+  "model": "SIERRA 1500",
+  "y0": 2019,
+  "y1": 2025,
+  "n": 880,
+  "shape": "early"
+ },
+ {
+  "url": "/mazda-mazda3-2004-2009/",
+  "make": "MAZDA",
+  "model": "MAZDA3",
+  "y0": 2004,
+  "y1": 2009,
+  "n": 1108,
+  "shape": "spread"
+ },
+ {
+  "url": "/mazda-mazda3-2010-2013/",
+  "make": "MAZDA",
+  "model": "MAZDA3",
+  "y0": 2010,
+  "y1": 2013,
+  "n": 1160,
+  "shape": "spread"
+ },
+ {
+  "url": "/mazda-mazda3-2014-2018/",
+  "make": "MAZDA",
+  "model": "MAZDA3",
+  "y0": 2014,
+  "y1": 2018,
+  "n": 367,
+  "shape": "early"
+ },
+ {
+  "url": "/volkswagen-passat-1995-1997/",
+  "make": "VOLKSWAGEN",
+  "model": "PASSAT",
+  "y0": 1995,
+  "y1": 1997,
+  "n": 102,
+  "shape": "late"
+ },
+ {
+  "url": "/volkswagen-passat-1998-2005/",
+  "make": "VOLKSWAGEN",
+  "model": "PASSAT",
+  "y0": 1998,
+  "y1": 2005,
+  "n": 3064,
+  "shape": "spread"
+ },
+ {
+  "url": "/volkswagen-passat-2006-2010/",
+  "make": "VOLKSWAGEN",
+  "model": "PASSAT",
+  "y0": 2006,
+  "y1": 2010,
+  "n": 1286,
+  "shape": "spread"
+ },
+ {
+  "url": "/volkswagen-passat-2012-2022/",
+  "make": "VOLKSWAGEN",
+  "model": "PASSAT",
+  "y0": 2012,
+  "y1": 2022,
+  "n": 1784,
+  "shape": "spread"
+ },
+ {
+  "url": "/chrysler-200-2011-2014/",
+  "make": "CHRYSLER",
+  "model": "200",
+  "y0": 2011,
+  "y1": 2014,
+  "n": 1913,
+  "shape": "spread"
+ },
+ {
+  "url": "/chrysler-200-2015-2017/",
+  "make": "CHRYSLER",
+  "model": "200",
+  "y0": 2015,
+  "y1": 2017,
+  "n": 2935,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-liberty-2002-2007/",
+  "make": "JEEP",
+  "model": "LIBERTY",
+  "y0": 2002,
+  "y1": 2007,
+  "n": 6239,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-liberty-2008-2012/",
+  "make": "JEEP",
+  "model": "LIBERTY",
+  "y0": 2008,
+  "y1": 2012,
+  "n": 1615,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-suburban-1992-1999/",
+  "make": "CHEVROLET",
+  "model": "SUBURBAN",
+  "y0": 1992,
+  "y1": 1999,
+  "n": 547,
+  "shape": "late"
+ },
+ {
+  "url": "/chevrolet-suburban-2000-2006/",
+  "make": "CHEVROLET",
+  "model": "SUBURBAN",
+  "y0": 2000,
+  "y1": 2006,
+  "n": 1400,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-suburban-2007-2014/",
+  "make": "CHEVROLET",
+  "model": "SUBURBAN",
+  "y0": 2007,
+  "y1": 2014,
+  "n": 947,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-suburban-2015-2020/",
+  "make": "CHEVROLET",
+  "model": "SUBURBAN",
+  "y0": 2015,
+  "y1": 2020,
+  "n": 758,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-ranger-1993-1997/",
+  "make": "FORD",
+  "model": "RANGER",
+  "y0": 1993,
+  "y1": 1997,
+  "n": 417,
+  "shape": "late"
+ },
+ {
+  "url": "/ford-ranger-1998-2011/",
+  "make": "FORD",
+  "model": "RANGER",
+  "y0": 1998,
+  "y1": 2011,
+  "n": 2653,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-ranger-2019-2023/",
+  "make": "FORD",
+  "model": "RANGER",
+  "y0": 2019,
+  "y1": 2023,
+  "n": 219,
+  "shape": "early"
+ },
+ {
+  "url": "/nissan-versa-2007-2011/",
+  "make": "NISSAN",
+  "model": "VERSA",
+  "y0": 2007,
+  "y1": 2011,
+  "n": 1380,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-versa-2012-2019/",
+  "make": "NISSAN",
+  "model": "VERSA",
+  "y0": 2012,
+  "y1": 2019,
+  "n": 1246,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-tundra-2000-2006/",
+  "make": "TOYOTA",
+  "model": "TUNDRA",
+  "y0": 2000,
+  "y1": 2006,
+  "n": 3281,
+  "shape": "late"
+ },
+ {
+  "url": "/toyota-tundra-2007-2021/",
+  "make": "TOYOTA",
+  "model": "TUNDRA",
+  "y0": 2007,
+  "y1": 2021,
+  "n": 1821,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/toyota-tundra-2022-2025/",
+  "make": "TOYOTA",
+  "model": "TUNDRA",
+  "y0": 2022,
+  "y1": 2025,
+  "n": 186,
+  "shape": "early"
+ },
+ {
+  "url": "/honda-fit-2007-2008/",
+  "make": "HONDA",
+  "model": "FIT",
+  "y0": 2007,
+  "y1": 2008,
+  "n": 544,
+  "shape": "spread"
+ },
+ {
+  "url": "/honda-fit-2009-2013/",
+  "make": "HONDA",
+  "model": "FIT",
+  "y0": 2009,
+  "y1": 2013,
+  "n": 595,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/honda-fit-2015-2020/",
+  "make": "HONDA",
+  "model": "FIT",
+  "y0": 2015,
+  "y1": 2020,
+  "n": 385,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-forte-2010-2013/",
+  "make": "KIA",
+  "model": "FORTE",
+  "y0": 2010,
+  "y1": 2013,
+  "n": 760,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-forte-2014-2018/",
+  "make": "KIA",
+  "model": "FORTE",
+  "y0": 2014,
+  "y1": 2018,
+  "n": 923,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/kia-forte-2019-2024/",
+  "make": "KIA",
+  "model": "FORTE",
+  "y0": 2019,
+  "y1": 2024,
+  "n": 148,
+  "shape": "early"
+ },
+ {
+  "url": "/jeep-compass-2007-2016/",
+  "make": "JEEP",
+  "model": "COMPASS",
+  "y0": 2007,
+  "y1": 2016,
+  "n": 1695,
+  "shape": "spread"
+ },
+ {
+  "url": "/jeep-compass-2017-2025/",
+  "make": "JEEP",
+  "model": "COMPASS",
+  "y0": 2017,
+  "y1": 2025,
+  "n": 1364,
+  "shape": "early"
+ },
+ {
+  "url": "/pontiac-g6-2005-2010/",
+  "make": "PONTIAC",
+  "model": "G6",
+  "y0": 2005,
+  "y1": 2010,
+  "n": 6886,
+  "shape": "spread"
+ },
+ {
+  "url": "/chrysler-pacifica-2004-2008/",
+  "make": "CHRYSLER",
+  "model": "PACIFICA",
+  "y0": 2004,
+  "y1": 2008,
+  "n": 4024,
+  "shape": "late"
+ },
+ {
+  "url": "/chrysler-pacifica-2017-2025/",
+  "make": "CHRYSLER",
+  "model": "PACIFICA",
+  "y0": 2017,
+  "y1": 2025,
+  "n": 2057,
+  "shape": "early"
+ },
+ {
+  "url": "/dodge-journey-2009-2020/",
+  "make": "DODGE",
+  "model": "JOURNEY",
+  "y0": 2009,
+  "y1": 2020,
+  "n": 5162,
+  "shape": "spread"
+ },
+ {
+  "url": "/buick-enclave-2008-2017/",
+  "make": "BUICK",
+  "model": "ENCLAVE",
+  "y0": 2008,
+  "y1": 2017,
+  "n": 1884,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-santa-fe-2001-2006/",
+  "make": "HYUNDAI",
+  "model": "SANTA FE",
+  "y0": 2001,
+  "y1": 2006,
+  "n": 1328,
+  "shape": "late"
+ },
+ {
+  "url": "/hyundai-santa-fe-2007-2012/",
+  "make": "HYUNDAI",
+  "model": "SANTA FE",
+  "y0": 2007,
+  "y1": 2012,
+  "n": 2664,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-santa-fe-2013-2018/",
+  "make": "HYUNDAI",
+  "model": "SANTA FE",
+  "y0": 2013,
+  "y1": 2018,
+  "n": 1459,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/hyundai-santa-fe-2019-2023/",
+  "make": "HYUNDAI",
+  "model": "SANTA FE",
+  "y0": 2019,
+  "y1": 2023,
+  "n": 249,
+  "shape": "early"
+ },
+ {
+  "url": "/nissan-murano-2003-2007/",
+  "make": "NISSAN",
+  "model": "MURANO",
+  "y0": 2003,
+  "y1": 2007,
+  "n": 4061,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-murano-2009-2014/",
+  "make": "NISSAN",
+  "model": "MURANO",
+  "y0": 2009,
+  "y1": 2014,
+  "n": 1233,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-murano-2015-2024/",
+  "make": "NISSAN",
+  "model": "MURANO",
+  "y0": 2015,
+  "y1": 2024,
+  "n": 491,
+  "shape": "early"
+ },
+ {
+  "url": "/chevrolet-camaro-1993-2002/",
+  "make": "CHEVROLET",
+  "model": "CAMARO",
+  "y0": 1993,
+  "y1": 2002,
+  "n": 225,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/chevrolet-camaro-2010-2015/",
+  "make": "CHEVROLET",
+  "model": "CAMARO",
+  "y0": 2010,
+  "y1": 2015,
+  "n": 1250,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-camaro-2016-2024/",
+  "make": "CHEVROLET",
+  "model": "CAMARO",
+  "y0": 2016,
+  "y1": 2024,
+  "n": 337,
+  "shape": "early"
+ },
+ {
+  "url": "/toyota-4runner-1996-2002/",
+  "make": "TOYOTA",
+  "model": "4RUNNER",
+  "y0": 1996,
+  "y1": 2002,
+  "n": 1428,
+  "shape": "late"
+ },
+ {
+  "url": "/toyota-4runner-2003-2009/",
+  "make": "TOYOTA",
+  "model": "4RUNNER",
+  "y0": 2003,
+  "y1": 2009,
+  "n": 2123,
+  "shape": "late"
+ },
+ {
+  "url": "/toyota-4runner-2010-2024/",
+  "make": "TOYOTA",
+  "model": "4RUNNER",
+  "y0": 2010,
+  "y1": 2024,
+  "n": 541,
+  "shape": "early"
+ },
+ {
+  "url": "/acura-mdx-2001-2006/",
+  "make": "ACURA",
+  "model": "MDX",
+  "y0": 2001,
+  "y1": 2006,
+  "n": 1056,
+  "shape": "late"
+ },
+ {
+  "url": "/acura-mdx-2007-2013/",
+  "make": "ACURA",
+  "model": "MDX",
+  "y0": 2007,
+  "y1": 2013,
+  "n": 404,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/acura-mdx-2014-2020/",
+  "make": "ACURA",
+  "model": "MDX",
+  "y0": 2014,
+  "y1": 2020,
+  "n": 818,
+  "shape": "early"
+ },
+ {
+  "url": "/audi-a4-1996-2001/",
+  "make": "AUDI",
+  "model": "A4",
+  "y0": 1996,
+  "y1": 2001,
+  "n": 486,
+  "shape": "spread"
+ },
+ {
+  "url": "/audi-a4-2002-2005/",
+  "make": "AUDI",
+  "model": "A4",
+  "y0": 2002,
+  "y1": 2005,
+  "n": 776,
+  "shape": "spread"
+ },
+ {
+  "url": "/audi-a4-2006-2008/",
+  "make": "AUDI",
+  "model": "A4",
+  "y0": 2006,
+  "y1": 2008,
+  "n": 426,
+  "shape": "spread"
+ },
+ {
+  "url": "/audi-a4-2009-2016/",
+  "make": "AUDI",
+  "model": "A4",
+  "y0": 2009,
+  "y1": 2016,
+  "n": 217,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-hhr-2006-2011/",
+  "make": "CHEVROLET",
+  "model": "HHR",
+  "y0": 2006,
+  "y1": 2011,
+  "n": 3794,
+  "shape": "spread"
+ },
+ {
+  "url": "/saturn-ion-2003-2007/",
+  "make": "SATURN",
+  "model": "ION",
+  "y0": 2003,
+  "y1": 2007,
+  "n": 4344,
+  "shape": "spread"
+ },
+ {
+  "url": "/ford-freestar-2004-2007/",
+  "make": "FORD",
+  "model": "FREESTAR",
+  "y0": 2004,
+  "y1": 2007,
+  "n": 2863,
+  "shape": "spread"
+ },
+ {
+  "url": "/mercury-grand-marquis-1992-1997/",
+  "make": "MERCURY",
+  "model": "GRAND MARQUIS",
+  "y0": 1992,
+  "y1": 1997,
+  "n": 369,
+  "shape": "spread"
+ },
+ {
+  "url": "/mercury-grand-marquis-1998-2002/",
+  "make": "MERCURY",
+  "model": "GRAND MARQUIS",
+  "y0": 1998,
+  "y1": 2002,
+  "n": 419,
+  "shape": "spread"
+ },
+ {
+  "url": "/mercury-grand-marquis-2003-2011/",
+  "make": "MERCURY",
+  "model": "GRAND MARQUIS",
+  "y0": 2003,
+  "y1": 2011,
+  "n": 1585,
+  "shape": "spread"
+ },
+ {
+  "url": "/lincoln-navigator-1998-2002/",
+  "make": "LINCOLN",
+  "model": "NAVIGATOR",
+  "y0": 1998,
+  "y1": 2002,
+  "n": 309,
+  "shape": "spread"
+ },
+ {
+  "url": "/lincoln-navigator-2003-2006/",
+  "make": "LINCOLN",
+  "model": "NAVIGATOR",
+  "y0": 2003,
+  "y1": 2006,
+  "n": 361,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/lincoln-navigator-2007-2017/",
+  "make": "LINCOLN",
+  "model": "NAVIGATOR",
+  "y0": 2007,
+  "y1": 2017,
+  "n": 188,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/mitsubishi-outlander-2003-2006/",
+  "make": "MITSUBISHI",
+  "model": "OUTLANDER",
+  "y0": 2003,
+  "y1": 2006,
+  "n": 198,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/mitsubishi-outlander-2007-2013/",
+  "make": "MITSUBISHI",
+  "model": "OUTLANDER",
+  "y0": 2007,
+  "y1": 2013,
+  "n": 333,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/mitsubishi-outlander-2014-2020/",
+  "make": "MITSUBISHI",
+  "model": "OUTLANDER",
+  "y0": 2014,
+  "y1": 2020,
+  "n": 344,
+  "shape": "spread"
+ },
+ {
+  "url": "/volvo-xc90-2003-2014/",
+  "make": "VOLVO",
+  "model": "XC90",
+  "y0": 2003,
+  "y1": 2014,
+  "n": 1179,
+  "shape": "spread"
+ },
+ {
+  "url": "/volvo-xc90-2016-2025/",
+  "make": "VOLVO",
+  "model": "XC90",
+  "y0": 2016,
+  "y1": 2025,
+  "n": 281,
+  "shape": "early"
+ },
+ {
+  "url": "/lexus-rx-2004-2009/",
+  "make": "LEXUS",
+  "model": "RX",
+  "y0": 2004,
+  "y1": 2009,
+  "n": 198,
+  "shape": "late"
+ },
+ {
+  "url": "/infiniti-g35-2003-2006/",
+  "make": "INFINITI",
+  "model": "G35",
+  "y0": 2003,
+  "y1": 2006,
+  "n": 1255,
+  "shape": "spread"
+ },
+ {
+  "url": "/infiniti-g35-2007-2008/",
+  "make": "INFINITI",
+  "model": "G35",
+  "y0": 2007,
+  "y1": 2008,
+  "n": 208,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-impreza-2002-2007/",
+  "make": "SUBARU",
+  "model": "IMPREZA",
+  "y0": 2002,
+  "y1": 2007,
+  "n": 540,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/subaru-impreza-2008-2011/",
+  "make": "SUBARU",
+  "model": "IMPREZA",
+  "y0": 2008,
+  "y1": 2011,
+  "n": 393,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-impreza-2012-2016/",
+  "make": "SUBARU",
+  "model": "IMPREZA",
+  "y0": 2012,
+  "y1": 2016,
+  "n": 705,
+  "shape": "spread"
+ },
+ {
+  "url": "/subaru-impreza-2017-2023/",
+  "make": "SUBARU",
+  "model": "IMPREZA",
+  "y0": 2017,
+  "y1": 2023,
+  "n": 274,
+  "shape": "early"
+ },
+ {
+  "url": "/pontiac-grand-am-1992-1998/",
+  "make": "PONTIAC",
+  "model": "GRAND AM",
+  "y0": 1992,
+  "y1": 1998,
+  "n": 393,
+  "shape": "late"
+ },
+ {
+  "url": "/pontiac-grand-am-1999-2005/",
+  "make": "PONTIAC",
+  "model": "GRAND AM",
+  "y0": 1999,
+  "y1": 2005,
+  "n": 2401,
+  "shape": "spread"
+ },
+ {
+  "url": "/oldsmobile-alero-1999-2004/",
+  "make": "OLDSMOBILE",
+  "model": "ALERO",
+  "y0": 1999,
+  "y1": 2004,
+  "n": 1580,
+  "shape": "spread"
+ },
+ {
+  "url": "/buick-lacrosse-2005-2009/",
+  "make": "BUICK",
+  "model": "LACROSSE",
+  "y0": 2005,
+  "y1": 2009,
+  "n": 1209,
+  "shape": "spread"
+ },
+ {
+  "url": "/buick-lacrosse-2010-2016/",
+  "make": "BUICK",
+  "model": "LACROSSE",
+  "y0": 2010,
+  "y1": 2016,
+  "n": 864,
+  "shape": "bimodal"
+ },
+ {
+  "url": "/chevrolet-colorado-2004-2012/",
+  "make": "CHEVROLET",
+  "model": "COLORADO",
+  "y0": 2004,
+  "y1": 2012,
+  "n": 1508,
+  "shape": "spread"
+ },
+ {
+  "url": "/chevrolet-colorado-2015-2022/",
+  "make": "CHEVROLET",
+  "model": "COLORADO",
+  "y0": 2015,
+  "y1": 2022,
+  "n": 1291,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-yukon-1992-1999/",
+  "make": "GMC",
+  "model": "YUKON",
+  "y0": 1992,
+  "y1": 1999,
+  "n": 197,
+  "shape": "late"
+ },
+ {
+  "url": "/gmc-yukon-2000-2006/",
+  "make": "GMC",
+  "model": "YUKON",
+  "y0": 2000,
+  "y1": 2006,
+  "n": 787,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-yukon-2007-2014/",
+  "make": "GMC",
+  "model": "YUKON",
+  "y0": 2007,
+  "y1": 2014,
+  "n": 969,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-yukon-2015-2020/",
+  "make": "GMC",
+  "model": "YUKON",
+  "y0": 2015,
+  "y1": 2020,
+  "n": 766,
+  "shape": "spread"
+ },
+ {
+  "url": "/gmc-yukon-2021-2025/",
+  "make": "GMC",
+  "model": "YUKON",
+  "y0": 2021,
+  "y1": 2025,
+  "n": 189,
+  "shape": "spread"
+ },
+ {
+  "url": "/mazda-cx-9-2007-2015/",
+  "make": "MAZDA",
+  "model": "CX-9",
+  "y0": 2007,
+  "y1": 2015,
+  "n": 921,
+  "shape": "spread"
+ },
+ {
+  "url": "/mazda-cx-9-2016-2023/",
+  "make": "MAZDA",
+  "model": "CX-9",
+  "y0": 2016,
+  "y1": 2023,
+  "n": 112,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-sportage-1995-2002/",
+  "make": "KIA",
+  "model": "SPORTAGE",
+  "y0": 1995,
+  "y1": 2002,
+  "n": 815,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-sportage-2005-2010/",
+  "make": "KIA",
+  "model": "SPORTAGE",
+  "y0": 2005,
+  "y1": 2010,
+  "n": 499,
+  "shape": "spread"
+ },
+ {
+  "url": "/kia-sportage-2011-2016/",
+  "make": "KIA",
+  "model": "SPORTAGE",
+  "y0": 2011,
+  "y1": 2016,
+  "n": 1074,
+  "shape": "late"
+ },
+ {
+  "url": "/kia-sportage-2017-2022/",
+  "make": "KIA",
+  "model": "SPORTAGE",
+  "y0": 2017,
+  "y1": 2022,
+  "n": 426,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-accent-2000-2005/",
+  "make": "HYUNDAI",
+  "model": "ACCENT",
+  "y0": 2000,
+  "y1": 2005,
+  "n": 302,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-accent-2006-2011/",
+  "make": "HYUNDAI",
+  "model": "ACCENT",
+  "y0": 2006,
+  "y1": 2011,
+  "n": 489,
+  "shape": "spread"
+ },
+ {
+  "url": "/hyundai-accent-2012-2017/",
+  "make": "HYUNDAI",
+  "model": "ACCENT",
+  "y0": 2012,
+  "y1": 2017,
+  "n": 446,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-frontier-1998-2004/",
+  "make": "NISSAN",
+  "model": "FRONTIER",
+  "y0": 1998,
+  "y1": 2004,
+  "n": 479,
+  "shape": "spread"
+ },
+ {
+  "url": "/nissan-frontier-2005-2021/",
+  "make": "NISSAN",
+  "model": "FRONTIER",
+  "y0": 2005,
+  "y1": 2021,
+  "n": 2660,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-avalon-1995-1999/",
+  "make": "TOYOTA",
+  "model": "AVALON",
+  "y0": 1995,
+  "y1": 1999,
+  "n": 163,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-avalon-2000-2004/",
+  "make": "TOYOTA",
+  "model": "AVALON",
+  "y0": 2000,
+  "y1": 2004,
+  "n": 606,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-avalon-2005-2012/",
+  "make": "TOYOTA",
+  "model": "AVALON",
+  "y0": 2005,
+  "y1": 2012,
+  "n": 1468,
+  "shape": "spread"
+ },
+ {
+  "url": "/toyota-avalon-2013-2018/",
+  "make": "TOYOTA",
+  "model": "AVALON",
+  "y0": 2013,
+  "y1": 2018,
+  "n": 283,
+  "shape": "early"
+ }
+]

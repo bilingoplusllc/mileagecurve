@@ -1,0 +1,41 @@
+{
+  "cmpl": {
+    "key": "cmpl",
+    "url": "https://static.nhtsa.gov/odi/ffdd/cmpl/FLAT_CMPL.zip",
+    "bytes": 369033568,
+    "sha256": "193a2da3744213171d36d0e0ebd094cf7a7a0c83a246e40a36c8d29c48969091",
+    "fetched_utc": "2026-08-12T09:12:27+00:00",
+    "members": [
+      {
+        "name": "FLAT_CMPL.txt",
+        "size": 1588434347
+      }
+    ]
+  },
+  "rcl": {
+    "key": "rcl",
+    "url": "https://static.nhtsa.gov/odi/ffdd/rcl/FLAT_RCL_POST_2010.zip",
+    "bytes": 14784245,
+    "sha256": "178af9168b4780038cdc0a67c60b1cc7dedf901a777ad72d67c6916b75901cf3",
+    "fetched_utc": "2026-08-12T09:18:13+00:00",
+    "members": [
+      {
+        "name": "FLAT_RCL_POST_2010.txt",
+        "size": 309728098
+      }
+    ]
+  },
+  "inv": {
+    "key": "inv",
+    "url": "https://static.nhtsa.gov/odi/ffdd/inv/FLAT_INV.zip",
+    "bytes": 4287209,
+    "sha256": "2ed822e5189e942f1150d5d1ffa1f555d2b7f93c363938a20329551080ab10eb",
+    "fetched_utc": "2026-08-12T09:18:20+00:00",
+    "members": [
+      {
+        "name": "FLAT_INV.txt",
+        "size": 390108467
+      }
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "total_rows": 2233713,
+  "vehicle_rows": 2161770,
+  "rows_with_miles": 1110692,
+  "miles_coverage_pct": 51.38,
+  "unique_mmy": 28744,
+  "mmy_with_miles": 20713,
+  "mmy_histogram_ready": 4639,
+  "min_for_histogram": 30
+}

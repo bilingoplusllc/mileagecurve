@@ -1,0 +1,24 @@
+# Рабочие данные — не в репозиторий. Пересобираются из pipeline/fetch_nhtsa.py
+data/raw/
+data/*.db
+data/_*.json
+
+# Сборка сайта
+dist/
+node_modules/
+.astro/
+
+# Служебное
+__pycache__/
+*.pyc
+.DS_Store
+
+# Отчёты пересобираются пайплайном
+reports/render.log
+
+# Внутренние документы ветки — остаются в рабочем дереве BiLingoPlus,
+# в публичный репозиторий не идут (бизнес-стратегия, прогнозы, конкуренты).
+SPEC.md
+MEMORY.md
+reports/sample-pages.txt
+data/generations.json

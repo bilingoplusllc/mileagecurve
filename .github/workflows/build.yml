@@ -1,0 +1,76 @@
+name: Build and deploy
+
+on:
+  schedule:
+    # NHTSA публикует помесячно; собираем 12-го числа в 04:20 UTC.
+    # Cron у GitHub «best effort», задержка 5–60 минут не важна.
+    - cron: "20 4 12 * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "pipeline/**"
+      - "data/generations.clean.json"
+      - ".github/workflows/build.yml"
+
+concurrency:
+  group: build
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Зависимостей нет по решению D-009 — только стандартная библиотека.
+      - name: Fetch NHTSA data
+        run: python pipeline/fetch_nhtsa.py
+
+      - name: Build database
+        run: python pipeline/build_db.py
+
+      - name: Coverage report
+        run: python pipeline/coverage_check.py
+
+      - name: Render site
+        run: python pipeline/render.py
+
+      - name: Sanity check
+        run: |
+          COUNT=$(find dist -name index.html | wc -l)
+          echo "страниц собрано: $COUNT"
+          # Защита от тихой поломки: если корпус внезапно усох, не публикуем.
+          if [ "$COUNT" -lt 200 ]; then
+            echo "::error::Слишком мало страниц ($COUNT) — публикация остановлена"
+            exit 1
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=mileagecurve --branch=main
+
+  # Отдельная задача-«сторож»: GitHub молча отключает cron после 60 дней
+  # без активности в репозитории. Ежемесячный коммит этого не допускает.
+  keepalive:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          date -u +"%Y-%m-%dT%H:%M:%SZ" > .keepalive
+          git config user.name "mileagecurve-bot"
+          git config user.email "hello@mileagecurve.com"
+          git add .keepalive
+          git diff --staged --quiet || git commit -m "chore: keepalive"
+          git push
