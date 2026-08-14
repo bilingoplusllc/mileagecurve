@@ -14,7 +14,10 @@
 from __future__ import annotations
 
 import html
+import charts
 import names
+
+from datetime import date
 
 # Дата правки политики, а не дата сборки: иначе поле заявляет
 # пересмотр при каждом деплое и теряет весь смысл.
@@ -51,23 +54,32 @@ def make_hub(make_raw: str, pages: list[dict], shell) -> str:
          f'model{"s" if models != 1 else ""}, built from {fmt(total)} complaints that record '
          f'mileage at failure.</p>']
 
-    # Раньше здесь были одни названия моделей и голые диапазоны лет: посетителю
-    # не по чему выбрать поколение. Теперь у каждой строки — сколько сообщений
-    # и на каком пробеге ломается, то есть ровно то, за чем сюда приходят.
+    # Хаб — малые кратные: линейка каждого поколения на ОДНОЙ линейной оси
+    # 0–200k, кодируются только пробеги (позиции соизмеримы, счётчики — нет).
+    # Молодой парк физически не набрал больших пробегов — полый бокс и крест.
+    young_edge = date.today().year - 4
+    B.append('<p class="meta">Each strip places that generation&rsquo;s mileage-tagged '
+             'reports on a linear 0&#8211;200,000-mile scale: whisker = middle 80%, '
+             'box = middle half, line = median. &#8224; marks recent generations &mdash; '
+             'their fleets are young, so their reports can only have come at low mileages. '
+             'Compare generations of similar age.</p>')
     for model in sorted(by_model):
         rows = sorted(by_model[model], key=lambda p: p["y0"])
         B.append(f'<h2>{esc(model)}</h2>')
         key = ('<span><span>Generation</span><i>Reports</i><i>Median</i></span>')
-        B.append(f'<div class="gen-key" aria-hidden="true">{key * 6}</div>')
-        B.append('<ul class="gens">')
+        B.append(f'<div class="gen-key gk1" aria-hidden="true">{key}</div>')
+        B.append('<ul class="gens gr">')
         for p in rows:
             med = p.get("median")
             med_txt = f"{names.round_miles(med):,}" if med else "&mdash;"
+            dag = "&#8224;" if p.get("y1", 0) >= young_edge else ""
             B.append(f'<li><a href="{p["url"]}">'
-                     f'<span class="gy">{p["y0"]}&#8211;{p["y1"]}</span>'
+                     f'<span class="gy">{p["y0"]}&#8211;{p["y1"]}{dag}</span>'
                      f'<span class="gn">{fmt(p["n"])}</span>'
-                     f'<span class="gm">{med_txt}</span></a></li>')
+                     f'<span class="gm">{med_txt}</span>'
+                     f'{charts.hub_ruler(p, young_edge)}</a></li>')
         B.append("</ul>")
+        B.append(f'<div class="hub-ax">{charts.axis_row()}</div>')
 
     B.append('<p class="prov">Every page here is generated from the NHTSA Office of Defects '
              f'Investigation dataset. <a href="/methodology/">How this is built</a> · '

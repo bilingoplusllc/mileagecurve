@@ -49,6 +49,19 @@ def slug(*parts: str) -> str:
     return re.sub(r"-+", "-", s).strip("-")
 
 
+def odo_digits(n) -> str:
+    """Число как ячейки одометра. ПРАВИЛО ОДНОГО МЕСТА: только настоящие
+    показания одометра (медиана пробега при отказе) — НИКОГДА счётчики жалоб
+    и проценты: статистика не показание одометра, и размывание видов чисел
+    было бы фабрикацией рода. Без анимации; медиана уже округлена
+    names.round_miles. Деградирует до обычных цифр без CSS."""
+    if n is None:
+        return "&mdash;"
+    return ('<span class="odo-w">' + "".join(
+        f'<i>{ch}</i>' if ch == "," else f"<b>{ch}</b>" for ch in f"{int(n):,}")
+        + "</span>")
+
+
 def fmt(n) -> str:
     return f"{int(n):,}".replace(",", ",") if n is not None else "—"
 
@@ -642,6 +655,77 @@ ol.check li.chk-alert{list-style:none;margin-left:-1.4em;padding:var(--s-2) var(
   background:var(--warn);border-left:3px solid var(--peak)}
 ol.check li.chk-alert strong{color:var(--peak)}
 
+/* ---------- 17. кумулятивная лестница --------------------------------------
+   График, в честь которого сайт назван: доля сообщений не выше каждого
+   пробега. Ступени только на границах корзин, ничего не сглаживается. */
+svg.cdf{width:100%;height:150px}
+.cdffig .yax{height:150px}
+.cdf .stp{fill:var(--bar)}
+.cdf .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
+.cdf .base{stroke:var(--line-strong);stroke-width:1}
+.cdf .anch{stroke:var(--line-strong);stroke-width:1;stroke-dasharray:2 3}
+.cdf .med{stroke:var(--ink);stroke-width:2;stroke-dasharray:3 3}
+.cdf .you{stroke:var(--peak);stroke-width:2;display:none}
+.cdffig.has-you .cdf .you{display:inline}
+.brk-row .k-you{width:3px;height:14px;border-radius:1px;background:var(--peak)}
+.brk-row .k-anch{width:3px;height:14px;border-radius:1px;background:var(--line-strong)}
+
+/* ---------- 18. линейки на хабе марки --------------------------------------
+   Малые кратные: одна линейная ось на все поколения. Полый бокс = молодой
+   парк, его сообщения физически не могли прийти на больших пробегах. */
+ul.gens.gr,.gen-key.gk1{grid-template-columns:1fr}
+ul.gens.gr svg.hruler,ul.gens.gr .hr-none{grid-column:1/-1;grid-row:2}
+svg.hruler{width:100%;height:14px;margin:1px 0 7px}
+.hr-none{font-size:var(--f-2xs);color:var(--muted);margin:1px 0 7px}
+.hruler .rtrack{fill:var(--line)}
+.hruler .whisk{fill:var(--bar)}
+.hruler .box{fill:var(--bar-hi)}
+.hruler .rmed{stroke:var(--ink);stroke-width:2}
+.hruler .rmed-in{stroke:var(--surface);stroke-width:2}
+.hruler.cens .box{fill:var(--surface);stroke:var(--bar);stroke-width:1.5;
+  vector-effect:non-scaling-stroke}
+.hruler.cens .whisk{fill:var(--track)}
+.hub-ax{margin:-4px 0 var(--s-4)}
+
+/* ---------- 19. одометр: только настоящие пробеги --------------------------
+   Правило одного места: ячейки-барабаны получают ИСКЛЮЧИТЕЛЬНО показания
+   одометра (медиана пробега), никогда счётчики и проценты. */
+.odo-w{display:inline-flex;gap:2px;align-items:baseline}
+.odo-w b{font-family:var(--sans);font-weight:600;font-variant-numeric:tabular-nums;
+  background:var(--bar-hi);color:var(--bg);padding:1px 5px 2px;border-radius:2px;
+  line-height:1.25}
+.odo-w i{font-style:normal;color:var(--muted)}
+
+/* ---------- 20. лента отзывных кампаний ------------------------------------
+   Положение штриха = дата подачи, и только оно. Оранжевым — исключительно
+   федеральные флаги do-not-drive / park-outside, не наша оценка тяжести. */
+.rtl-wrap{margin:0 0 var(--s-4)}
+svg.rtl{width:100%;height:28px}
+.rtl .zone{fill:var(--warn)}
+.rtl .t{stroke:var(--accent);stroke-width:2}
+.rtl .t-a{stroke:var(--peak);stroke-width:2}
+.rtl .base{stroke:var(--line-strong);stroke-width:1}
+.rtl-x{display:flex;margin-top:4px;font-size:var(--f-2xs);color:var(--muted);
+  font-variant-numeric:tabular-nums}
+.rtl-x span{flex:1 1 0;min-width:0;text-align:right;white-space:nowrap}
+.rtl-x .pair{display:flex;justify-content:space-between}
+.rtl-x i{font-style:normal}
+.brk-row .k-zone{background:var(--warn);box-shadow:inset 0 0 0 1px var(--line-strong)}
+.brk-row .k-t{width:3px;height:14px;background:var(--accent)}
+.brk-row .k-ta{width:3px;height:14px;background:var(--peak)}
+.rcl-dt{color:var(--muted);font-weight:400;font-variant-numeric:tabular-nums}
+
+/* ---------- 21. пара кривых на главной -------------------------------------
+   Каждая лестница нормирована на СВОЁ число сообщений — объём жалоб не может
+   ничего исказить. Серии различаются светлотой; --peak только для «вы». */
+svg.cdfp{width:100%;height:180px}
+.cdfp-fig .yax{height:180px}
+.cdfp .grid{stroke:var(--line);stroke-width:1;stroke-dasharray:2 4}
+.cdfp .base{stroke:var(--line-strong);stroke-width:1}
+.cdfp .c-a{stroke:var(--bar);stroke-width:2;fill:none}
+.cdfp .c-b{stroke:var(--bar-hi);stroke-width:2;fill:none}
+.cdfp-fig .fig-foot b{font-family:var(--sans);font-variant-numeric:tabular-nums}
+
 /* ---------- 13f. «где ваша машина» ------------------------------------------
    Три статических якоря пробега — то, что видит робот и читатель без JS.
    JS пересчитывает те же группы под точный пробег и ставит маркер на полоски
@@ -1098,8 +1182,8 @@ ODO_JS = r"""
     var p = pctAt(v);
     h += (p === null)
       ? '<p><strong>Reports describe the population, not your odds.</strong></p>'
-      : '<p>' + p + '% of the failure reports on this generation came at or below this ' +
-        'mileage. <strong>That describes reports, not your odds.</strong></p>';
+      : '<p>The curve reads ' + p + '% at this point. ' +
+        '<strong>That describes reports, not your odds.</strong></p>';
     h += group('Reported earlier than this mileage — ask for repair records', earlier, 'med');
     h += group('In the reporting window', win, 'iqr');
     h += group('Mostly reported later', later, 'iqr');
@@ -1117,6 +1201,20 @@ ODO_JS = r"""
       if (lbl) {
         lbl.textContent = 'Your car: ' + fmt(v) + ' mi — the orange tick on each bar';
         lbl.hidden = false;
+      }
+    }
+    var cfig = document.querySelector('figure.cdffig');
+    if (cfig) {
+      var xc = (Math.min(v, 200000) / 200000 * 948).toFixed(1);
+      var yc = cfig.querySelector('svg.cdf .you');
+      if (yc) { yc.setAttribute('x1', xc); yc.setAttribute('x2', xc); }
+      cfig.classList.add('has-you');
+      var cl = cfig.querySelector('.you-lbl');
+      if (cl) {
+        var pc = pctAt(v);
+        cl.textContent = 'Your car: ' + fmt(v) + ' mi' + (pc === null ? ''
+          : ' — the curve reads ' + pc + '% at this point');
+        cl.hidden = false;
       }
     }
   });
@@ -1165,7 +1263,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     snap_cells = [f'<div><dt>Reports with mileage</dt><dd>{fmt(s["complaints_with_miles"])}</dd></div>']
     if sh.get("median"):
         snap_cells.append(f'<div><dt>Median of reported failures</dt>'
-                          f'<dd>{fmt(names.round_miles(sh["median"]))} mi</dd></div>')
+                          f'<dd>{odo_digits(names.round_miles(sh["median"]))} mi</dd></div>')
     if top_sys:
         _tn = re.sub(r"^the ", "", narrative.plain(top_sys["system"])).capitalize()
         snap_cells.append(f'<div><dt>Most-reported system</dt>'
@@ -1240,7 +1338,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     strips = charts.system_strips(
         s["systems"],
         kicker=f"Figure 2 &middot; {esc(make)} {esc(model)} {years}",
-        title="When each system fails")
+        title="When each system fails", you_key=True)
     if strips:
         B.append(strips)
     B.append('<div class="tw" tabindex="0" role="region" aria-label="Complaints by system">'
@@ -1268,7 +1366,15 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     if withm and cum:
         B.append('<h2 id="mileage">Where your car sits</h2>')
         B.append('<p class="sub">Failure reports by the odometer reading they were filed at. '
-                 'Pick the anchor nearest your car &mdash; or type the exact mileage.</p>')
+                 'Pick the anchor nearest your car &mdash; or type the exact mileage: '
+                 'your marker lands on this curve and on the timing chart above.</p>')
+        # Лестница пробега — график, в честь которого сайт назван.
+        if s["histogram"]:
+            B.append(charts.cumulative(
+                s["histogram"], sh, s["complaints_with_miles"], f"{make} {model} {years}",
+                kicker=f'Figure 3 &middot; {esc(make)} {esc(model)} {years} &middot; '
+                       f'{fmt(s["complaints_with_miles"])} reports with mileage',
+                title="Share of reports at or below each mileage", level="h3"))
         B.append('<form class="odo-f" id="odo-f" action="#mileage">'
                  '<label class="vh" for="odo-i">Your odometer, miles</label>'
                  '<input id="odo-i" inputmode="numeric" autocomplete="off" '
@@ -1305,7 +1411,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                     f'{fmt(names.round_miles(x["p75_miles"]))} mi</li>' for x in later)
                     + '</ul>')
             B.append(f'<div class="odo-a"><h3>At {fmt(anchor)} miles</h3>'
-                     f'<p>{pct}% of the failure reports on this generation came at or below '
+                     f'<p>{pct}% of the failure reports on this generation came below '
                      f'this mileage. <strong>That describes reports, not your odds.</strong></p>'
                      + "".join(grp) + '</div>')
         B.append('</div>')
@@ -1369,6 +1475,10 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                  'owner. Check a specific vehicle by VIN at '
                  '<a href="https://www.nhtsa.gov/recalls">nhtsa.gov/recalls</a>. '
                  'The text below is NHTSA&rsquo;s own wording.</p>')
+        tl = charts.recall_timeline(s["recalls"], s["year_start"], s["year_end"],
+                                    int(SNAPSHOT[:4]))
+        if tl:
+            B.append(tl)
         B.append('<ol class="rcl">')
         for r in s["recalls"][:25]:
             yrs = (str(r["year_min"]) if r["year_min"] == r["year_max"]
@@ -1382,6 +1492,11 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
             if r["park_outside"]:
                 badges += ' <span class="alert">park outside</span>'
             open_attr = " open" if r["do_not_drive"] else ""
+            try:
+                r_dt = datetime.strptime(r["report_date"], "%Y-%m-%d").strftime("%b %Y")
+            except (TypeError, ValueError):
+                r_dt = ""
+            dt_bit = f'<span class="rcl-dt">{r_dt}</span> &middot; ' if r_dt else ""
             body_bits = []
             if r.get("defect"):
                 body_bits.append(f'<p><b>The defect.</b> '
@@ -1394,7 +1509,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
             body_bits.append(f'<p class="meta">NHTSA campaign {esc(r["campaign"])}, '
                              f'reported {esc(r["report_date"] or "—")}.</p>')
             B.append(f'<li><details class="rcl-item"{open_attr}><summary>'
-                     f'<span class="rcl-line"><b>{yrs}</b> &middot; {esc(comp)}{badges}</span>'
+                     f'<span class="rcl-line">{dt_bit}<b>{yrs}</b> &middot; {esc(comp)}{badges}</span>'
                      f'<span class="rcl-what">{esc(first)}</span></summary>'
                      f'<div class="rcl-body">{"".join(body_bits)}</div></details></li>')
         B.append('</ol>')
@@ -1454,7 +1569,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         f'<div><dt>Complaints</dt><dd>{fmt(s["complaints_total"])}</dd></div>',
         f'<div><dt>With mileage</dt><dd>{fmt(s["complaints_with_miles"])}</dd></div>',
         f'<div><dt>Median of reported failures</dt><dd>'
-        f'{fmt(names.round_miles(med)) if med else "&mdash;"}</dd></div>',
+        f'{odo_digits(names.round_miles(med)) if med else "&mdash;"}</dd></div>',
         f'<div><dt>Recalls</dt><dd>{s["recalls_count"]}</dd></div>',
         '</dl>',
         # Правило рельса: над рекламным местом всегда редакционные блоки.
@@ -1560,6 +1675,22 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
                    f'{fmt(demo.get("n", 0))} reports',
             title="Counts tell you a car has a problem. Timing tells you which problem.",
             foot=foot, level="h2"))
+    # Вторая витрина: одно имя модели — две разные кривые. Показывает категорию
+    # продукта целиком и задаёт визуальный язык будущих страниц сравнений.
+    if demo and demo.get("pair"):
+        pr = demo["pair"]
+        pfoot = ""
+        if pr["a"]["median"] and pr["b"]["median"]:
+            pfoot = (f'<p>Half of the {esc(pr["b"]["label"])} reports arrive by '
+                     f'<b>{fmt(names.round_miles(pr["b"]["median"]))} miles</b>; the '
+                     f'{esc(pr["a"]["label"])} takes '
+                     f'<b>{fmt(names.round_miles(pr["a"]["median"]))}</b>. Same nameplate, '
+                     f'different curve &mdash; that is what every page here shows.</p>')
+        B.append(charts.cdf_pair(
+            pr["a"], pr["b"],
+            kicker="Figure 2 &middot; Toyota Prius, two generations",
+            title="Same model name, different mileage curve",
+            foot=pfoot, level="h2"))
 
     # Указатель марок, а не 28 одинаковых плиток. Различие дают сами числа
     # в табличной колонке справа — Ford 149,119 против Lexus 198, — а не полоска,
@@ -1801,9 +1932,11 @@ def main() -> int:
             index.append({"url": f"/{out.name}/", "make": m["make"], "model": m["model"],
                           "y0": g["year_start"], "y1": g["year_end"],
                           "n": s["complaints_with_miles"], "shape": s["shape"].get("kind"),
-                          # Медиана нужна хабу марки: без неё страница марки —
-                          # одни названия и диапазоны лет, выбирать не по чему.
-                          "median": s["shape"].get("median")})
+                          # Медиана и квартили нужны хабу марки: линейка поколения
+                          # кодирует ТОЛЬКО пробеги — позиции соизмеримы, счётчики нет.
+                          "median": s["shape"].get("median"),
+                          "p10": s["shape"].get("p10"), "p25": s["shape"].get("p25"),
+                          "p75": s["shape"].get("p75"), "p90": s["shape"].get("p90")})
             built += 1
             if args.limit and built >= args.limit:
                 break
@@ -1835,6 +1968,15 @@ def main() -> int:
             demo = {"systems": d["systems"], "hyd": hyd, "svc": svc,
                     "n": d["complaints_with_miles"],
                     "url": "/toyota-prius-2010-2015/"}
+            d2 = analyze.generation_stats(con, "TOYOTA", "PRIUS", 2004, 2009)
+            if d2["histogram"] and d["histogram"]:
+                demo["pair"] = {
+                    "a": {"hist": d2["histogram"], "total": d2["complaints_with_miles"],
+                          "label": "Prius 2004–2009",
+                          "median": d2["shape"].get("median")},
+                    "b": {"hist": d["histogram"], "total": d["complaints_with_miles"],
+                          "label": "Prius 2010–2015",
+                          "median": d["shape"].get("median")}}
     except Exception:
         demo = None
 

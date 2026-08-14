@@ -221,31 +221,29 @@ def recalls_narrative(s: dict) -> str:
 
 # --------------------------------------------------------------- severity
 def severity_narrative(s: dict) -> str:
+    """Ряд из четырёх ячеек ОДНИМ кеглем — и никогда график. Флаги пересекаются
+    (одна жалоба несёт несколько), разброс 100×+: линейная длина прячет смерти,
+    логарифм у нас запрещён, стек двойным счётом лжёт о частях целого,
+    пиктограммы выдумывают единицу. Позиция и одинаковый кегль — единственные
+    каналы, в которых нечего завысить."""
     sev = s["severity"]
     total = s["complaints_total"]
-    if not total:
+    if not total or not any(sev.values()):
         return ""
-    parts = []
-    if sev["crashes"]:
-        parts.append(f"{fmt(sev['crashes'])} reported a crash")
-    if sev["fires"]:
-        parts.append(f"{fmt(sev['fires'])} reported a fire")
-    if sev["injured"]:
-        parts.append(f"{fmt(sev['injured'])} reported an injury")
-    if sev["deaths"]:
-        parts.append(f"{fmt(sev['deaths'])} reported a fatality")
-    if not parts:
-        return ""
-
     pct = (sev["crashes"] or 0) / total * 100
-    out = [_p(
-        f"Of the {fmt(total)} complaints filed against this generation, " + "; ".join(parts) +
-        f". Crash-involved reports represent {pct:.1f}% of the total.")]
-    out.append(_p(
-        "These are owner-reported outcomes, not verified investigations, and they are not "
-        "adjusted for how many of these vehicles are on the road. They are included because the "
-        "distinction between a fault that strands a car and a fault that causes a collision is "
-        "the one that matters most, and it is not visible in a complaint count alone."))
+    cells = [("Crashes", f'{fmt(sev["crashes"])} ({pct:.1f}%)'),
+             ("Fires", fmt(sev["fires"])),
+             ("Injury reports", fmt(sev["injured"])),
+             ("Fatality reports", fmt(sev["deaths"]))]
+    row = "".join(f'<div><dt>{k}</dt><dd>{v}</dd></div>' for k, v in cells)
+    out = [_p(f"What owners reported alongside the failure itself, out of {fmt(total)} "
+              f"complaints against this generation:"),
+           f'<dl class="pct">{row}</dl>',
+           _p("These flags are self-reported by complainants and unverified by NHTSA; one "
+              "report can carry several flags, so the counts overlap and do not sum to a "
+              "total. They are not adjusted for how many of these vehicles are on the road. "
+              "No chart is drawn here on purpose: overlapping counts spanning very "
+              "different magnitudes cannot be honestly encoded as lengths.")]
     return "".join(out)
 
 

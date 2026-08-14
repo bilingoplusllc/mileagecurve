@@ -124,9 +124,11 @@ def _shape(vals: list[int]) -> dict:
         "p10": p10, "p25": p25, "median": int(med), "p75": p75, "p90": p90,
         "early_share": round(early, 3), "late_share": round(late, 3),
         "late_pct": int(round(late * 100)), "early_pct": early_pct,
-        # Кумулятивная доля сообщений на якорных пробегах — для раздела
-        # «Where your car sits». Точный счёт по значениям, не по корзинам.
-        "cum_pct": {a: int(round(100 * sum(1 for v in vs if v <= a) / len(vs)))
+        # Кумулятивная доля сообщений НИЖЕ якорного пробега (строго <):
+        # то же определение, что у ступени лестницы на границе корзины.
+        # «Не выше» расходилось с рисунком на долю круглых пробегов —
+        # на границе 120 000 стояло до 5% сообщений (Honda Odyssey 1995-98).
+        "cum_pct": {a: int(round(100 * sum(1 for v in vs if v < a) / len(vs)))
                     for a in (60_000, 90_000, 120_000)},
         "density": density,
     }
