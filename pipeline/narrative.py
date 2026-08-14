@@ -349,8 +349,11 @@ def checklist_items(s: dict, gen: dict) -> list[tuple[str, str, bool]]:
         comp = names.display(it.get("component", "")) or "the documented problem area"
         yrs = it.get("affected_years", "")
         yrs_bit = f" on {yrs.replace('-', '–')} cars" if yrs else ""
+        # Опускаем регистр, но возвращаем аббревиатуры: «Check EGR system»,
+        # а не «Check egr system».
+        comp_low = names._restore(comp.lower()) if not comp.isupper() else comp
         items.append((
-            f"Check {comp.lower() if not comp.isupper() else comp}{yrs_bit}.",
+            f"Check {comp_low}{yrs_bit}.",
             names.truncate_words(it.get("description") or "", 220), False))
 
     # Нейтральный указатель на разброс по годам — без «избегайте» и множителей.

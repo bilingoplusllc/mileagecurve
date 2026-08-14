@@ -148,7 +148,7 @@ def _restore(s: str, extra: tuple = ()) -> str:
     Без этого «GMC» в жалобе владельца становится «Gmc», а «RAV4» — «Rav4»,
     прямо в цитате на странице.
     """
-    for ab in ("nhtsa", "abs", "suv", "vin", "tsb", "usa", "us dot", "epa", "dot",
+    for ab in ("nhtsa", "abs", "suv", "vin", "tsb", "usa", "us dot", "epa", "dot", "egr",
                "led", "ecu", "pcm", "tpms", "awd", "4wd", "fwd", "rwd", "cvt",
                "mph", "rpm", "psi", "vsc"):
         s = re.sub(rf"\b{ab}\b", ab.upper(), s)
