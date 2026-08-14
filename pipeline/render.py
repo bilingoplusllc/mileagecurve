@@ -1374,7 +1374,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                 s["histogram"], sh, s["complaints_with_miles"], f"{make} {model} {years}",
                 kicker=f'Figure 3 &middot; {esc(make)} {esc(model)} {years} &middot; '
                        f'{fmt(s["complaints_with_miles"])} reports with mileage',
-                title="Share of reports at or below each mileage", level="h3"))
+                title="Share of reports below each mileage", level="h3"))
         B.append('<form class="odo-f" id="odo-f" action="#mileage">'
                  '<label class="vh" for="odo-i">Your odometer, miles</label>'
                  '<input id="odo-i" inputmode="numeric" autocomplete="off" '
