@@ -184,7 +184,7 @@ def search_markup(n: int) -> str:
         '<form class="qbox" id="qf" action="/#makes" method="get" role="search">'
         '<label class="vh" for="q">Find a vehicle</label>'
         '<input id="q" name="q" type="search" autocomplete="off" spellcheck="false" '
-        'placeholder="Try “2013 Escape” or “Prius”" aria-describedby="qh">'
+        'placeholder="e.g. 2013 Escape" aria-describedby="qh">'
         '<button type="submit">Find</button>'
         '</form>'
         '<div id="qr" class="qr" hidden></div>'

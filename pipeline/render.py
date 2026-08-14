@@ -598,7 +598,65 @@ ul.rel a:hover{background:var(--track);border-color:var(--accent)}
     text-decoration:none}
   .jump a:hover{color:var(--accent-ink);text-decoration:underline}
   .ad-rail{min-height:636px;margin:0}
+  .rail-vin{font-size:var(--f-xs);line-height:1.45;padding:var(--s-3);
+    background:var(--warn);margin:0 0 var(--s-5);max-width:none}
+  .rail-vin b{display:block;font-size:var(--f-2xs);letter-spacing:.06em;
+    text-transform:uppercase;color:var(--muted);margin-bottom:2px}
 }
+
+/* ---------- 13c. первый экран страницы поколения ---------------------------
+   Ответ раньше объяснения: четыре числа и два действия. На ≥1180px блок
+   скрыт — те же числа несёт боковая колонка. */
+.alert-strip{background:var(--danger-bg);color:var(--danger-fg);font-weight:600;
+  font-size:var(--f-sm);line-height:1.4;padding:10px var(--s-3);margin:0 0 var(--s-3);
+  box-shadow:inset 0 0 0 1px var(--danger-ring);border-radius:var(--radius);
+  max-width:none}
+.snap-top{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:0 var(--s-4);margin:0 0 var(--s-3);padding:2px var(--s-3) var(--s-2);
+  background:var(--surface);border:1px solid var(--line);
+  border-top:var(--rule) solid var(--ink);max-width:none}
+.snap-top>div{padding:var(--s-2) 0 6px;border-bottom:1px solid var(--line)}
+.snap-top>div:nth-last-child(-n+2){border-bottom:0;padding-bottom:2px}
+.snap-top dt{font-size:var(--f-2xs);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted)}
+.snap-top dd{margin:2px 0 0;max-width:none;font-size:var(--f-md);font-weight:700;
+  letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.btn-row{display:flex;flex-wrap:wrap;gap:var(--s-2);margin:0 0 var(--s-4);
+  max-width:none}
+.btn{display:inline-block;padding:10px 14px;border:2px solid var(--accent);
+  border-radius:var(--radius);font-size:var(--f-sm);font-weight:600;
+  text-decoration:none;background:var(--accent);color:var(--bg)}
+.btn:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+.btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--line-strong)}
+.btn-ghost:hover{background:var(--track);color:var(--ink);border-color:var(--accent)}
+@media(min-width:1180px){.snap-top,.snap-btns{display:none}}
+@media(max-width:379px){.snap-top{grid-template-columns:1fr}
+  .snap-top>div:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+  .snap-top>div:last-child{border-bottom:0}}
+
+/* ---------- 13d. чек-лист перед покупкой ----------------------------------- */
+ol.check{margin:0;padding-left:1.4em}
+ol.check li{margin:0 0 var(--s-3);max-width:var(--measure);line-height:1.5}
+ol.check li:last-child{margin-bottom:0}
+ol.check li.chk-alert{list-style:none;margin-left:-1.4em;padding:var(--s-2) var(--s-3);
+  background:var(--warn);border-left:3px solid var(--peak)}
+ol.check li.chk-alert strong{color:var(--peak)}
+
+/* ---------- 13e. отзывы раскрывающимися записями ---------------------------
+   Родная details/summary: ни строчки JS, работает с клавиатуры из коробки. */
+ol.rcl{list-style:none;margin:var(--s-3) 0 var(--s-4);padding:0;
+  border-top:1px solid var(--line-strong);max-width:none}
+ol.rcl li{margin:0;max-width:none;border-bottom:1px solid var(--line)}
+.rcl-item summary{cursor:pointer;padding:12px 0;color:var(--ink)}
+.rcl-item summary:hover .rcl-line{color:var(--accent-ink)}
+.rcl-line{font-size:var(--f-sm);font-weight:600}
+.rcl-line b{font-variant-numeric:tabular-nums}
+.rcl-what{display:block;font-size:var(--f-xs);color:var(--muted);margin-top:2px;
+  max-width:68ch}
+.rcl-body{padding:0 0 var(--s-3) 1.1em}
+.rcl-body p{font-size:var(--f-sm);max-width:var(--measure);margin:0 0 var(--s-2)}
+.rcl-body p:last-child{margin-bottom:0}
+.rcl-body .meta{margin-top:var(--s-2)}
 
 /* ---------- 14. provenance strip and footer -------------------------------- */
 .prov{display:flex;flex-wrap:wrap;gap:var(--s-2) var(--s-3);
@@ -773,7 +831,8 @@ ul.gens a:hover .gy{text-decoration:underline;text-decoration-thickness:2px;
     gap:var(--s-6);align-items:start}
   .wrap.wide .hero-say{grid-column:1}
   .wrap.wide .hero h1{max-width:20ch}
-  .wrap.wide .hero-find{grid-column:2;grid-row:1;margin:0;padding:0;
+  .wrap.wide .hero .stats{grid-column:1;grid-row:2}
+  .wrap.wide .hero-find{grid-column:2;grid-row:1/span 2;margin:0;padding:0;
     border:0;background:none}
   .wrap.wide .qbox,.wrap.wide .qr{max-width:none}
 }
@@ -840,8 +899,9 @@ AD_DISCLOSURE = ("<p>This site carries third-party display advertising. Advertis
 AD_LABEL = '<span class="ad-label">Advertisement</span>' if ADS_LIVE else ""
 ADS_TXT = "google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0\n"  # вместе с ADS_LIVE
 
-JUMP_SECTIONS = (("fails", "What fails, and when"), ("years", "By model year"),
-                 ("recalls", "Recalls"), ("owners", "What owners reported"))
+JUMP_SECTIONS = (("buy", "Before you buy"), ("fails", "What fails, and when"),
+                 ("years", "By model year"), ("recalls", "Recalls"),
+                 ("owners", "What owners reported"))
 
 
 def _jump(parts: list[str]) -> str:
@@ -985,6 +1045,30 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
              f'<span>{fmt(s["complaints_total"])} complaints, {fmt(s["complaints_with_miles"])} with mileage</span>'
              f'<span><a href="/methodology/">Method</a></span></p>')
 
+    # Первый экран отвечает раньше, чем объясняет: четыре числа и два действия.
+    # На ≥1180px этот блок скрыт — там те же числа несёт боковая колонка.
+    # Ярлык медианы — строго «Median of reported failures»: блок имеет форму
+    # готового ответа для выдачи, и без оговорки в самом ярлыке «median at
+    # failure 15,000» читался бы как «ваша машина сломается на 15 тысячах».
+    if s.get("severe_advisories"):
+        B.append('<p class="alert-strip">A DO NOT DRIVE recall covers part of this generation '
+                 '&mdash; check the VIN before driving it home.</p>')
+    top_sys = s["systems"][0] if s["systems"] else None
+    snap_cells = [f'<div><dt>Reports with mileage</dt><dd>{fmt(s["complaints_with_miles"])}</dd></div>']
+    if sh.get("median"):
+        snap_cells.append(f'<div><dt>Median of reported failures</dt>'
+                          f'<dd>{fmt(names.round_miles(sh["median"]))} mi</dd></div>')
+    if top_sys:
+        _tn = re.sub(r"^the ", "", narrative.plain(top_sys["system"])).capitalize()
+        snap_cells.append(f'<div><dt>Most-reported system</dt>'
+                          f'<dd>{esc(_tn)} ({top_sys["share"]}%)</dd></div>')
+    snap_cells.append(f'<div><dt>Recalls</dt><dd>{s["recalls_count"]}</dd></div>')
+    B.append(f'<dl class="snap-top">{"".join(snap_cells)}</dl>')
+    B.append('<p class="btn-row snap-btns">'
+             '<a class="btn" href="#buy">Before-you-buy checklist &darr;</a>'
+             '<a class="btn btn-ghost" href="https://www.nhtsa.gov/recalls">'
+             'Check this VIN &mdash; NHTSA &nearr;</a></p>')
+
     # Однострочный вывод — первое, что читают
     if sh.get("note"):
         note = sh["note"]
@@ -1012,6 +1096,30 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
              'by being common. <a href="/methodology/">How this is built</a>.</p>')
 
     B.append(f'<div class="card finding">{lead_paragraph(s, gen)}</div>')
+
+    # Проверка перед покупкой: персона стоит на площадке с телефоном, у неё
+    # три минуты. Раздел «What this means if you are buying one» влит сюда —
+    # две покупательские секции на одной странице соревновались бы.
+    checks = narrative.checklist_items(s, gen)
+    if checks:
+        n_iss = len(gen.get("known_issues") or [])
+        B.append(f'<h2 id="buy">Before you buy a {years} {esc(model)}: the 3-minute check</h2>')
+        src_bits = [f'{fmt(s["complaints_with_miles"])} mileage-tagged complaints']
+        if s["recalls_count"]:
+            src_bits.append(f'{s["recalls_count"]} recall campaign'
+                            f'{"s" if s["recalls_count"] != 1 else ""}')
+        if n_iss:
+            src_bits.append(f'{n_iss} documented problem area{"s" if n_iss != 1 else ""}')
+        B.append(f'<p class="sub">Generated from {", ".join(src_bits)}. '
+                 f'Print this page &mdash; the checklist survives print.</p>')
+        B.append('<div class="card"><ol class="check">')
+        for lead, body, is_alert in checks:
+            cls = ' class="chk-alert"' if is_alert else ""
+            B.append(f'<li{cls}><strong>{lead}</strong> {body}</li>')
+        B.append('</ol></div>')
+        guide = narrative.guidance_narrative(s)
+        if guide:
+            B.append(guide)
 
     # Системы: полоски + таблица
     B.append('<h2 id="fails">What fails, and when</h2>')
@@ -1071,20 +1179,50 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         B.append("</tbody></table></div>")
 
     if s["recalls"]:
-        B.append(f'<h2 id="recalls">Recalls ({s["recalls_count"]})</h2>')
-        B.append('<div class="tw" tabindex="0" role="region" aria-label="Recall campaigns">'
-                 '<table><caption class="vh">Recall campaigns</caption><thead><tr>'
-                 '<th scope="col">Campaign</th><th scope="col">Date</th>'
-                 '<th scope="col">Component</th></tr></thead><tbody>')
+        # Раньше это была таблица «кампания-дата-узел»: сами номера кампаний
+        # читателю ни о чём. Теперь каждый отзыв отвечает на три вопроса —
+        # что сломано, что может случиться, что починят бесплатно. Текст
+        # правительственный, дословный (через sentence_case: он приходит
+        # КАПСОМ); телефоны в нём — горячие линии производителей, не PII
+        # (проверено по всем 217 256 строкам).
+        B.append(f'<h2 id="recalls">Recalls ({s["recalls_count"]}) &mdash; '
+                 f'is your car included?</h2>')
+        B.append('<p class="meta">Recalls are fixed free of charge at any dealer, for any '
+                 'owner. Check a specific vehicle by VIN at '
+                 '<a href="https://www.nhtsa.gov/recalls">nhtsa.gov/recalls</a>. '
+                 'The text below is NHTSA&rsquo;s own wording.</p>')
+        B.append('<ol class="rcl">')
         for r in s["recalls"][:25]:
-            flags = ""
+            yrs = (str(r["year_min"]) if r["year_min"] == r["year_max"]
+                   else f'{r["year_min"]}&#8211;{r["year_max"]}')
+            comp = names.display((r["component"] or "—").split(":")[0])
+            cq = names.sentence_case((r.get("consequence") or "").strip(), (make, model))
+            first = names.truncate_words(re.split(r"(?<=[.!?])\s", cq)[0], 110) if cq else ""
+            badges = ""
             if r["do_not_drive"]:
-                flags += ' <span class="alert">do not drive</span>'
+                badges += ' <span class="alert">do not drive</span>'
             if r["park_outside"]:
-                flags += ' <span class="alert">park outside</span>'
-            B.append(f'<tr><td>{esc(r["campaign"])}{flags}</td><td>{esc(r["report_date"] or "—")}</td>'
-                     f'<td>{esc(names.display(r["component"] or "—"))}</td></tr>')
-        B.append("</tbody></table></div>")
+                badges += ' <span class="alert">park outside</span>'
+            open_attr = " open" if r["do_not_drive"] else ""
+            body_bits = []
+            if r.get("defect"):
+                body_bits.append(f'<p><b>The defect.</b> '
+                                 f'{esc(names.sentence_case(r["defect"], (make, model)))}</p>')
+            if cq:
+                body_bits.append(f'<p><b>What can happen.</b> {esc(cq)}</p>')
+            if r.get("remedy"):
+                body_bits.append(f'<p><b>The free fix.</b> '
+                                 f'{esc(names.sentence_case(r["remedy"], (make, model)))}</p>')
+            body_bits.append(f'<p class="meta">NHTSA campaign {esc(r["campaign"])}, '
+                             f'reported {esc(r["report_date"] or "—")}.</p>')
+            B.append(f'<li><details class="rcl-item"{open_attr}><summary>'
+                     f'<span class="rcl-line"><b>{yrs}</b> &middot; {esc(comp)}{badges}</span>'
+                     f'<span class="rcl-what">{esc(first)}</span></summary>'
+                     f'<div class="rcl-body">{"".join(body_bits)}</div></details></li>')
+        B.append('</ol>')
+        if s["recalls_count"] > 25:
+            B.append(f'<p class="meta">Showing the 25 most recent of {s["recalls_count"]} '
+                     f'campaigns.</p>')
         B.append(f'<div class="ad">{AD_LABEL}</div>')
 
     if s["quotes"]:
@@ -1137,10 +1275,17 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         '<dl class="snap">',
         f'<div><dt>Complaints</dt><dd>{fmt(s["complaints_total"])}</dd></div>',
         f'<div><dt>With mileage</dt><dd>{fmt(s["complaints_with_miles"])}</dd></div>',
-        f'<div><dt>Median at failure</dt><dd>'
+        f'<div><dt>Median of reported failures</dt><dd>'
         f'{fmt(names.round_miles(med)) if med else "&mdash;"}</dd></div>',
         f'<div><dt>Recalls</dt><dd>{s["recalls_count"]}</dd></div>',
         '</dl>',
+        # Правило рельса: над рекламным местом всегда редакционные блоки.
+        f'<p class="rail-vin"><b>Recall check.</b> '
+        + (f'{s["recalls_count"]} campaign'
+           f'{"s" if s["recalls_count"] != 1 else ""} cover this generation. '
+           if s["recalls_count"] else '')
+        + 'Recalls are fixed free, for any owner. '
+          '<a href="https://www.nhtsa.gov/recalls">Enter your VIN at NHTSA &nearr;</a></p>',
         _jump(B),
         f'<div class="ad ad-rail">{AD_LABEL}</div>',
         '</div></aside></div>']
@@ -1177,14 +1322,6 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
          # о том, чего у других нет.
          '<p class="lede">Complaint databases tell you how many owners had a problem. '
          'They almost never tell you at what mileage. This one does.</p>',
-         # Числа точные и неокруглённые, прямо из базы: 2,116,532 — это довод,
-         # а «2,1 млн» — реклама. Никаких отзывов, звёзд и логотипов, и НИКОГДА
-         # эмблемы NHTSA: страница «О проекте» прямо отрицает связь с ведомством.
-         '<dl class="stats">'
-         f'<div><dt>Complaints analysed</dt><dd>{fmt(stats["complaints"])}</dd></div>'
-         f'<div><dt>With an odometer reading</dt><dd>{fmt(stats["with_miles"])}</dd></div>'
-         f'<div><dt>Generations covered</dt><dd>{len(index)}</dd></div>'
-         '</dl>',
          '</div>',
          # Поиск без карточки: у поля своя граница в 2px, и этого достаточно,
          # чтобы читалось как главный орган управления. Рамка вокруг только
@@ -1213,6 +1350,15 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
                  f'{esc(names.display(p["model"]))} <span>{p["y0"]}&#8211;{p["y1"]}</span></a></li>')
     B.append('</ul>')
     B.append('</div>')
+    # Цифры вынесены из левой колонки в отдельный элемент героя: на мобильном
+    # порядок стал «заголовок → поиск → цифры» — раньше поиск стоял после цифр,
+    # и главный орган управления уезжал под сгиб. На широком экране цифры
+    # остаются в левой колонке (col1, второй ряд), поиск справа.
+    B.append('<dl class="stats">'
+             f'<div><dt>Complaints analysed</dt><dd>{fmt(stats["complaints"])}</dd></div>'
+             f'<div><dt>With an odometer reading</dt><dd>{fmt(stats["with_miles"])}</dd></div>'
+             f'<div><dt>Generations covered</dt><dd>{len(index)}</dd></div>'
+             '</dl>')
     B.append('</div>')
 
     # Лучшая находка сайта — это его пронумерованный экспонат, а не абзац.

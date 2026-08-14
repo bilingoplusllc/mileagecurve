@@ -11,6 +11,7 @@
 """
 from __future__ import annotations
 
+import re
 import statistics
 
 import names
@@ -306,13 +307,79 @@ def guidance_narrative(s: dict) -> str:
     return "".join(out)
 
 
+def checklist_items(s: dict, gen: dict) -> list[tuple[str, str, bool]]:
+    """Проверка перед покупкой: (жирный зачин, продолжение, тревожный?).
+
+    Каждый пункт — действие, а не факт: персона стоит на площадке с телефоном
+    и у неё три минуты. Всё генерируется из данных; ручной работы на страницу
+    нет. ЗАПРЕЩЕНО: «years to avoid» и любые множители по годам — счёт жалоб
+    по годам смешивает объём продаж и срок на дороге (D-007).
+    """
+    items: list[tuple[str, str, bool]] = []
+
+    dnd = any(r["do_not_drive"] for r in s["recalls"])
+    if dnd:
+        items.append((
+            "A DO NOT DRIVE recall covers part of this generation.",
+            "Run the VIN before you drive it home — the fix is free at any dealer.",
+            True))
+    if s["recalls_count"]:
+        items.append((
+            'Run the VIN at <a href="https://www.nhtsa.gov/recalls">nhtsa.gov/recalls</a>.',
+            f'{s["recalls_count"]} campaign{"s" if s["recalls_count"] != 1 else ""} cover this '
+            f'generation; an open recall is a free repair you can make the seller\'s problem.',
+            False))
+
+    # Системы с ранним отказом: на машине этого возраста дефект либо уже
+    # случился, либо уже не случится — вопрос в том, чинили ли по гарантии.
+    early = [x for x in s["systems"]
+             if x.get("median_miles") and x["median_miles"] <= 12_000
+             and x.get("count", 0) >= 50][:2]
+    for x in early:
+        nm = plain(x["system"])
+        items.append((
+            f"Ask for {re.sub(r'^the ', '', nm)} repair records.",
+            f"This area fails at a median of {fmt(names.round_miles(x['median_miles']))} miles — "
+            f"on any car this age it already happened or never will; the question is whether "
+            f"it was fixed under warranty.",
+            False))
+
+    # Курируемые документированные проблемы — с годами, которых они касаются.
+    for it in (gen.get("known_issues") or [])[:3]:
+        comp = names.display(it.get("component", "")) or "the documented problem area"
+        yrs = it.get("affected_years", "")
+        yrs_bit = f" on {yrs.replace('-', '–')} cars" if yrs else ""
+        items.append((
+            f"Check {comp.lower() if not comp.isupper() else comp}{yrs_bit}.",
+            names.truncate_words(it.get("description") or "", 220), False))
+
+    # Нейтральный указатель на разброс по годам — без «избегайте» и множителей.
+    by = s.get("by_year") or []
+    if len(by) > 2:
+        counts = [y["complaints"] for y in by if y.get("complaints")]
+        if counts and max(counts) >= 3 * max(1, min(counts)):
+            items.append((
+                "Complaint reports are not spread evenly across model years here",
+                "— see the by-model-year table below before you settle on a year.", False))
+
+    items.append((
+        "End with a pre-purchase inspection of this car.",
+        "Aggregate data describes the population; the example in front of you has its own history.",
+        False))
+    return items
+
+
 def full_analysis(s: dict, gen: dict) -> list[tuple[str, str]]:
-    """Возвращает список (заголовок, html) — разделы разбора."""
+    """Возвращает список (заголовок, html) — разделы разбора.
+
+    «What this means if you are buying one» отсюда убран: его содержимое
+    влито в раздел «Before you buy» (чек-лист), чтобы две покупательские
+    секции не соревновались на одной странице.
+    """
     sections = [
         ("Which systems, and when", systems_narrative(s)),
         ("Differences between model years", years_narrative(s, gen)),
         ("Recalls and what they cover", recalls_narrative(s)),
         ("Reported severity", severity_narrative(s)),
-        ("What this means if you are buying one", guidance_narrative(s)),
     ]
     return [(t, b) for t, b in sections if b]

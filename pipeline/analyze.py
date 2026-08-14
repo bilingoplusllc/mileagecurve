@@ -177,13 +177,16 @@ def generation_stats(con: sqlite3.Connection, make: str, model: str,
         "SELECT SUM(crash), SUM(fire), SUM(injured > 0), SUM(deaths > 0) FROM complaints "
         "WHERE make=? AND model=? AND year BETWEEN ? AND ?", args).fetchone()
 
-    # Отзывы поколения
+    # Отзывы поколения. consequence («что может случиться») заполнено на всех
+    # 217 256 строках, но до 2026-08-13 вообще не выбиралось из базы — страница
+    # показывала дефект и лечение, пропуская само последствие.
     recalls = [{"campaign": c, "year_min": y0, "year_max": y1, "component": comp,
-                "report_date": rd, "defect": d, "remedy": rem,
+                "report_date": rd, "defect": d, "consequence": cq, "remedy": rem,
                 "do_not_drive": bool(dnd), "park_outside": bool(po)}
-               for c, y0, y1, comp, rd, d, rem, dnd, po in con.execute(
+               for c, y0, y1, comp, rd, d, cq, rem, dnd, po in con.execute(
         "SELECT campaign, MIN(year), MAX(year), component, MIN(report_date), "
-        "  MIN(defect), MIN(remedy), MAX(do_not_drive), MAX(park_outside) "
+        "  MIN(defect), MIN(consequence), MIN(remedy), "
+        "  MAX(do_not_drive), MAX(park_outside) "
         "FROM recalls WHERE make=? AND model=? AND year BETWEEN ? AND ? "
         "GROUP BY campaign ORDER BY MIN(report_date) DESC", args)]
 
