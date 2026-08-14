@@ -642,6 +642,36 @@ ol.check li.chk-alert{list-style:none;margin-left:-1.4em;padding:var(--s-2) var(
   background:var(--warn);border-left:3px solid var(--peak)}
 ol.check li.chk-alert strong{color:var(--peak)}
 
+/* ---------- 13f. «где ваша машина» ------------------------------------------
+   Три статических якоря пробега — то, что видит робот и читатель без JS.
+   JS пересчитывает те же группы под точный пробег и ставит маркер на полоски
+   Figure 2 (строго вертикальный отрезок — preserveAspectRatio его не гнёт). */
+.odo-f{display:flex;gap:var(--s-2);margin:0 0 var(--s-4);max-width:420px}
+.odo-f input{flex:1 1 auto;min-width:0;font:inherit;font-size:var(--f-sm);
+  padding:10px var(--s-3);border:2px solid var(--line-strong);
+  border-radius:var(--radius);background:var(--surface);color:var(--ink);
+  font-variant-numeric:tabular-nums}
+.odo-f input:focus-visible{border-color:var(--accent)}
+.odo-f input::placeholder{color:var(--muted)}
+.odo-f button{flex:none;font:inherit;font-weight:600;padding:10px var(--s-4);
+  border:2px solid var(--accent);border-radius:var(--radius);
+  background:var(--accent);color:var(--bg);cursor:pointer}
+.odo-f button:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
+.odo-a{margin:0 0 var(--s-4);padding:var(--s-3) var(--s-4);
+  background:var(--surface);border:1px solid var(--line);max-width:none}
+.odo-a h3{margin:0 0 var(--s-1)}
+.odo-a>p{max-width:var(--measure);margin:0 0 var(--s-2);font-size:var(--f-sm)}
+.odo-h{font-size:var(--f-2xs);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin:var(--s-3) 0 2px;max-width:none}
+.odo-l{list-style:none;margin:0;padding:0}
+.odo-l li{margin:0;padding:6px 0;border-bottom:1px solid var(--line);
+  font-size:var(--f-sm);max-width:var(--measure);font-variant-numeric:tabular-nums}
+.odo-l li:last-child{border-bottom:0}
+.strip .you{stroke:var(--peak);stroke-width:2;display:none}
+.sysfig.has-you .strip .you{display:inline}
+.you-lbl{font-size:var(--f-xs);font-weight:600;color:var(--peak);
+  margin:0 0 var(--s-2);max-width:none}
+
 /* ---------- 13e. отзывы раскрывающимися записями ---------------------------
    Родная details/summary: ни строчки JS, работает с клавиатуры из коробки. */
 ol.rcl{list-style:none;margin:var(--s-3) 0 var(--s-4);padding:0;
@@ -900,8 +930,8 @@ AD_LABEL = '<span class="ad-label">Advertisement</span>' if ADS_LIVE else ""
 ADS_TXT = "google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0\n"  # вместе с ADS_LIVE
 
 JUMP_SECTIONS = (("buy", "Before you buy"), ("fails", "What fails, and when"),
-                 ("years", "By model year"), ("recalls", "Recalls"),
-                 ("owners", "What owners reported"))
+                 ("mileage", "Where your car sits"), ("years", "By model year"),
+                 ("recalls", "Recalls"), ("owners", "What owners reported"))
 
 
 def _jump(parts: list[str]) -> str:
@@ -1014,6 +1044,84 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
   {AD_DISCLOSURE}
 </footer>
 </div>{tail}</body></html>"""
+
+
+ODO_JS = r"""
+(function () {
+  var blob = document.getElementById('odo-data');
+  var form = document.getElementById('odo-f');
+  if (!blob || !form) return;
+  var D = JSON.parse(blob.textContent);
+  var inp = document.getElementById('odo-i');
+  var out = document.getElementById('odo-out');
+  var stat = document.getElementById('odo-static');
+
+  function fmt(n) { return n.toLocaleString('en-US'); }
+  function lx(m) {
+    m = Math.min(Math.max(m, 500), 200000);
+    return (Math.log(m / 500) / Math.LN10) / 2.60206 * 1000;
+  }
+  function pctAt(v) {
+    if (!D.bins.length || v > 200000) return null;
+    for (var i = 0; i < D.bins.length; i++) if (v < D.bins[i][0]) return D.bins[i][1];
+    return D.bins[D.bins.length - 1][1];
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function group(title, rows, mode) {
+    if (!rows.length) return '';
+    var g = '<p class="odo-h">' + title + '</p><ul class="odo-l">';
+    for (var j = 0; j < rows.length; j++) {
+      var r = rows[j];
+      g += '<li>' + esc(r.n) + ' — ' + (mode === 'med'
+        ? 'median ' + fmt(r.med) + ' mi'
+        : 'middle half ' + fmt(r.p25) + '–' + fmt(r.p75) + ' mi') + '</li>';
+    }
+    return g + '</ul>';
+  }
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var v = parseInt(String(inp.value).replace(/[^0-9]/g, ''), 10);
+    if (!v) { out.hidden = true; stat.hidden = false; return; }
+    v = Math.min(v, 400000);
+    var earlier = [], win = [], later = [];
+    for (var i = 0; i < D.sys.length; i++) {
+      var x = D.sys[i];
+      if (x.p75 <= v) earlier.push(x);
+      else if (x.p25 > v) later.push(x);
+      else win.push(x);
+    }
+    var h = '<div class="odo-a"><h3>At ' + fmt(v) + ' miles</h3>';
+    var p = pctAt(v);
+    h += (p === null)
+      ? '<p><strong>Reports describe the population, not your odds.</strong></p>'
+      : '<p>' + p + '% of the failure reports on this generation came at or below this ' +
+        'mileage. <strong>That describes reports, not your odds.</strong></p>';
+    h += group('Reported earlier than this mileage — ask for repair records', earlier, 'med');
+    h += group('In the reporting window', win, 'iqr');
+    h += group('Mostly reported later', later, 'iqr');
+    out.innerHTML = h + '</div>';
+    out.hidden = false; stat.hidden = true;
+    var fig = document.querySelector('figure.sysfig');
+    if (fig) {
+      var xs = lx(v).toFixed(1);
+      var lines = fig.querySelectorAll('svg.strip .you');
+      for (var k = 0; k < lines.length; k++) {
+        lines[k].setAttribute('x1', xs); lines[k].setAttribute('x2', xs);
+      }
+      fig.classList.add('has-you');
+      var lbl = fig.querySelector('.you-lbl');
+      if (lbl) {
+        lbl.textContent = 'Your car: ' + fmt(v) + ' mi — the orange tick on each bar';
+        lbl.hidden = false;
+      }
+    }
+  });
+})();
+"""
 
 
 def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict]) -> str:
@@ -1148,6 +1256,76 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                  f'<td class="num">{fmt(x["count"])}</td><td class="num">{x["share"]}%</td>'
                  f'<td class="num">{med}</td><td class="num">{rng}</td></tr>')
     B.append("</tbody></table></div>")
+
+    # «Где ваша машина»: три статических якоря пробега + необязательный JS-ввод
+    # одометра. Статические якоря — то, что видит робот и читатель без JS;
+    # JS лишь пересчитывает те же три группы под точный пробег и ставит маркер
+    # на полоски Figure 2. ЗАПРЕЩЕНЫ заголовки-предсказания («Likely already
+    # happened»): у большинства машин жалоба так и не подана. Обязательная
+    # строка «That describes reports, not your odds» — над группами.
+    withm = [x for x in s["systems"] if x.get("median_miles") and x.get("p25_miles")][:7]
+    cum = sh.get("cum_pct") or {}
+    if withm and cum:
+        B.append('<h2 id="mileage">Where your car sits</h2>')
+        B.append('<p class="sub">Failure reports by the odometer reading they were filed at. '
+                 'Pick the anchor nearest your car &mdash; or type the exact mileage.</p>')
+        B.append('<form class="odo-f" id="odo-f" action="#mileage">'
+                 '<label class="vh" for="odo-i">Your odometer, miles</label>'
+                 '<input id="odo-i" inputmode="numeric" autocomplete="off" '
+                 'placeholder="Your odometer, e.g. 91,000">'
+                 '<button type="submit">Go</button></form>')
+        B.append('<div id="odo-out" hidden></div>')
+        B.append('<div id="odo-static">')
+        for anchor in (60_000, 90_000, 120_000):
+            pct = cum.get(anchor)
+            if pct is None:
+                continue
+            earlier = [x for x in withm if x["p75_miles"] <= anchor]
+            later = [x for x in withm if x["p25_miles"] > anchor]
+            window = [x for x in withm if x not in earlier and x not in later]
+            grp = []
+            if earlier:
+                grp.append('<p class="odo-h">Reported earlier than this mileage '
+                           '&mdash; ask for repair records</p><ul class="odo-l">' + "".join(
+                    f'<li>{esc(x["display_name"])} &mdash; median '
+                    f'{fmt(names.round_miles(x["median_miles"]))} mi</li>' for x in earlier)
+                    + '</ul>')
+            if window:
+                grp.append('<p class="odo-h">In the reporting window</p><ul class="odo-l">'
+                           + "".join(
+                    f'<li>{esc(x["display_name"])} &mdash; middle half '
+                    f'{fmt(names.round_miles(x["p25_miles"]))}&#8211;'
+                    f'{fmt(names.round_miles(x["p75_miles"]))} mi</li>' for x in window)
+                    + '</ul>')
+            if later:
+                grp.append('<p class="odo-h">Mostly reported later</p><ul class="odo-l">'
+                           + "".join(
+                    f'<li>{esc(x["display_name"])} &mdash; middle half '
+                    f'{fmt(names.round_miles(x["p25_miles"]))}&#8211;'
+                    f'{fmt(names.round_miles(x["p75_miles"]))} mi</li>' for x in later)
+                    + '</ul>')
+            B.append(f'<div class="odo-a"><h3>At {fmt(anchor)} miles</h3>'
+                     f'<p>{pct}% of the failure reports on this generation came at or below '
+                     f'this mileage. <strong>That describes reports, not your odds.</strong></p>'
+                     + "".join(grp) + '</div>')
+        B.append('</div>')
+        # Данные для JS: кумулятивные корзины + окна систем. json.dumps не даёт
+        # «</script» на этих данных (числа и названия систем).
+        odo_bins = []
+        if s["histogram"]:
+            run = 0
+            tot = s["complaints_with_miles"] or 1
+            for b_ in s["histogram"]["bins"]:
+                run += b_["count"]
+                odo_bins.append([b_["hi"], round(run / tot * 100)])
+        odo_data = {"bins": odo_bins,
+                    "sys": [{"n": x["display_name"],
+                             "p25": names.round_miles(x["p25_miles"]),
+                             "med": names.round_miles(x["median_miles"]),
+                             "p75": names.round_miles(x["p75_miles"])} for x in withm]}
+        B.append('<script type="application/json" id="odo-data">'
+                 + json.dumps(odo_data, separators=(",", ":")) + '</script>')
+
     B.append(f'<div class="ad">{AD_LABEL}</div>')
 
     for heading, block in narrative.full_analysis(s, gen):
@@ -1294,7 +1472,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     # но Google читает не его, а разметку.
     crumbs = [("Home", "/"), (make, f"/{slug(s['make'])}/"), (f"{model} {years}", None)]
     return page_shell(title, desc, "\n".join(body), f"{DOMAIN}/{slug_self}/",
-                      gen=True, crumbs=crumbs)
+                      script=ODO_JS, gen=True, crumbs=crumbs)
 
 
 # ---------------------------------------------------------------- institutional pages

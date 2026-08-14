@@ -1,0 +1,632 @@
+[
+ {
+  "a": {
+   "make": "Ford",
+   "model": "Explorer",
+   "y0": 2011,
+   "y1": 2019,
+   "url": "/ford-explorer-2011-2019/",
+   "n": 9738
+  },
+  "b": {
+   "make": "Jeep",
+   "model": "Grand Cherokee",
+   "y0": 2011,
+   "y1": 2020,
+   "url": "/jeep-grand-cherokee-2011-2020/",
+   "n": 8252
+  },
+  "overlap_years": 9,
+  "compare_url": "/compare/ford-explorer-2011-2019-vs-jeep-grand-cherokee-2011-2020/",
+  "why": "Midsize SUV: adventure-image Jeep versus mainstream Explorer at similar used price points."
+ },
+ {
+  "a": {
+   "make": "Chevrolet",
+   "model": "Traverse",
+   "y0": 2009,
+   "y1": 2017,
+   "url": "/chevrolet-traverse-2009-2017/",
+   "n": 3713
+  },
+  "b": {
+   "make": "Ford",
+   "model": "Explorer",
+   "y0": 2011,
+   "y1": 2019,
+   "url": "/ford-explorer-2011-2019/",
+   "n": 9738
+  },
+  "overlap_years": 7,
+  "compare_url": "/compare/chevrolet-traverse-2009-2017-vs-ford-explorer-2011-2019/",
+  "why": "Midsize SUV: domestic three-row rivals cross-shopped on space and towing for the money."
+ },
+ {
+  "a": {
+   "make": "Ford",
+   "model": "Explorer",
+   "y0": 2011,
+   "y1": 2019,
+   "url": "/ford-explorer-2011-2019/",
+   "n": 9738
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Highlander",
+   "y0": 2014,
+   "y1": 2019,
+   "url": "/toyota-highlander-2014-2019/",
+   "n": 885
+  },
+  "overlap_years": 6,
+  "compare_url": "/compare/ford-explorer-2011-2019-vs-toyota-highlander-2014-2019/",
+  "why": "Cheaper, plentiful Explorer vs the Highlander's reliability premium — a classic budget-vs-longevity call."
+ },
+ {
+  "a": {
+   "make": "Hyundai",
+   "model": "Sonata",
+   "y0": 2006,
+   "y1": 2010,
+   "url": "/hyundai-sonata-2006-2010/",
+   "n": 3175
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Camry",
+   "y0": 2007,
+   "y1": 2011,
+   "url": "/toyota-camry-2007-2011/",
+   "n": 5795
+  },
+  "overlap_years": 4,
+  "compare_url": "/compare/hyundai-sonata-2006-2010-vs-toyota-camry-2007-2011/",
+  "why": "Value-priced midsize vs the segment benchmark; a staple of used-sedan buying guides."
+ },
+ {
+  "a": {
+   "make": "Jeep",
+   "model": "Grand Cherokee",
+   "y0": 2011,
+   "y1": 2020,
+   "url": "/jeep-grand-cherokee-2011-2020/",
+   "n": 8252
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "4Runner",
+   "y0": 2010,
+   "y1": 2024,
+   "url": "/toyota-4runner-2010-2024/",
+   "n": 541
+  },
+  "overlap_years": 10,
+  "compare_url": "/compare/jeep-grand-cherokee-2011-2020-vs-toyota-4runner-2010-2024/",
+  "why": "Comfort and price vs body-on-frame longevity in the used midsize-SUV aisle."
+ },
+ {
+  "a": {
+   "make": "Chevrolet",
+   "model": "Malibu",
+   "y0": 2016,
+   "y1": 2025,
+   "url": "/chevrolet-malibu-2016-2025/",
+   "n": 2277
+  },
+  "b": {
+   "make": "Ford",
+   "model": "Fusion",
+   "y0": 2013,
+   "y1": 2020,
+   "url": "/ford-fusion-2013-2020/",
+   "n": 6011
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/chevrolet-malibu-2016-2025-vs-ford-fusion-2013-2020/",
+  "why": "Midsize sedan: the two discontinued domestic midsizers that dominate budget used-sedan searches."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "Accord",
+   "y0": 2013,
+   "y1": 2017,
+   "url": "/honda-accord-2013-2017/",
+   "n": 3156
+  },
+  "b": {
+   "make": "Nissan",
+   "model": "Altima",
+   "y0": 2013,
+   "y1": 2018,
+   "url": "/nissan-altima-2013-2018/",
+   "n": 4516
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/honda-accord-2013-2017-vs-nissan-altima-2013-2018/",
+  "why": "Altima's lower used prices vs the Accord's reputation — shoppers search whether the CVT is worth the savings."
+ },
+ {
+  "a": {
+   "make": "Ford",
+   "model": "F-150",
+   "y0": 2015,
+   "y1": 2020,
+   "url": "/ford-f-150-2015-2020/",
+   "n": 5591
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Tundra",
+   "y0": 2007,
+   "y1": 2021,
+   "url": "/toyota-tundra-2007-2021/",
+   "n": 1821
+  },
+  "overlap_years": 6,
+  "compare_url": "/compare/ford-f-150-2015-2020-vs-toyota-tundra-2007-2021/",
+  "why": "Full-size truck: Tundra's longevity reputation versus F-150's range and availability."
+ },
+ {
+  "a": {
+   "make": "Jeep",
+   "model": "Wrangler",
+   "y0": 2007,
+   "y1": 2017,
+   "url": "/jeep-wrangler-2007-2017/",
+   "n": 6125
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "4Runner",
+   "y0": 2010,
+   "y1": 2024,
+   "url": "/toyota-4runner-2010-2024/",
+   "n": 541
+  },
+  "overlap_years": 8,
+  "compare_url": "/compare/jeep-wrangler-2007-2017-vs-toyota-4runner-2010-2024/",
+  "why": "Off-road icons that hold value like nothing else; constant r/whatcarshouldibuy matchup."
+ },
+ {
+  "a": {
+   "make": "Nissan",
+   "model": "Frontier",
+   "y0": 2005,
+   "y1": 2021,
+   "url": "/nissan-frontier-2005-2021/",
+   "n": 2660
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Tacoma",
+   "y0": 2005,
+   "y1": 2015,
+   "url": "/toyota-tacoma-2005-2015/",
+   "n": 3800
+  },
+  "overlap_years": 11,
+  "compare_url": "/compare/nissan-frontier-2005-2021-vs-toyota-tacoma-2005-2015/",
+  "why": "The 'Tacoma tax' question: pay the resale premium or get the same-era Frontier for thousands less."
+ },
+ {
+  "a": {
+   "make": "Nissan",
+   "model": "Altima",
+   "y0": 2013,
+   "y1": 2018,
+   "url": "/nissan-altima-2013-2018/",
+   "n": 4516
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Camry",
+   "y0": 2012,
+   "y1": 2017,
+   "url": "/toyota-camry-2012-2017/",
+   "n": 1850
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/nissan-altima-2013-2018-vs-toyota-camry-2012-2017/",
+  "why": "Midsize sedan: Altima undercuts Camry on used price for the same commuter mission."
+ },
+ {
+  "a": {
+   "make": "Chevrolet",
+   "model": "Silverado 1500",
+   "y0": 1999,
+   "y1": 2006,
+   "url": "/chevrolet-silverado-1500-1999-2006/",
+   "n": 4742
+  },
+  "b": {
+   "make": "GMC",
+   "model": "Sierra 1500",
+   "y0": 1999,
+   "y1": 2006,
+   "url": "/gmc-sierra-1500-1999-2006/",
+   "n": 1412
+  },
+  "overlap_years": 8,
+  "compare_url": "/compare/chevrolet-silverado-1500-1999-2006-vs-gmc-sierra-1500-1999-2006/",
+  "why": "Full-size truck: GM twins cross-shopped purely on trim, condition, and price."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "CR-V",
+   "y0": 2007,
+   "y1": 2011,
+   "url": "/honda-cr-v-2007-2011/",
+   "n": 2241
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "RAV4",
+   "y0": 2006,
+   "y1": 2012,
+   "url": "/toyota-rav4-2006-2012/",
+   "n": 3336
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/honda-cr-v-2007-2011-vs-toyota-rav4-2006-2012/",
+  "why": "Compact SUV: the two best-selling compact crossovers, the default used-SUV comparison."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "Civic",
+   "y0": 2006,
+   "y1": 2011,
+   "url": "/honda-civic-2006-2011/",
+   "n": 4056
+  },
+  "b": {
+   "make": "Mazda",
+   "model": "Mazda3",
+   "y0": 2004,
+   "y1": 2009,
+   "url": "/mazda-mazda3-2004-2009/",
+   "n": 1108
+  },
+  "overlap_years": 4,
+  "compare_url": "/compare/honda-civic-2006-2011-vs-mazda-mazda3-2004-2009/",
+  "why": "Compact sedan: cross-shopped by buyers wanting a sportier, nicer-cabin compact."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "CR-V",
+   "y0": 2017,
+   "y1": 2022,
+   "url": "/honda-cr-v-2017-2022/",
+   "n": 3253
+  },
+  "b": {
+   "make": "Subaru",
+   "model": "Forester",
+   "y0": 2019,
+   "y1": 2024,
+   "url": "/subaru-forester-2019-2024/",
+   "n": 952
+  },
+  "overlap_years": 4,
+  "compare_url": "/compare/honda-cr-v-2017-2022-vs-subaru-forester-2019-2024/",
+  "why": "Compact SUV: standard AWD Forester versus CR-V for snow-belt family buyers."
+ },
+ {
+  "a": {
+   "make": "Chevrolet",
+   "model": "Tahoe",
+   "y0": 2007,
+   "y1": 2014,
+   "url": "/chevrolet-tahoe-2007-2014/",
+   "n": 2731
+  },
+  "b": {
+   "make": "Ford",
+   "model": "Expedition",
+   "y0": 2007,
+   "y1": 2017,
+   "url": "/ford-expedition-2007-2017/",
+   "n": 1339
+  },
+  "overlap_years": 8,
+  "compare_url": "/compare/chevrolet-tahoe-2007-2014-vs-ford-expedition-2007-2017/",
+  "why": "Full-size family/tow haulers with deep used inventory; 5.3L V8 vs EcoBoost is a standing debate."
+ },
+ {
+  "a": {
+   "make": "Hyundai",
+   "model": "Sonata",
+   "y0": 2006,
+   "y1": 2010,
+   "url": "/hyundai-sonata-2006-2010/",
+   "n": 3175
+  },
+  "b": {
+   "make": "Kia",
+   "model": "Optima",
+   "y0": 2006,
+   "y1": 2010,
+   "url": "/kia-optima-2006-2010/",
+   "n": 700
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/hyundai-sonata-2006-2010-vs-kia-optima-2006-2010/",
+  "why": "Midsize sedan: platform siblings with identical value pitch, shoppers pick on price and trim."
+ },
+ {
+  "a": {
+   "make": "Hyundai",
+   "model": "Elantra",
+   "y0": 2011,
+   "y1": 2016,
+   "url": "/hyundai-elantra-2011-2016/",
+   "n": 2778
+  },
+  "b": {
+   "make": "Kia",
+   "model": "Forte",
+   "y0": 2014,
+   "y1": 2018,
+   "url": "/kia-forte-2014-2018/",
+   "n": 923
+  },
+  "overlap_years": 3,
+  "compare_url": "/compare/hyundai-elantra-2011-2016-vs-kia-forte-2014-2018/",
+  "why": "Compact sedan: corporate twins competing on warranty balance and lowest used price."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "Civic",
+   "y0": 2001,
+   "y1": 2005,
+   "url": "/honda-civic-2001-2005/",
+   "n": 2436
+  },
+  "b": {
+   "make": "Hyundai",
+   "model": "Elantra",
+   "y0": 2001,
+   "y1": 2006,
+   "url": "/hyundai-elantra-2001-2006/",
+   "n": 1257
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/honda-civic-2001-2005-vs-hyundai-elantra-2001-2006/",
+  "why": "Budget compact face-off: cheaper Elantra with more features vs the Civic's resale and reputation."
+ },
+ {
+  "a": {
+   "make": "Nissan",
+   "model": "Sentra",
+   "y0": 2013,
+   "y1": 2019,
+   "url": "/nissan-sentra-2013-2019/",
+   "n": 1952
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Corolla",
+   "y0": 2014,
+   "y1": 2019,
+   "url": "/toyota-corolla-2014-2019/",
+   "n": 1002
+  },
+  "overlap_years": 6,
+  "compare_url": "/compare/nissan-sentra-2013-2019-vs-toyota-corolla-2014-2019/",
+  "why": "Compact sedan: budget commuter pick where Sentra's discount meets Corolla's reputation."
+ },
+ {
+  "a": {
+   "make": "Chrysler",
+   "model": "Pacifica",
+   "y0": 2017,
+   "y1": 2025,
+   "url": "/chrysler-pacifica-2017-2025/",
+   "n": 2057
+  },
+  "b": {
+   "make": "Honda",
+   "model": "Odyssey",
+   "y0": 2018,
+   "y1": 2025,
+   "url": "/honda-odyssey-2018-2025/",
+   "n": 781
+  },
+  "overlap_years": 8,
+  "compare_url": "/compare/chrysler-pacifica-2017-2025-vs-honda-odyssey-2018-2025/",
+  "why": "Minivan: Pacifica's features and Stow 'n Go versus Odyssey's durability record."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "Odyssey",
+   "y0": 2011,
+   "y1": 2017,
+   "url": "/honda-odyssey-2011-2017/",
+   "n": 1307
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Sienna",
+   "y0": 2011,
+   "y1": 2020,
+   "url": "/toyota-sienna-2011-2020/",
+   "n": 1260
+  },
+  "overlap_years": 7,
+  "compare_url": "/compare/honda-odyssey-2011-2017-vs-toyota-sienna-2011-2020/",
+  "why": "Minivan: the two default family haulers, compared on AWD availability and reliability."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "Civic",
+   "y0": 2016,
+   "y1": 2021,
+   "url": "/honda-civic-2016-2021/",
+   "n": 1474
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Corolla",
+   "y0": 2014,
+   "y1": 2019,
+   "url": "/toyota-corolla-2014-2019/",
+   "n": 1002
+  },
+  "overlap_years": 4,
+  "compare_url": "/compare/honda-civic-2016-2021-vs-toyota-corolla-2014-2019/",
+  "why": "Compact sedan: the classic first-car/commuter duel on resale value and running costs."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "Pilot",
+   "y0": 2009,
+   "y1": 2015,
+   "url": "/honda-pilot-2009-2015/",
+   "n": 1105
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Highlander",
+   "y0": 2008,
+   "y1": 2013,
+   "url": "/toyota-highlander-2008-2013/",
+   "n": 1311
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/honda-pilot-2009-2015-vs-toyota-highlander-2008-2013/",
+  "why": "Midsize SUV: the two three-row family staples compared on reliability and resale."
+ },
+ {
+  "a": {
+   "make": "Honda",
+   "model": "Accord",
+   "y0": 2018,
+   "y1": 2022,
+   "url": "/honda-accord-2018-2022/",
+   "n": 1394
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "Camry",
+   "y0": 2018,
+   "y1": 2024,
+   "url": "/toyota-camry-2018-2024/",
+   "n": 871
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/honda-accord-2018-2022-vs-toyota-camry-2018-2024/",
+  "why": "Midsize sedan: the definitive reliability-first family sedan showdown every US shopper compares."
+ },
+ {
+  "a": {
+   "make": "Chevrolet",
+   "model": "Silverado 1500",
+   "y0": 2019,
+   "y1": 2025,
+   "url": "/chevrolet-silverado-1500-2019-2025/",
+   "n": 1414
+  },
+  "b": {
+   "make": "Ford",
+   "model": "F-150",
+   "y0": 2021,
+   "y1": 2025,
+   "url": "/ford-f-150-2021-2025/",
+   "n": 569
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/chevrolet-silverado-1500-2019-2025-vs-ford-f-150-2021-2025/",
+  "why": "Full-size truck: America's two best-selling pickups, the archetypal brand-loyalty duel."
+ },
+ {
+  "a": {
+   "make": "Subaru",
+   "model": "Forester",
+   "y0": 2019,
+   "y1": 2024,
+   "url": "/subaru-forester-2019-2024/",
+   "n": 952
+  },
+  "b": {
+   "make": "Subaru",
+   "model": "Outback",
+   "y0": 2020,
+   "y1": 2025,
+   "url": "/subaru-outback-2020-2025/",
+   "n": 679
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/subaru-forester-2019-2024-vs-subaru-outback-2020-2025/",
+  "why": "The same-brand cross-shop Subaru buyers agonize over: wagon ride vs boxy SUV practicality."
+ },
+ {
+  "a": {
+   "make": "Chevrolet",
+   "model": "Camaro",
+   "y0": 2016,
+   "y1": 2024,
+   "url": "/chevrolet-camaro-2016-2024/",
+   "n": 337
+  },
+  "b": {
+   "make": "Ford",
+   "model": "Mustang",
+   "y0": 2015,
+   "y1": 2023,
+   "url": "/ford-mustang-2015-2023/",
+   "n": 1089
+  },
+  "overlap_years": 8,
+  "compare_url": "/compare/chevrolet-camaro-2016-2024-vs-ford-mustang-2015-2023/",
+  "why": "The eternal pony-car rivalry; deep used inventory of V6 and V8 examples from every model year."
+ },
+ {
+  "a": {
+   "make": "Chevrolet",
+   "model": "Equinox",
+   "y0": 2018,
+   "y1": 2024,
+   "url": "/chevrolet-equinox-2018-2024/",
+   "n": 651
+  },
+  "b": {
+   "make": "Ford",
+   "model": "Escape",
+   "y0": 2020,
+   "y1": 2025,
+   "url": "/ford-escape-2020-2025/",
+   "n": 724
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/chevrolet-equinox-2018-2024-vs-ford-escape-2020-2025/",
+  "why": "Compact SUV: the domestic value alternatives cross-shopped on price per year of age."
+ },
+ {
+  "a": {
+   "make": "Nissan",
+   "model": "Rogue",
+   "y0": 2021,
+   "y1": 2025,
+   "url": "/nissan-rogue-2021-2025/",
+   "n": 354
+  },
+  "b": {
+   "make": "Toyota",
+   "model": "RAV4",
+   "y0": 2019,
+   "y1": 2025,
+   "url": "/toyota-rav4-2019-2025/",
+   "n": 796
+  },
+  "overlap_years": 5,
+  "compare_url": "/compare/nissan-rogue-2021-2025-vs-toyota-rav4-2019-2025/",
+  "why": "Compact SUV: Rogue's lower used prices lure shoppers otherwise set on a RAV4."
+ }
+]
