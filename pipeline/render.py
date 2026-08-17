@@ -2043,6 +2043,16 @@ def main() -> int:
     # Никаких catch-all правил: неизвестный адрес должен отдавать 404.html,
     # а не главную с кодом 200 — это блокер при проверке AdSense.
     (DIST / "_redirects").write_text("/index.html  /  301\n", encoding="utf-8")
+    # Защитные заголовки, управляемые из кода (Cloudflare Pages читает _headers).
+    # HSTS безопасен: сайт живёт только на https, поддомен www — тоже https.
+    (DIST / "_headers").write_text(
+        "/*\n"
+        "  Strict-Transport-Security: max-age=31536000; includeSubDomains\n"
+        "  X-Frame-Options: DENY\n"
+        "  X-Content-Type-Options: nosniff\n"
+        "  Referrer-Policy: strict-origin-when-cross-origin\n"
+        "  Permissions-Policy: camera=(), microphone=(), geolocation=(), "
+        "interest-cohort=()\n", encoding="utf-8")
 
     (DIST / "sitemap.xml").write_text(render_sitemap(index), encoding="utf-8")
     (DIST / "robots.txt").write_text(
