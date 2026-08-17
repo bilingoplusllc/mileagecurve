@@ -103,6 +103,12 @@ def lead_paragraph(s: dict, gen: dict) -> str:
         out.append(f'{s["recalls_count"]} recall campaign'
                    f'{"s" if s["recalls_count"] != 1 else ""} cover this generation.{sev}')
 
+    # Семья запросов «is it reliable?»: слово «reliable» появляется ТОЛЬКО
+    # в кавычках как вопрос читателя, никогда как наш вердикт (D-007).
+    out.append('If you arrived asking &ldquo;is it reliable?&rdquo; &mdash; this page answers '
+               'the version of that question the data can support: which problems owners '
+               'reported, and at what mileage.')
+
     if gen.get("mixed_years"):
         yrs = ", ".join(str(y) for y in gen["mixed_years"])
         out.append(f'<mark>Note: in {yrs}, both this generation and the previous one were sold '
@@ -1013,9 +1019,10 @@ AD_DISCLOSURE = ("<p>This site carries third-party display advertising. Advertis
 AD_LABEL = '<span class="ad-label">Advertisement</span>' if ADS_LIVE else ""
 ADS_TXT = "google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0\n"  # вместе с ADS_LIVE
 
-JUMP_SECTIONS = (("buy", "Before you buy"), ("fails", "What fails, and when"),
-                 ("mileage", "Where your car sits"), ("years", "By model year"),
-                 ("recalls", "Recalls"), ("owners", "What owners reported"))
+JUMP_SECTIONS = (("lifespan", "How many miles?"), ("buy", "Before you buy"),
+                 ("fails", "What fails, and when"), ("mileage", "Where your car sits"),
+                 ("years", "By model year"), ("recalls", "Recalls"),
+                 ("owners", "What owners reported"))
 
 
 def _jump(parts: list[str]) -> str:
@@ -1226,15 +1233,30 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     make, model = names.display(s["make"]), names.display(s["model"])
     years = f'{s["year_start"]}–{s["year_end"]}'
     head = f"{make} {model} {years}"
-    # 54 заголовка вылезали за 60 знаков и обрезались в выдаче.
-    title = (f"{head} — what breaks and at what mileage" if len(head) <= 26
-             else f"{head} — common problems by mileage")
-    desc = (f'{fmt(s["complaints_with_miles"])} NHTSA complaints with mileage for the '
-            f'{years} {make} {model}: when each system fails, recalls, and what it means '
-            f'if you are buying one.')
+    sh = s["shape"]
+    # Семья запросов «how many miles does it last» доминирует в Search Console,
+    # а старые заголовки её не говорили. Заголовок задаёт вопрос читателя;
+    # честный ответ (отчёты, не срок службы) живёт в блоке #lifespan.
+    # Замерено по всем 318 реальным head: 48–59 знаков — не режется в выдаче.
+    title = (f"{head} — how many miles does it last?" if len(head) <= 28
+             else f"{head}: how long does it last?")
+    # Описание открывается точным ответом языком отчётов («reports … came by»,
+    # никогда «lasts»), несёт «common problems» для второй семьи запросов и
+    # обещает recalls только там, где раздел существует (54 страницы без
+    # кампаний). Хвосты одной длины, чтобы ветка без отзывов не переполнялась.
+    # Замерено: 139–159 знаков на всех 318 страницах, все уникальны.
+    _med, _p90 = sh.get("median"), sh.get("p90")
+    if _med and _p90:
+        _tail = 'the recalls' if s["recalls_count"] else 'a checklist'
+        desc = (f'Half of {fmt(s["complaints_with_miles"])} failure reports on the {years} '
+                f'{make} {model} came by {fmt(names.round_miles(_med))} miles, 90% by '
+                f'{fmt(names.round_miles(_p90))} — plus common problems by system and {_tail}.')
+    else:  # страховка: сегодня все 318 страниц имеют median и p90
+        desc = (f'{fmt(s["complaints_with_miles"])} NHTSA complaints with mileage for the '
+                f'{years} {make} {model}: when each system fails, and what it means '
+                f'if you are buying one.')
     slug_self = slug(s["make"], s["model"], s["year_start"], s["year_end"])
     make_slug = slug(s["make"])
-    sh = s["shape"]
 
     B = [f'<ol class="crumbs"><li><a href="/">Home</a></li>'
          f'<li><a href="/{make_slug}/">{esc(make)}</a></li>'
@@ -1302,6 +1324,27 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
              'by being common. <a href="/methodology/">How this is built</a>.</p>')
 
     B.append(f'<div class="card finding">{lead_paragraph(s, gen)}</div>')
+
+    # Ответ на доминирующий запрос «сколько миль проходит». Одна цитируемая
+    # карточка: ответ первым, оговорка о выживаемости — придаточным ВНУТРИ
+    # того же предложения (клип сниппета не оторвёт числа от оговорки),
+    # доказательство выносливости — вторым абзацем: жалоба на 220 000 миль
+    # доказывает, что машина ДОЕХАЛА до 220 000, а не что умерла там.
+    if sh.get("median") and sh.get("p90") and s["histogram"]:
+        _ovf = s["histogram"]["overflow"]
+        B.append(f'<h2 id="lifespan">How many miles does a {years} {esc(make)} '
+                 f'{esc(model)} last?</h2>')
+        _endure = (f'<p>{fmt(_ovf["count"])} report{"s" if _ovf["count"] != 1 else ""} '
+                   f'({_ovf["pct"]:g}%) came in past {fmt(_ovf["lo"])} miles &mdash; each one '
+                   f'proof a {esc(model)} reached that mileage, not that it died there.</p>'
+                   if _ovf["count"] else "")
+        B.append(f'<div class="card"><p>Half of the failure reports on the {years} '
+                 f'{esc(make)} {esc(model)} were filed by '
+                 f'<strong>{fmt(names.round_miles(sh["median"]))} miles</strong> and 90% by '
+                 f'<strong>{fmt(names.round_miles(sh["p90"]))} miles</strong> &mdash; figures '
+                 f'drawn from {fmt(s["complaints_with_miles"])} NHTSA complaints that record '
+                 f'an odometer reading, so they time reported failures, not the cars whose '
+                 f'owners never filed one.</p>{_endure}</div>')
 
     # Проверка перед покупкой: персона стоит на площадке с телефоном, у неё
     # три минуты. Раздел «What this means if you are buying one» влит сюда —
