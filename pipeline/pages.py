@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import html
 import charts
+import glyphs
 import names
 
 from datetime import date
@@ -65,7 +66,9 @@ def make_hub(make_raw: str, pages: list[dict], shell) -> str:
              'Compare generations of similar age.</p>')
     for model in sorted(by_model):
         rows = sorted(by_model[model], key=lambda p: p["y0"])
-        B.append(f'<h2>{esc(model)}</h2>')
+        _g = glyphs.glyph(make_raw, rows[0]["model"])
+        B.append(f'<h2 class="h2-glyph">{_g}<span>{esc(model)}</span></h2>'
+                 if _g else f'<h2>{esc(model)}</h2>')
         key = ('<span><span>Generation</span><i>Reports</i><i>Median</i></span>')
         B.append(f'<div class="gen-key gk1" aria-hidden="true">{key}</div>')
         B.append('<ul class="gens gr">')

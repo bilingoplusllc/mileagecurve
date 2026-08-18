@@ -1,0 +1,74 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MileageCurve body-style glyphs — final verification</title>
+<style>
+:root{--bg:#fbfbfa;--surface:#fff;--ink:#181c1b;--muted:#5a6360;--line:#d5dbd9;
+ --accent:#0f6e5e;--bar:#758a85;
+ --serif:Georgia,"Times New Roman",serif;--sans:system-ui,"Segoe UI",Roboto,sans-serif;
+ --s-1:4px;--s-2:8px;--s-3:16px;--f-xs:13px;--f-2xl:34px}
+.dark{--bg:#111413;--surface:#191d1c;--ink:#e6eae8;--muted:#9aa5a1;--line:#2f3634;
+ --accent:#4fc0aa;--bar:#667672}
+body{margin:0;font-family:var(--sans);background:#888}
+section.theme{background:var(--bg);color:var(--ink);padding:24px 32px 40px}
+h2{font-family:var(--serif);font-size:20px;margin:24px 0 8px}
+table{border-collapse:collapse}
+td,th{padding:6px 14px;text-align:center;font-size:12px;color:var(--muted);
+ border-bottom:1px solid var(--line)}
+th{text-transform:uppercase;letter-spacing:.06em;font-size:11px}
+.vglyph{color:var(--bar);display:block;margin:0 auto}
+td .vglyph{height:auto;aspect-ratio:48/20}
+/* placement mocks */
+.pagebox{max-width:680px;background:var(--bg);border:1px dashed var(--line);padding:16px;margin:12px 0}
+.m360{max-width:360px}
+h1{font-family:var(--serif);font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.12;
+ letter-spacing:-.018em;font-weight:700;margin:0 0 var(--s-2);max-width:22ch}
+.h1-years{font-family:var(--sans);font-weight:400;font-size:.72em;color:var(--muted);
+ font-variant-numeric:tabular-nums;white-space:nowrap}
+.h1-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);margin:0 0 var(--s-2)}
+.h1-row h1{margin:0;min-width:0}
+.h1-row .vglyph{flex:none;width:52px;height:auto;aspect-ratio:48/20;margin:0}
+.h1-row.vend{align-items:flex-end}
+.h1-row.vend .vglyph{margin-bottom:.35rem}
+.m360 .h1-row .vglyph{width:40px}
+h2.h2-glyph{display:flex;align-items:center;gap:.5em;margin:16px 0 8px}
+h2.h2-glyph .vglyph{flex:none;width:30px;height:auto;aspect-ratio:48/20;margin:0}
+.lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 4px}
+</style>
+<body>
+<script>
+const BODIES={
+ sedan:"M2 12.5L3 8L14 8L18 4L30 4L34 8L44 8L46 10.5L46 12.5Z",
+ coupe:"M2 12.5L3 8L16 8L21 4L27 4L38 8.5L44 8.5L46 11L46 12.5Z",
+ wagon:"M2 12.5L3 8L14 8L18 4L40 4L43 7L44 12.5Z",
+ hatchback:"M2 12.5L3 8L14 8L18 4L34 4L42 10.5L42 12.5Z",
+ suv:"M2 12.5L3 6L13 6L17 2L41 2L45 6L45 12.5Z",
+ minivan:"M2 12.5L3 8L7 8L15 2L43 2L45 4L45 12.5Z",
+ pickup:"M2 12.5L3 6L13 6L17 2L26 2L26 8L45 8L45 12.5Z",
+ van:"M2 12.5L2 6L5 6L9 1L45 1L45 12.5Z"};
+const WHEELS="M8 15a3 3 0 1 1 6 0a3 3 0 1 1-6 0Zm1.8 0a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0Z"+
+ "M34 15a3 3 0 1 1 6 0a3 3 0 1 1-6 0Zm1.8 0a1.2 1.2 0 1 0 2.4 0a1.2 1.2 0 1 0-2.4 0Z";
+const svg=(s,w)=>`<svg class="vglyph" viewBox="0 0 48 20" style="width:${w}px" aria-hidden="true"><path fill="currentColor" d="${BODIES[s]}${WHEELS}"/></svg>`;
+const ORDER=["sedan","coupe","wagon","hatchback","suv","minivan","pickup","van"];
+function theme(cls,label){
+ let h=`<section class="theme ${cls}"><h2>${label}</h2><table><tr><th></th>`;
+ for(const s of ORDER)h+=`<th>${s}</th>`;h+="</tr>";
+ for(const w of[48,32,24]){h+=`<tr><th>${w}px</th>`;
+  for(const s of ORDER)h+=`<td>${svg(s,w)}</td>`;h+="</tr>"}
+ h+="</table>";
+ h+=`<div class="lbl">Placement 1 — generation H1, desktop (52px, align-items:center)</div>
+ <div class="pagebox"><div class="h1-row"><h1>Toyota Camry <span class="h1-years">2018–2024</span></h1>${svg("sedan",52)}</div></div>
+ <div class="lbl">Placement 1 — 360px, two-line title — SHIPPED: align-items:center</div>
+ <div class="pagebox m360"><div class="h1-row"><h1>Chevrolet Silverado 1500 <span class="h1-years">2019–2025</span></h1>${svg("pickup",40)}</div></div>
+ <div class="lbl">Rejected variant: flex-end + .35rem — glyph detaches to the years line (verified in Chrome 2026-08-18)</div>
+ <div class="pagebox m360"><div class="h1-row vend"><h1>Chevrolet Silverado 1500 <span class="h1-years">2019–2025</span></h1>${svg("pickup",40)}</div></div>
+ <div class="lbl">Placement 2 — make hub H2 (30px)</div>
+ <div class="pagebox">
+  <h2 class="h2-glyph">${svg("suv",30)}<span style="font-family:var(--serif)">4Runner</span></h2>
+  <h2 class="h2-glyph">${svg("pickup",30)}<span style="font-family:var(--serif)">Tacoma</span></h2>
+  <h2 class="h2-glyph">${svg("minivan",30)}<span style="font-family:var(--serif)">Sienna</span></h2>
+ </div></section>`;
+ return h}
+document.body.innerHTML=theme("","Light")+theme("dark","Dark");
+</script>
+</body>
