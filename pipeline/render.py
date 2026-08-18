@@ -20,7 +20,6 @@ from pathlib import Path
 
 import analyze
 import charts
-import glyphs
 import pages
 import names
 import search
@@ -265,18 +264,6 @@ header.site nav a[aria-current="page"]{color:var(--ink);border-bottom-color:var(
    Ограничивать нужно колонку, а не сам блок с линией. */
 h1{font-family:var(--serif);font-size:clamp(28px,4.6vw,var(--f-2xl));line-height:1.12;
   letter-spacing:-.018em;font-weight:700;margin:0 0 var(--s-2);max-width:22ch}
-/* Глиф кузова. currentColor + токен --bar: тон гистограмм — «мебель», ниже
-   текста в иерархии. Тёмная тема бесплатно через токен. Размер только здесь:
-   у <svg> нет width/height, без CSS он развернулся бы в 300×150. */
-.vglyph{color:var(--bar);flex:none;height:auto;aspect-ratio:48/20}
-.h1-row{display:flex;align-items:center;justify-content:space-between;
-  gap:var(--s-3);margin:0 0 var(--s-2)}
-.h1-row h1{margin:0;min-width:0}
-.h1-row .vglyph{width:52px}
-@media(max-width:419px){.h1-row .vglyph{width:40px}}
-h2.h2-glyph{display:flex;align-items:center;gap:.5em}
-h2.h2-glyph .vglyph{width:30px}
-
 /* Цифры — всегда гротеском: у Georgia минускульные цифры, и «2010–2015»
    в засечках прыгает по базовой линии. */
 .h1-years{font-family:var(--sans);font-weight:400;font-size:.72em;color:var(--muted);
@@ -1274,11 +1261,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     B = [f'<ol class="crumbs"><li><a href="/">Home</a></li>'
          f'<li><a href="/{make_slug}/">{esc(make)}</a></li>'
          f'<li>{esc(model)} {years}</li></ol>']
-    # Глиф кузова: справа от H1, тоном гистограмм (--bar). Если пары нет
-    # в body_styles.json — рендерим ровно прежний <h1>, без обёртки.
-    _g = glyphs.glyph(s["make"], s["model"])
-    _h1 = f'<h1>{esc(make)} {esc(model)} <span class="h1-years">{years}</span></h1>'
-    B.append(f'<div class="h1-row">{_h1}{_g}</div>' if _g else _h1)
+    B.append(f'<h1>{esc(make)} {esc(model)} <span class="h1-years">{years}</span></h1>')
 
     plat = gen.get("platform_code")
     bits = [esc(gen.get("gen_label", ""))]
