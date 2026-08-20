@@ -165,3 +165,57 @@ def render_terms(shell) -> str:
          f'<h2>Contact</h2><p><a href="/contact/">Get in touch</a> · {OWNER}.</p>']
     return shell(f"Terms — {SITE}", f"Terms of use for {SITE}.",
                  "\n".join(B), f"{DOMAIN}/terms/")
+
+def render_vehicles_index(index: list[dict], shell) -> str:
+    """Полный каталог: каждое поколение получает ссылку с одной страницы.
+
+    Сгруппировано по марке, внутри — по модели и году. Строка несёт годы,
+    число отчётов с пробегом и медиану: список, который сам по себе отвечает
+    на вопрос «что тут есть», а не только раздаёт ссылки.
+    """
+    by_make: dict[str, dict[str, list[dict]]] = {}
+    for pg in index:
+        by_make.setdefault(names.display(pg["make"]), {}) \
+               .setdefault(names.display(pg["model"]), []).append(pg)
+
+    total = sum(pg["n"] for pg in index)
+    makes = sorted(by_make)
+
+    B = [f'<ol class="crumbs"><li><a href="/">Home</a></li><li>All vehicles</li></ol>',
+         "<h1>All vehicles</h1>",
+         f'<p class="sub">Every generation covered here &mdash; {len(index)} of them across '
+         f'{len(makes)} makes, built from {fmt(total)} complaints that record mileage at '
+         f'failure. Median is the mileage by which half the reports on that generation had '
+         f'been filed.</p>']
+
+    # Алфавитный перескок: 40 марок — это длинная страница, и без него
+    # телефон листает вслепую.
+    jump = "".join(f'<a href="#{_slug(m)}">{esc(m)}</a>' for m in makes)
+    B.append(f'<nav class="qr-list" aria-label="Makes">{jump}</nav>')
+
+    for make in makes:
+        models = by_make[make]
+        gens = sum(len(v) for v in models.values())
+        B.append(f'<h2 id="{_slug(make)}"><a href="/{_slug(make)}/">{esc(make)}</a></h2>')
+        B.append(f'<p class="meta">{gens} generation{"s" if gens != 1 else ""} across '
+                 f'{len(models)} model{"s" if len(models) != 1 else ""}.</p>')
+        B.append('<ul class="gens gr">')
+        B.append('<li class="gen-key gk1"><span><span>Generation</span>'
+                 '<i>Reports</i><i>Median</i></span></li>')
+        for model in sorted(models):
+            for pg in sorted(models[model], key=lambda x: x["y0"]):
+                med = pg.get("median")
+                med_txt = f"{names.round_miles(med):,}" if med else "&mdash;"
+                B.append(f'<li><a href="{pg["url"]}">'
+                         f'<span class="gy">{esc(model)} {pg["y0"]}&#8211;{pg["y1"]}</span>'
+                         f'<span class="gn">{fmt(pg["n"])}</span>'
+                         f'<span class="gm">{med_txt}</span></a></li>')
+        B.append("</ul>")
+
+    B.append('<p class="prov">Every page here is generated from the NHTSA Office of Defects '
+             'Investigation dataset. <a href="/methodology/">How this is built</a></p>')
+
+    return shell(f"All vehicles &mdash; every generation covered | {SITE}",
+                 f"Complete index of {len(index)} vehicle generations across {len(makes)} makes, "
+                 f"with the mileage at which half of all failure reports had been filed.",
+                 "\n".join(B), f"{DOMAIN}/vehicles/", nav_key="home")

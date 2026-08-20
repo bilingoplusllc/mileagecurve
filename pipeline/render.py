@@ -30,6 +30,7 @@ DB = ROOT / "data" / "mileagecurve.db"
 GENS = ROOT / "data" / "generations.clean.json"
 DIST = ROOT / "dist"
 
+GA_ID = "G-WHE70YWW82"  # GA4, свойство MileageCurve в аккаунте BiLingoPlus
 SITE = "MileageCurve"
 TAGLINE = "What breaks, and at what mileage"
 OWNER = "BiLingoPlus LLC"
@@ -647,6 +648,7 @@ ul.rel a:hover{background:var(--track);border-color:var(--accent)}
   text-decoration:none;background:var(--accent);color:var(--bg)}
 .btn:hover{background:var(--accent-ink);border-color:var(--accent-ink)}
 .btn-ghost{background:var(--surface);color:var(--ink);border-color:var(--line-strong)}
+.warn-note{background:var(--warn);border-left:3px solid var(--accent);padding:10px var(--s-3);margin:0 0 var(--s-3);font-size:.94em}
 .btn-ghost:hover{background:var(--track);color:var(--ink);border-color:var(--accent)}
 @media(min-width:1180px){.snap-top,.snap-btns{display:none}}
 @media(max-width:379px){.snap-top{grid-template-columns:1fr}
@@ -1105,6 +1107,8 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' fill='%230f6e5e'/%3E%3Crect x='3' y='4' width='2.4' height='8' fill='%23fff'/%3E%3Crect x='6.6' y='8' width='2.4' height='4' fill='%23fff' opacity='.7'/%3E%3Crect x='10.2' y='9.5' width='2.4' height='2.5' fill='%23fff' opacity='.5'/%3E%3C/svg%3E">
 {ld}
+<script async src="https://www.googletagmanager.com/gtag/js?id={GA_ID}"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}gtag('consent','default',{{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'granted'}});gtag('consent','default',{{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied','region':["AT","BE","BG","HR","CY","CZ","DK","EE","FI","FR","DE","GR","HU","IE","IT","LV","LT","LU","MT","NL","PL","PT","RO","SK","SI","ES","SE","IS","LI","NO","GB","CH"]}});gtag('js',new Date());gtag('config','{GA_ID}');</script>
 <style>{strip_comments(css=CSS)}</style>
 </head><body>
 <a class="skip" href="#main">Skip to content</a>
@@ -1115,7 +1119,7 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
    y="6" width="3" height="9" fill="currentColor" opacity=".62"/><rect x="11" y="10" width="3"
    height="5" fill="currentColor" opacity=".38"/></svg>{SITE}</a>
   <span class="masthead-tag">{TAGLINE}</span>
-  <nav aria-label="Main"><a href="/"{_cur("home", nav_key)}>All vehicles</a><a
+  <nav aria-label="Main"><a href="/vehicles/"{_cur("home", nav_key)}>All vehicles</a><a
   href="/methodology/"{_cur("method", nav_key)}>Methodology</a><a
   href="/about/"{_cur("about", nav_key)}>About</a><a
   href="/privacy/"{_cur("privacy", nav_key)}>Privacy</a></nav>
@@ -1125,7 +1129,7 @@ def page_shell(title: str, desc: str, body: str, canonical: str,
 </main>
 <footer>
   <nav class="foot-nav" aria-label="Site">
-    <a href="/methodology/">Methodology</a><a href="/about/">About</a>
+    <a href="/vehicles/">All vehicles</a><a href="/methodology/">Methodology</a><a href="/about/">About</a>
     <a href="/privacy/">Privacy</a><a href="/terms/">Terms</a>
     <a href="/contact/">Contact</a><a href="/privacy/#us-state-rights">Your privacy choices</a><a href="mailto:{CONTACT}">{CONTACT}</a></nav>
   <p>Data: <a href="https://www.nhtsa.gov/nhtsa-datasets-and-apis">NHTSA Office of Defects
@@ -1338,7 +1342,25 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
                    f'({_ovf["pct"]:g}%) came in past {fmt(_ovf["lo"])} miles &mdash; each one '
                    f'proof a {esc(model)} reached that mileage, not that it died there.</p>'
                    if _ovf["count"] else "")
-        B.append(f'<div class="card"><p>Half of the failure reports on the {years} '
+        # Цензурирование возрастом. Молодой парк физически не мог дать больших
+        # пробегов, поэтому медиана у свежего поколения меряет возраст, а не
+        # выносливость. Оговорка стоит ПЕРЕД числами и в том же блоке: клип
+        # сниппета не оторвёт её, и глаз читает её раньше цифры.
+        _y1 = gen.get("year_end") or 0
+        _age = date.today().year - _y1
+        if _age <= 2:
+            _cap = (f'<p class="warn-note"><strong>Read this first:</strong> the {years} '
+                    f'{esc(model)} is still being built or has only just finished, so almost no '
+                    f'example has covered high mileage yet. The figures below are bounded by how '
+                    f'long these cars have been on the road, not by how long they last. Compare '
+                    f'them only with generations of a similar age.</p>')
+        elif _age <= 6:
+            _cap = (f'<p class="warn-note">The oldest {esc(model)} of this generation is about '
+                    f'{_age + 1} years old, so few examples have yet reached high mileage. These '
+                    f'figures are still partly a measure of fleet age, not only of durability.</p>')
+        else:
+            _cap = ""
+        B.append(f'<div class="card">{_cap}<p>Half of the failure reports on the {years} '
                  f'{esc(make)} {esc(model)} were filed by '
                  f'<strong>{fmt(names.round_miles(sh["median"]))} miles</strong> and 90% by '
                  f'<strong>{fmt(names.round_miles(sh["p90"]))} miles</strong> &mdash; figures '
@@ -1879,8 +1901,21 @@ def render_privacy() -> str:
          "<p>This site is a set of static pages. It has no accounts, no logins, no comment "
          "system and no newsletter, and it never asks you for personal information.</p>"
          "<p>The hosting provider keeps standard server request logs (page requested, referrer, "
-         "approximate location, browser type) for security and to see which pages are used. "
-         "There is no analytics script on this site and nothing here is used to identify you.</p>",
+         "approximate location, browser type) for security and to see which pages are used.</p>"
+         "<h2>Analytics</h2>"
+         "<p>This site uses Google Analytics 4 to count visits and see which pages are read. "
+         "It records the page you viewed, where you arrived from, your approximate location "
+         "derived from your IP address, and your browser and device type. Google Analytics 4 "
+         "does not log or store IP addresses. We never see your name, your email or anything "
+         "that identifies you personally, and we do not try to.</p>"
+         "<p>Outside the European Economic Area, the United Kingdom and Switzerland, Analytics "
+         "sets its own cookies to tell a returning visit from a new one. Inside those regions, "
+         "analytics storage is switched off by default, so no analytics cookie is set at all "
+         "unless and until you choose otherwise.</p>"
+         '<p>You can block Analytics everywhere with Google\'s official '
+         '<a href="https://tools.google.com/dlpage/gaoptout">opt-out browser add-on</a>, or by '
+         "using any browser setting or extension that blocks it. The site works exactly the "
+         "same either way.</p>",
          "<h2>Advertising</h2>"
          "<p>This site does not yet carry advertising and sets no cookies of its own. When "
          "advertising is added, partners may set cookies or use similar technology to serve and "
@@ -1894,7 +1929,7 @@ def render_privacy() -> str:
          "<p>Residents of California, Colorado, Connecticut, Virginia and other states with "
          "comprehensive privacy laws have rights to access, correct and delete personal "
          "information, and to opt out of its sale or of targeted advertising. This site does not "
-         "sell or share personal information and runs no advertising today. When advertising is "
+         "sell or share personal information, and runs no advertising today. When advertising is "
          "added, personalised ads count as sharing or targeted advertising under those laws, and "
          "an opt-out will be published here before any ad is served. To exercise a right or ask "
          f'what is held, write to <a href="mailto:{CONTACT}">{CONTACT}</a>.</p>',
@@ -1920,7 +1955,7 @@ def write_page(path: Path, content: str) -> None:
 def render_sitemap(index: list[dict]) -> str:
     today = date.today().isoformat()
     makes = sorted({p["make"] for p in index})
-    urls = (["/", "/methodology/", "/about/", "/privacy/", "/contact/", "/terms/"]
+    urls = (["/", "/vehicles/", "/methodology/", "/about/", "/privacy/", "/contact/", "/terms/"]
             + [f"/{slug(m)}/" for m in makes] + [p["url"] for p in index])
     body = "".join(
         f"<url><loc>{DOMAIN}{u}</loc><lastmod>{today}</lastmod></url>" for u in urls)
@@ -2030,6 +2065,7 @@ def main() -> int:
     write_page(DIST / "privacy", render_privacy())
     write_page(DIST / "contact", pages.render_contact(page_shell))
     write_page(DIST / "terms", pages.render_terms(page_shell))
+    write_page(DIST / "vehicles", pages.render_vehicles_index(index, page_shell))
 
     # Хабы по маркам: даёт иерархию вместо 318 листьев на корне
     by_make: dict[str, list[dict]] = {}
