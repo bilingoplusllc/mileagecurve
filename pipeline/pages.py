@@ -191,7 +191,7 @@ def render_vehicles_index(index: list[dict], shell) -> str:
     # Алфавитный перескок: 40 марок — это длинная страница, и без него
     # телефон листает вслепую.
     jump = "".join(f'<a href="#{_slug(m)}">{esc(m)}</a>' for m in makes)
-    B.append(f'<nav class="qr-list" aria-label="Makes">{jump}</nav>')
+    B.append(f'<nav class="az" aria-label="Makes">{jump}</nav>')
 
     for make in makes:
         models = by_make[make]
@@ -215,7 +215,7 @@ def render_vehicles_index(index: list[dict], shell) -> str:
     B.append('<p class="prov">Every page here is generated from the NHTSA Office of Defects '
              'Investigation dataset. <a href="/methodology/">How this is built</a></p>')
 
-    return shell(f"All vehicles &mdash; every generation covered | {SITE}",
+    return shell(f"All vehicles — every generation covered | {SITE}",
                  f"Complete index of {len(index)} vehicle generations across {len(makes)} makes, "
                  f"with the mileage at which half of all failure reports had been filed.",
                  "\n".join(B), f"{DOMAIN}/vehicles/", nav_key="home")

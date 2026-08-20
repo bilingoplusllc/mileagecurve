@@ -867,6 +867,9 @@ footer a{color:var(--muted)}
 
 .qr{max-width:520px;margin:var(--s-2) 0 0}
 .qr[hidden]{display:none}
+.az{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 var(--s-4)}
+.az a{display:inline-block;padding:4px 10px;text-decoration:none;color:var(--ink);border:1px solid var(--line);font-size:.86em;line-height:1.4}
+.az a:hover,.az a:focus-visible{border-color:var(--accent);background:var(--track)}
 .qr-list{list-style:none;margin:0;padding:0;border:1px solid var(--line-strong);
   border-radius:var(--radius);background:var(--surface);overflow:hidden}
 .qr-list li{margin:0;border-bottom:1px solid var(--line)}
