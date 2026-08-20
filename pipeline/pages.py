@@ -179,6 +179,7 @@ def render_vehicles_index(index: list[dict], shell) -> str:
                .setdefault(names.display(pg["model"]), []).append(pg)
 
     total = sum(pg["n"] for pg in index)
+    young_edge = date.today().year - 4
     makes = sorted(by_make)
 
     B = [f'<ol class="crumbs"><li><a href="/">Home</a></li><li>All vehicles</li></ol>',
@@ -186,7 +187,11 @@ def render_vehicles_index(index: list[dict], shell) -> str:
          f'<p class="sub">Every generation covered here &mdash; {len(index)} of them across '
          f'{len(makes)} makes, built from {fmt(total)} complaints that record mileage at '
          f'failure. Median is the mileage by which half the reports on that generation had '
-         f'been filed.</p>']
+         f'been filed.</p>',
+         '<p class="warn-note">Medians fall as generations get newer, and that is age, not '
+         'decline. A car built in 2023 has only covered a few thousand miles, so its reports '
+         'can only have come at low mileage. &#8224; marks generations too recent to judge. '
+         '<strong>Compare generations of similar age, never across the column.</strong></p>']
 
     # Алфавитный перескок: 40 марок — это длинная страница, и без него
     # телефон листает вслепую.
@@ -206,8 +211,9 @@ def render_vehicles_index(index: list[dict], shell) -> str:
             for pg in sorted(models[model], key=lambda x: x["y0"]):
                 med = pg.get("median")
                 med_txt = f"{names.round_miles(med):,}" if med else "&mdash;"
+                dag = "&#8224;" if pg.get("y1", 0) >= young_edge else ""
                 B.append(f'<li><a href="{pg["url"]}">'
-                         f'<span class="gy">{esc(model)} {pg["y0"]}&#8211;{pg["y1"]}</span>'
+                         f'<span class="gy">{esc(model)} {pg["y0"]}&#8211;{pg["y1"]}{dag}</span>'
                          f'<span class="gn">{fmt(pg["n"])}</span>'
                          f'<span class="gm">{med_txt}</span></a></li>')
         B.append("</ul>")
