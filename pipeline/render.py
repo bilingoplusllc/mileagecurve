@@ -29,6 +29,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DB = ROOT / "data" / "mileagecurve.db"
 GENS = ROOT / "data" / "generations.clean.json"
 DIST = ROOT / "dist"
+TODAY = date.today()
 
 GA_ID = "G-WHE70YWW82"  # GA4, свойство MileageCurve в аккаунте BiLingoPlus
 SITE = "MileageCurve"
@@ -1236,6 +1237,53 @@ ODO_JS = r"""
 """
 
 
+# ОПЫТ С ЗАГОЛОВКАМИ, начат 09.09.2026.
+#
+# Почему вообще. Заголовок всех 318 страниц спрашивает «how many miles does it
+# last?», а данные отвечают на другой вопрос — когда поступали отчёты об
+# отказах. Цена расхождения измерена: 34 страницы стоят на ПЕРВОЙ странице
+# выдачи, дали 1 203 показа и ОДИН переход. Страница /toyota-highlander-
+# 2001-2007/ — 1 038 показов, среднее место 8,1, ноль переходов. Для сравнения
+# у соседнего сайта фермы на месте 8,4 кликабельность 10,8%.
+#
+# Почему СРЕЗОМ, а не сразу везде. Поменяв все 318, мы не сможем сказать,
+# сработало ли: сравнивать будет не с чем, а показы у сайта и так падают
+# седьмую неделю. Срез сравнивается с нетронутым остатком за одно окно.
+#
+# Заголовок среза говорит «problems by mileage» — это семья запросов, по
+# которой мы УЖЕ показываемся («2002 subaru forester problems», «2008 jeep
+# liberty problems»), и обещание, которое страница выполняет.
+EXPERIMENT_SLUGS: set = set()
+EXPERIMENT_NAME = "titles-2026-09"
+
+
+def pick_experiment(models: list, want: int = 60) -> set:
+    """Срез: по одному поколению у каждой N-й модели.
+
+    Каждой N-й, а не первых шестидесяти по алфавиту: алфавитный срез сел бы на
+    Acura, Audi и BMW, и опыт мерил бы марку, а не заголовок. Берётся САМОЕ
+    СТАРОЕ поколение модели — у него больше истории отчётов и Google берёт его
+    в индекс охотнее (у поколений, кончающихся 2024+, отказов впятеро больше).
+    Правило не зависит от данных, поэтому срез один и тот же на любой сборке.
+    """
+    ms = sorted(models, key=lambda m: (m["make"], m["model"]))
+    ms = [m for m in ms if m.get("generations")]
+    if not ms:
+        return set()
+    # Шаг ДРОБНЫЙ. Целочисленный давал step=1 при 99 моделях и 60 нужных, то
+    # есть просто первые шестьдесят по алфавиту: марки A–F в опыте, G–V в
+    # контроле. Опыт мерил бы марку, а не заголовок.
+    if want >= len(ms):
+        take = ms
+    else:
+        take = [ms[round(i * len(ms) / want)] for i in range(want)]
+    out = set()
+    for m in take:
+        g = min(m["generations"], key=lambda g: int(g["year_start"]))
+        out.add(slug(m["make"], m["model"], g["year_start"], g["year_end"]))
+    return out
+
+
 def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict]) -> str:
     make, model = names.display(s["make"]), names.display(s["model"])
     years = f'{s["year_start"]}–{s["year_end"]}'
@@ -1245,15 +1293,31 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
     # а старые заголовки её не говорили. Заголовок задаёт вопрос читателя;
     # честный ответ (отчёты, не срок службы) живёт в блоке #lifespan.
     # Замерено по всем 318 реальным head: 48–59 знаков — не режется в выдаче.
-    title = (f"{head} — how many miles does it last?" if len(head) <= 28
-             else f"{head}: how long does it last?")
+    slug_now = slug(s["make"], s["model"], s["year_start"], s["year_end"])
+    in_exp = slug_now in EXPERIMENT_SLUGS
+    if in_exp:
+        # Обещание, которое страница ВЫПОЛНЯЕТ. Прежний заголовок спрашивал
+        # «сколько проедет», а описание отвечало «половина отказов к 67 000» —
+        # человек на первой странице выдачи читал это как «машина умирает на
+        # 67 тысячах» и не заходил.
+        title = f"{head}: problems by mileage"
+    else:
+        title = (f"{head} — how many miles does it last?" if len(head) <= 28
+                 else f"{head}: how long does it last?")
     # Описание открывается точным ответом языком отчётов («reports … came by»,
     # никогда «lasts»), несёт «common problems» для второй семьи запросов и
     # обещает recalls только там, где раздел существует (54 страницы без
     # кампаний). Хвосты одной длины, чтобы ветка без отзывов не переполнялась.
     # Замерено: 139–159 знаков на всех 318 страницах, все уникальны.
     _med, _p90 = sh.get("median"), sh.get("p90")
-    if _med and _p90:
+    if in_exp:
+        # Без ведущего числа пробега: именно оно читается как приговор машине.
+        # Обещаем то, что на странице есть, — раскладку по системам и срокам.
+        desc = (f'{fmt(s["complaints_with_miles"])} owner-reported failures on the '
+                f'{years} {make} {model}, sorted by odometer reading: which system '
+                f'fails first, where the reports cluster, and what that means if '
+                f'you are buying one.')
+    elif _med and _p90:
         _tail = 'the recalls' if s["recalls_count"] else 'a checklist'
         desc = (f'Half of {fmt(s["complaints_with_miles"])} failure reports on the {years} '
                 f'{make} {model} came by {fmt(names.round_miles(_med))} miles, 90% by '
@@ -1262,7 +1326,7 @@ def render_generation(s: dict, gen: dict, model_entry: dict, siblings: list[dict
         desc = (f'{fmt(s["complaints_with_miles"])} NHTSA complaints with mileage for the '
                 f'{years} {make} {model}: when each system fails, and what it means '
                 f'if you are buying one.')
-    slug_self = slug(s["make"], s["model"], s["year_start"], s["year_end"])
+    slug_self = slug_now
     make_slug = slug(s["make"])
 
     B = [f'<ol class="crumbs"><li><a href="/">Home</a></li>'
@@ -1681,8 +1745,15 @@ def render_index(index: list[dict], stats: dict, demo: dict | None = None) -> st
          # Убрано «That second number is what makes this site possible» — сайт
          # говорил о себе в самой дорогой строке страницы. Теперь строка говорит
          # о том, чего у других нет.
-         '<p class="lede">Complaint databases tell you how many owners had a problem. '
-         'They almost never tell you at what mileage. This one does.</p>',
+         # Прежняя строка — «They almost never tell you at what mileage. This
+         # one does.» — была неправдой и помечена неправдой 01.09: пробег
+         # печатают и carcomplaints, и carprobs, и problemsbyvin. Новая
+         # говорит то, чего у них действительно нет, и НЕ НЕСЁТ ЧИСЕЛ: число
+         # на витрине живёт своей жизнью и однажды разойдётся с данными.
+         '<p class="lede">One number for a whole car hides the car. The same '
+         'model can have a part failing early and another failing late — an '
+         'average sits between them and describes neither. This site shows '
+         'the timing, system by system.</p>',
          '</div>',
          # Поиск без карточки: у поля своя граница в 2px, и этого достаточно,
          # чтобы читалось как главный орган управления. Рамка вокруг только
@@ -1991,6 +2062,11 @@ def main() -> int:
     built = skipped = 0
     index: list[dict] = []
 
+    global EXPERIMENT_SLUGS
+    EXPERIMENT_SLUGS = pick_experiment(models)
+    print(f"опыт {EXPERIMENT_NAME}: срез из {len(EXPERIMENT_SLUGS)} страниц")
+    exp_built: list = []
+
     for m in models:
         label = f'{m["make"]} {m["model"]}'
         if args.only and args.only.upper() not in label.upper():
@@ -2010,6 +2086,8 @@ def main() -> int:
             out = DIST / slug(m["make"], m["model"], g["year_start"], g["year_end"])
             out.mkdir(parents=True, exist_ok=True)
             (out / "index.html").write_text(render_generation(s, g, m, live), encoding="utf-8")
+            if out.name in EXPERIMENT_SLUGS:
+                exp_built.append(f"/{out.name}/")
             index.append({"url": f"/{out.name}/", "make": m["make"], "model": m["model"],
                           "y0": g["year_start"], "y1": g["year_end"],
                           "n": s["complaints_with_miles"], "shape": s["shape"].get("kind"),
@@ -2060,6 +2138,28 @@ def main() -> int:
                           "median": d["shape"].get("median")}}
     except Exception:
         demo = None
+
+    # Состав опыта записывается ФАКТИЧЕСКИЙ, а не задуманный: часть срезовых
+    # поколений могла не пройти порог отчётов и не собраться. Сравнивать через
+    # шесть недель надо с тем, что действительно выложено.
+    exp_dir = ROOT / "data" / "experiments"
+    exp_dir.mkdir(parents=True, exist_ok=True)
+    exp_path = exp_dir / f"{EXPERIMENT_NAME}.json"
+    prev = {}
+    if exp_path.exists():
+        prev = json.loads(exp_path.read_text(encoding="utf-8"))
+    payload = {
+        "name": EXPERIMENT_NAME,
+        "started": prev.get("started") or TODAY.isoformat(),
+        "what": "Заголовок и описание срезовых страниц говорят «problems by "
+                "mileage» вместо «how many miles does it last?»",
+        "control": "остальные страницы поколений, не тронуты",
+        "pages": sorted(exp_built),
+        "built": TODAY.isoformat(),
+    }
+    exp_path.write_text(json.dumps(payload, ensure_ascii=False, indent=1) + chr(10),
+                        encoding="utf-8")
+    print(f"опыт {EXPERIMENT_NAME}: собрано {len(exp_built)} страниц среза")
 
     write_page(DIST, render_index(index, stats, demo))
     (DIST / "search-index.json").write_text(search.build_index(index), encoding="utf-8")
