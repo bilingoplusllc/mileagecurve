@@ -16,6 +16,7 @@ from __future__ import annotations
 import html
 import charts
 import names
+import search
 
 from datetime import date
 
@@ -182,8 +183,15 @@ def render_vehicles_index(index: list[dict], shell) -> str:
     young_edge = date.today().year - 4
     makes = sorted(by_make)
 
+    # ПОЛЕ ПОИСКА ЗДЕСЬ, а не только на главной. Из шапки сюда ведёт
+    # единственный пункт меню, на странице 388 ссылок и до сегодня — ни
+    # одного поля: человек, посмотревший свою машину и захотевший
+    # проверить машину жены, упирался в алфавитный список. Поиск стоял
+    # на ОДНОЙ странице сайта из трёхсот с лишним, и та — не та, куда
+    # приходят из Google.
     B = [f'<ol class="crumbs"><li><a href="/">Home</a></li><li>All vehicles</li></ol>',
          "<h1>All vehicles</h1>",
+         search.search_markup(len(index)),
          f'<p class="sub">Every generation covered here &mdash; {len(index)} of them across '
          f'{len(makes)} makes, built from {fmt(total)} complaints that record mileage at '
          f'failure. Median is the mileage by which half the reports on that generation had '
@@ -224,4 +232,5 @@ def render_vehicles_index(index: list[dict], shell) -> str:
     return shell(f"All vehicles — every generation covered | {SITE}",
                  f"Complete index of {len(index)} vehicle generations across {len(makes)} makes, "
                  f"with the mileage at which half of all failure reports had been filed.",
-                 "\n".join(B), f"{DOMAIN}/vehicles/", nav_key="home")
+                 "\n".join(B), f"{DOMAIN}/vehicles/", nav_key="home",
+                 script=search.SEARCH_JS)
