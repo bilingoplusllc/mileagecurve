@@ -111,8 +111,10 @@ def main() -> int:
     raw = DATA / "raw"
     manifest_path = DATA / "manifest.json"
     manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else {}
+    prev_manifest = dict(manifest)   # нужен, чтобы не закрепить усохший объём как норму
 
     ok = 0
+    shrink = []            # наборы, чей объём рухнул относительно прошлого снимка
     for k in keys:
         info = download(k, SOURCES[k], raw / k)
         if info:
@@ -124,6 +126,15 @@ def main() -> int:
                 flag = "  ⚠️ ОТКЛОНЕНИЕ >8%" if abs(delta) > 0.08 else ""
                 print(f"[{k}] изменение объёма к прошлому снимку: {delta:+.1%}{flag}")
                 info["delta_vs_prev"] = round(delta, 4)
+                # Правило выше было написано, но не исполнялось: код печатал флаг и шёл дальше.
+                # 2026-09-12 NHTSA отдал FLAT_CMPL.zip, усохший на 99.1% (1.5 ГБ -> 15.5 МБ).
+                # Загрузка «удалась», база собралась почти пустой (пробег остался у ОДНОЙ жалобы
+                # из 42 529), и сборку остановил только гейт «мало страниц» в самом конце — с
+                # сообщением про страницы, а не про данные. Усыхание источника недвусмысленно:
+                # такие корпуса не теряют пятую часть объёма законно. Рост не трогаем — новый
+                # месяц данных законно прибавляет объём.
+                if delta < -0.20:
+                    shrink.append((k, prev["bytes"], info["bytes"], delta))
             manifest[k] = info
             ok += 1
 
@@ -131,6 +142,23 @@ def main() -> int:
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
     print(f"\nМанифест: {manifest_path}")
     print(f"Успешно: {ok}/{len(keys)}")
+
+    # Останавливаемся ЗДЕСЬ, а не через три шага на счётчике страниц: сообщение должно
+    # называть настоящую причину. Усохший объём в манифест НЕ записываем — иначе следующий
+    # запуск сравнит новый файл с усохшим снимком, увидит «рост» и промолчит.
+    if shrink:
+        for k, was, now, delta in shrink:
+            # Три отдельных print вместо одной строки с \n: при записи этого файла escape
+            # трижды превращался в настоящий перевод строки и рвал f-строку. Проще не рисковать.
+            print("", file=sys.stderr)
+            print(f"[{k}] ИСТОЧНИК УСОХ: было {human(was)}, стало {human(now)} ({delta:+.1%}).", file=sys.stderr)
+            print("      Данные на стороне NHTSA неполные — публиковать нечего, сборка остановлена.", file=sys.stderr)
+            print("      Это не наша поломка: перезапустить, когда файл на их стороне восстановят.", file=sys.stderr)
+            if prev_manifest.get(k):
+                manifest[k] = prev_manifest[k]
+        manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False))
+        return 2
+
     return 0 if ok == len(keys) else 1
 
 
